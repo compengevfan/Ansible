@@ -1,0 +1,32 @@
+#Inputs Required:
+#  AliasAName, AliasBName, Array, Port1A, Port2A, Port1B, Port2B
+---
+- hosts: 10.92.238.99
+  vars: 
+    ZoneA1Name: "z_{{ AliasAName }}_{{ Array }}_{{ Port1A }}"
+    ZoneA2Name: "z_{{ AliasAName }}_{{ Array }}_{{ Port2A }}"
+  gather_facts: False
+  tasks:
+    - name: Create A Side Zone 1
+      raw: 'zonecreate {{ ZoneA1Name }},"{{ AliasAName }};{{ Array }}_{{ Port1A }}"'
+
+    - name: Create A Side Zone 2
+      raw: 'zonecreate {{ ZoneA2Name }},"{{ AliasAName }};{{ Array }}_{{ Port2A }}"'
+
+    - name: Save Config
+      raw: 'cfgsave -f'
+
+- hosts: 10.92.238.100
+  vars: 
+    ZoneB1Name: "z_{{ AliasBName }}_{{ Array }}_{{ Port1B }}"
+    ZoneB2Name: "z_{{ AliasBName }}_{{ Array }}_{{ Port2B }}"
+  gather_facts: False
+  tasks:
+    - name: Create B Side Zone 1
+      raw: 'zonecreate {{ ZoneB1Name }},"{{ AliasBName }};{{ Array }}_{{ Port1B }}"'
+
+    - name: Create B Side Zone 2
+      raw: 'zonecreate {{ ZoneB2Name }},"{{ AliasBName }};{{ Array }}_{{ Port2B }}"'
+
+    - name: Save Config
+      raw: 'cfgsave -f'

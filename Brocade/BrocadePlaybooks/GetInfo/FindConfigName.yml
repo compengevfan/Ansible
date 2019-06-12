@@ -1,0 +1,29 @@
+#Inputs Required: None
+---
+- hosts: 10.92.238.99
+  vars:
+    SplitA: "{{ CfgResponseA.stdout_lines[1].split(':') }}"
+    CfgNameA: "{{ SplitA[1] }}"
+  gather_facts: False
+  tasks:
+    - name: Get Config Name A
+      raw: 'configshow | grep enable:'
+      register: CfgResponseA
+
+    - name: Show Config Name A
+      debug:
+        msg: "{{ CfgNameA }}"
+
+- hosts: 10.92.238.100
+  vars:
+    SplitB: "{{ CfgResponseB.stdout_lines[1].split(':') }}"
+    CfgNameB: "{{ SplitB[1] }}"
+  gather_facts: False
+  tasks:
+    - name: Get Config Name B
+      raw: 'configshow | grep enable:'
+      register: CfgResponseB
+
+    - name: Show Config Name B
+      debug:
+        msg: "{{ CfgNameB }}"

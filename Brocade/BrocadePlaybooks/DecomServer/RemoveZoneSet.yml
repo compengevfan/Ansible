@@ -1,0 +1,44 @@
+#Inputs Required:
+#  CfgNameA, CfgNameB, ServerName
+---
+- hosts: 10.92.238.99
+  vars:
+    SplitA1Name: "{{ ZoneResponseA.stdout_lines[0].split('\t') }}"
+    SplitA2Name: "{{ ZoneResponseA.stdout_lines[1].split('\t') }}"
+    ZoneA1Name: "{{ SplitA1Name[1] }}"
+    ZoneA2Name: "{{ SplitA2Name[1] }}"
+  gather_facts: False
+  tasks:
+    - name: Get Zone Names A Side
+      raw: 'zoneshow --ic "z_{{ ServerName }}*" | grep zone'
+      register: ZoneResponseA
+
+    - debug:
+        msg: "{{ ZoneA1Name }} {{ ZoneA2Name }}"
+
+    - name: Remove Zones from ZoneSet A Side
+      raw: 'cfgremove {{ CfgNameA }}, "{{ ZoneA1Name }};{{ ZoneA2Name }}"'
+
+    - name: Enable Config
+      raw: "cfgenable {{ CfgNameA }} -f"
+
+- hosts: 10.92.238.100
+  vars:
+    SplitB1Name: "{{ ZoneResponseB.stdout_lines[0].split('\t') }}"
+    SplitB2Name: "{{ ZoneResponseB.stdout_lines[1].split('\t') }}"
+    ZoneB1Name: "{{ SplitB1Name[1] }}"
+    ZoneB2Name: "{{ SplitB2Name[1] }}"
+  gather_facts: False
+  tasks:
+    - name: Get Zone Names B Side
+      raw: 'zoneshow --ic "z_{{ ServerName }}*" | grep zone'
+      register: ZoneResponseB
+
+    - debug:
+        msg: "{{ ZoneB1Name }} {{ ZoneB2Name }}"
+
+    - name: Remove Zones from ZoneSet B Side
+      raw: 'cfgremove {{ CfgNameB }}, "{{ ZoneB1Name }};{{ ZoneB2Name }}"'
+
+    - name: Enable Config
+      raw: "cfgenable {{ CfgNameB }} -f"

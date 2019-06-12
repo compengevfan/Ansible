@@ -1,0 +1,20 @@
+#Inputs Required:
+#  CfgNameA, CfgNameB, ZoneA1Name, ZoneA2Name, ZoneB1Name, ZoneB2Name
+---
+- hosts: 10.92.238.99
+  gather_facts: False
+  tasks:
+    - name: Update the Config
+      raw: 'cfgadd {{ CfgNameA }},"{{ ZoneA1Name }};{{ ZoneA2Name }}"'
+
+    - name: Enable Config
+      raw: "cfgenable {{ CfgNameA }} -f"
+
+- hosts: 10.92.238.100
+  gather_facts: False
+  tasks:
+    - name: Update the Config
+      raw: 'cfgadd {{ CfgNameB }},"{{ ZoneB1Name }};{{ ZoneB2Name }}"'
+
+    - name: Enable Config
+      raw: "cfgenable {{ CfgNameB }} -f"

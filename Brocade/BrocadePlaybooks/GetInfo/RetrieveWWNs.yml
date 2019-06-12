@@ -1,0 +1,30 @@
+#Inputs Required:
+#  PortNumberA, PortNumberB
+---
+- hosts: 10.92.238.99
+  vars:
+    wwnInfoA: "{{ PortInfoA.stdout_lines }}"
+    WWNA: "{{ wwnInfoA[21].replace('\t', '') }}"
+  gather_facts: False
+  tasks:
+    - name: Get WWN A
+      raw: 'portshow {{ PortNumberA }}'
+      register: PortInfoA
+
+    - name: Show Info
+      debug:
+        msg: "{{ WWNA }}"
+
+- hosts: 10.92.238.100
+  vars:
+    wwnInfoB: "{{ PortInfoB.stdout_lines }}"
+    WWNB: "{{ wwnInfoB[21].replace('\t', '') }}"
+  gather_facts: False
+  tasks:
+    - name: Get WWN B
+      raw: 'portshow {{ PortNumberB }}'
+      register: PortInfoB
+
+    - name: Show Info
+      debug:
+        msg: "{{ WWNB }}"

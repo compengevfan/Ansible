@@ -1,0 +1,28 @@
+#Inputs Required:
+#  ServerName, CfgNameA, CfgNameB
+---
+- hosts: 10.92.238.99
+  vars:
+    ZoneCfgA: "{{ ZoneCfgResponseA.stdout.replace('\t', '')[:-4] }}"
+  gather_facts: False
+  tasks:
+    - name: Get Zone
+      raw: "cfgshow {{ CfgNameA }} | grep {{ ServerName }}"
+      register: ZoneCfgResponseA
+
+    - name: Show ZoneSet A
+      debug:
+        msg: "{{ ZoneCfgA }}"
+
+- hosts: 10.92.238.100
+  vars:
+    ZoneCfgB: "{{ ZoneCfgResponseB.stdout.replace('\t', '')[:-4] }}"
+  gather_facts: False
+  tasks:
+    - name: Get Zone
+      raw: "cfgshow {{ CfgNameB }} | grep {{ ServerName }}"
+      register: ZoneCfgResponseB
+
+    - name: Show ZoneSet B
+      debug:
+        msg: "{{ ZoneCfgB }}"

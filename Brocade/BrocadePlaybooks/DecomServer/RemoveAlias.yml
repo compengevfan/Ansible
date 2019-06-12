@@ -1,0 +1,34 @@
+#Inputs Required:
+#  ServerName
+---
+- hosts: 10.92.238.99
+  vars: 
+    SplitA: "{{ AliasResponseA.stdout_lines[0].split(':') }}"
+    AliasA: "{{ SplitA[1].replace('\t', '') }}"
+  gather_facts: False
+  tasks:
+    - name: Find Server Alias Name
+      raw: "alishow | grep 'alias:[[:space:]]{{ ServerName }}'"
+      register: AliasResponseA
+
+    - name: Remove Alias on A Side
+      raw: "alidelete {{ AliasA }}"
+
+    - name: Save Config
+      raw: 'cfgsave -f'
+
+- hosts: 10.92.238.100
+  vars: 
+    SplitB: "{{ AliasResponseB.stdout_lines[0].split(':') }}"
+    AliasB: "{{ SplitB[1].replace('\t', '') }}"
+  gather_facts: False
+  tasks:
+    - name: Find Server Alias Name
+      raw: "alishow | grep 'alias:[[:space:]]{{ ServerName }}'"
+      register: AliasResponseB
+
+    - name: Remove Alias on B Side
+      raw: "alidelete {{ AliasB }}"
+
+    - name: Save Config
+      raw: 'cfgsave -f'

@@ -1,0 +1,26 @@
+#Inputs Required:
+#  ZoneA1Name, ZoneA2Name, ZoneB1Name, ZoneB2Name
+---
+- hosts: 10.92.238.99
+  gather_facts: False
+  tasks: 
+    - name: Remove Zone 1 A Side
+      raw: "zonedelete {{ ZoneA1Name }}"
+
+    - name: Remove Zone 2 A Side
+      raw: "zonedelete {{ ZoneA2Name }}"
+
+    - name: Save Config
+      raw: 'cfgsave -f'
+
+- hosts: 10.92.238.100
+  gather_facts: False
+  tasks: 
+    - name: Remove Zone 1 B Side
+      raw: "zonedelete {{ ZoneB1Name }}"
+
+    - name: Remove Zone 2 B Side
+      raw: "zonedelete {{ ZoneB2Name }}"
+
+    - name: Save Config
+      raw: 'cfgsave -f'
