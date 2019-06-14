@@ -1,5 +1,0 @@
----
-- hosts: 10.92.238.100
-  gather_facts: False
-  roles:
-    - BrocadeDecomServerB
