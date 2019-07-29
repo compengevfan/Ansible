@@ -1,0 +1,43 @@
+---
+# tasks file for BrocadeZoning
+
+#FindServer.yml
+- name: Find Server
+  raw: 'portname | grep {{ ServerName }}'
+  register: SWInfo
+  ignore_errors: yes
+  when: ServerName is defined
+
+#RetrieveWWNs.yml
+- name: Get WWN
+  raw: 'portshow {{ PortNumber }}'
+  register: PortInfo
+
+#CreateAlias.yml
+- name: Create An Alias
+  raw: 'alicreate {{ AliasName }},"{{ WWN }}"'
+
+- name: Save Config
+  raw: 'cfgsave -f'
+
+#CreateZone.yml
+- name: Create Side Zone 1
+  raw: 'zonecreate {{ Zone1Name }},"{{ AliasName }};{{ Array }}_{{ Port1 }}"'
+
+- name: Create Side Zone 2
+  raw: 'zonecreate {{ Zone2Name }},"{{ AliasName }};{{ Array }}_{{ Port2 }}"'
+
+- name: Save Config
+  raw: 'cfgsave -f'
+
+#FindConfigName.yml
+- name: Get Config Name
+  raw: 'configshow | grep enable:'
+  register: CfgResponse
+
+#UpdateZoneSet.yml
+- name: Update the Config
+  raw: 'cfgadd {{ CfgName }},"{{ Zone1Name }};{{ Zone2Name }}"'
+
+- name: Enable Config
+  raw: "cfgenable {{ CfgName }} -f"

@@ -1,0 +1,39 @@
+---
+# tasks file for BrocadeDecom
+
+#FindConfigName.yml
+- name: Get Config
+  raw: 'configshow | grep enable:'
+  register: CfgResponse
+
+#RemoveZoneSet.yml
+- name: Get Zone Names
+  raw: 'zoneshow --ic "z_{{ ServerName }}*" | grep zone'
+  register: ZoneResponse
+
+- name: Remove Zones from ZoneSet
+  raw: 'cfgremove {{ CfgName }}, "{{ Zone1Name }};{{ Zone2Name }}"'
+
+- name: Enable Config
+  raw: "cfgenable {{ CfgName }} -f"
+
+#RemoveZone.yml
+- name: Remove Zone 1
+  raw: "zonedelete {{ Zone1Name }}"
+
+- name: Remove Zone 2
+  raw: "zonedelete {{ Zone2Name }}"
+
+- name: Save Config
+  raw: 'cfgsave -f'
+
+#RemoveAlias.yml
+- name: Find Server Alias Name
+  raw: "alishow | grep 'alias:[[:space:]]{{ ServerName }}'"
+  register: AliasResponse
+
+- name: Remove Alias
+  raw: "alidelete {{ Alias }}"
+
+- name: Save Config
+  raw: 'cfgsave -f'

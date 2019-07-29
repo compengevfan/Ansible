@@ -1,0 +1,16 @@
+---
+# vars file for BrocadeDecom
+
+#FindConfigName.yml
+SplitF: "{{ CfgResponse.stdout_lines[1].split(':') }}"
+CfgName: "{{ SplitF[1] }}"
+
+#RemoveZoneSet.yml
+Split1Name: "{{ ZoneResponse.stdout_lines[0].split('\t') }}"
+Split2Name: "{{ ZoneResponse.stdout_lines[1].split('\t') }}"
+Zone1Name: "{{ Split1Name[1] }}"
+Zone2Name: "{{ Split2Name[1] }}"
+
+#RemoveAlias.yml
+SplitR: "{{ AliasResponse.stdout_lines[0].split(':') }}"
+Alias: "{{ SplitR[1].replace('\t', '') }}"
