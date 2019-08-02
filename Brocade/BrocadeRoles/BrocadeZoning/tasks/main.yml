@@ -8,6 +8,11 @@
   ignore_errors: yes
   when: ServerName is defined
 
+- name: Fail if server not found
+  fail:
+    msg: "Server not found on Brocade switch!!!"
+  when: SWInfo.rc != 0
+
 #RetrieveWWNs.yml
 - name: Get WWN
   raw: 'portshow {{ PortNumber }}'
