@@ -1,0 +1,5 @@
+---
+# vars file for BrocadePortDown
+
+ServerInfo: "{{ SWInfo.stdout }}"
+Split1: "{{ ServerInfo.split() }}"

@@ -1,0 +1,5 @@
+---
+# vars file for BrocadeObtainFEPorts
+
+Port1: "{{ PortReturn.stdout_lines[0].replace('\\t,','') }}"
+Port2: "{{ PortReturn.stdout_lines[1].replace('\\t,','') }}"

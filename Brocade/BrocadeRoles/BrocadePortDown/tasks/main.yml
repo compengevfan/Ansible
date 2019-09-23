@@ -1,0 +1,31 @@
+---
+# tasks file for BrocadePortDown
+
+- name: Get port information
+  raw: 'portname | grep {{ ServerName }}'
+  register: SWInfo
+  failed_when: SWInfo.rc == -1
+  when: ServerName is defined
+
+- name: Fail if server not found
+  fail:
+    msg: "Order 66 Server not found on Brocade switch!!! Please contact DASDMGT to verify the ports have been renamed appropriately."
+  when: SWInfo.rc != 0
+
+- name: Fail if multiple connections found
+  fail:
+    msg: "Order 66 Multiple connections found on switch for this server!!! Automation only supports one connection per switch. Please contact DASDMGT for assistance."
+  when: Split1|count > 3
+
+- name: Call Python
+  script: PortID.py {{ SWInfo.stdout }}
+  args: 
+    executable: /usr/bin/python
+  register: PythonReturn
+  delegate_to: localhost
+
+- name: Disable Port
+  raw: portcfgpersistentdisable {{ PythonReturn.stdout_lines[0] }}
+
+- name: Rename Port
+  raw: portname {{ PythonReturn.stdout_lines[0] }} -n {{ PythonReturn.stdout_lines[1] }}

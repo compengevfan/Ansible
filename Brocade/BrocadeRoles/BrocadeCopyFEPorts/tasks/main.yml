@@ -1,0 +1,28 @@
+---
+# tasks file for BrocadeObtainFEPorts
+
+- name: Get Zone Info
+  raw: 'zoneshow *{{ ServerName }}*{{ ArrayName }}*'
+  register: ZoneInfo
+  failed_when: ZoneInfo.rc == -1
+
+- name: Fail if no zone is found
+  fail:
+    msg: "Order 66 Zone for {{ ServerName }} on {{ ArrayName }} not found!!!"
+  when: "'does not exist' in ZoneInfo.stdout_lines[1]"
+
+- name: Fail if incorrect number of zones found
+  fail:
+    msg: "Order 66 Incorrect number of zones found!!! Automation only supports 2 zones per switch!!! Please contact DASDMGT to have the server zoned manually!!!"
+  when: ZoneInfo.stdout_lines|count != 5
+
+- name: Extract ports
+  script: Ports.py {{ ZoneInfo.stdout_lines }}
+  args:
+    executable: /usr/bin/python
+  register: PortReturn
+  delegate_to: localhost
+
+- name: Return Values
+  debug:
+    msg: "{{ Port1 }};{{ Port2 }}"

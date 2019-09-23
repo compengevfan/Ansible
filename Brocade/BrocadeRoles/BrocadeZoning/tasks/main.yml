@@ -1,31 +1,45 @@
 ---
 # tasks file for BrocadeZoning
 
-#FindServer.yml
+### FindServer
 - name: Find Server
   raw: 'portname | grep {{ ServerName }}'
   register: SWInfo
-  ignore_errors: yes
+  failed_when: SWInfo.rc == -1
   when: ServerName is defined
 
 - name: Fail if server not found
   fail:
-    msg: "Server not found on Brocade switch!!!"
+    msg: "Order 66 Server not found on Brocade switch!!! Please contact DASDMGT to verify the ports have been renamed appropriately."
   when: SWInfo.rc != 0
 
-#RetrieveWWNs.yml
-- name: Get WWN
+- name: Fail if multiple connections found
+  fail:
+    msg: "Order 66 Multiple connections found on switch for this server!!! Automation only supports one connection per switch. Please contact DASDMGT to have the server zoned manually."
+  when: Split1|count > 3
+
+### RetrieveWWN
+- name: Get port information
   raw: 'portshow {{ PortNumber }}'
   register: PortInfo
 
-#CreateAlias.yml
+- name: Fail if port offline
+  fail:
+    msg: "Order 66 Port assigned to server is offline!!!"
+  when: PortInfo.stdout_lines[2].find("OFFLINE") != -1
+
+- name: Get WWN
+  script: WWN.py {{ PortInfo.stdout_lines }}
+  args: 
+    executable: /usr/bin/python
+  register: WWNReturn
+  delegate_to: localhost
+
+### CreateAlias
 - name: Create An Alias
   raw: 'alicreate {{ AliasName }},"{{ WWN }}"'
 
-- name: Save Config
-  raw: 'cfgsave -f'
-
-#CreateZone.yml
+### CreateZone
 - name: Create Side Zone 1
   raw: 'zonecreate {{ Zone1Name }},"{{ AliasName }};{{ Array }}_{{ Port1 }}"'
 
@@ -35,12 +49,12 @@
 - name: Save Config
   raw: 'cfgsave -f'
 
-#FindConfigName.yml
+### FindConfigName
 - name: Get Config Name
   raw: 'configshow | grep enable:'
   register: CfgResponse
 
-#UpdateZoneSet.yml
+### UpdateZoneSet
 - name: Update the Config
   raw: 'cfgadd {{ CfgName }},"{{ Zone1Name }};{{ Zone2Name }}"'
 

@@ -1,21 +1,21 @@
 ---
 # vars file for BrocadeZoning
 
-#FindServer.yml
+#Breakdown Portname
 ServerInfo: "{{ SWInfo.stdout }}"
 Split1: "{{ ServerInfo.split() }}"
-PortNumber: "{{ Split1[1].replace(':', '') }}"
 Split2: "{{ Split1[2].split('_') }}"
+#Get port number
+PortNumber: "{{ Split2[0].replace('port','') }}"
+#Create Alias name
 AliasName: "{{ Split2[1] + '_' + Split2[2] }}"
 
-#RetrieveWWNs.yml
-wwnInfo: "{{ PortInfo.stdout_lines }}"
-WWN: "{{ wwnInfo[21].replace('\t', '') }}"
+WWN: "{{ WWNReturn.stdout.replace('u\\t','').replace(',\n','') }}"
 
-#CreateZone.yml
+#Generate zone names
 Zone1Name: "z_{{ AliasName }}_{{ Array }}_{{ Port1 }}"
 Zone2Name: "z_{{ AliasName }}_{{ Array }}_{{ Port2 }}"
 
-#FindConfigName.yml
+#Obtain zone config name
 Split: "{{ CfgResponse.stdout_lines[1].split(':') }}"
 CfgName: "{{ Split[1] }}"

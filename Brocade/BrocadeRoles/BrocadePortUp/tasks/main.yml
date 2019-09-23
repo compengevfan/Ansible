@@ -1,0 +1,24 @@
+---
+# tasks file for BrocadePortUp
+
+- name: Call Python
+  script: PortID.py {{ PortNumber }} {{ SlotNumber }}
+  args: 
+    executable: /usr/bin/python
+  register: PortReturn
+  delegate_to: localhost
+
+- name: Get Port Info
+  raw: 'portshow {{ PortReturn.stdout_lines[0] }}'
+  register: PortInfo
+
+- name: Fail if port already enabled
+  fail:
+    msg: "Order 66 Port is already enabled!!! Please verify your information and try again or contact DASDMGT!!!"
+  when: "PortInfo.stdout_lines[5] == 'portDisableReason: None'"
+
+- name: Enable Port
+  raw: portcfgpersistentenable {{ PortReturn.stdout_lines[0] }}
+
+- name: Rename Port
+  raw: portname {{ PortReturn.stdout_lines[0] }} -n {{ Name }}

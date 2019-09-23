@@ -1,0 +1,4 @@
+---
+# vars file for BrocadePortUp
+
+Name: "port{{ PortReturn.stdout_lines[0] }}_{{ ServerName }}_{{ HBAPort }}"
