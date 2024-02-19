@@ -1,6 +1,6 @@
 ---
 - name: Run PowerShell script on Windows servers
-  hosts: jax-task001.evorigin.com
+  hosts: WindowsTaskServer
   gather_facts: no
   connection: winrm
 
