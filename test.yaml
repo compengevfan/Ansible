@@ -1,6 +1,8 @@
 ---
 - name: Run PowerShell script on Windows servers
   hosts: all
+  gather_facts: no
+  connection: winrm
 
   tasks:
     - name: Execute PowerShell script
