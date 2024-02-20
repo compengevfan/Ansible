@@ -11,4 +11,4 @@
 
     - name: Show Info
       debug:
-        msg: {{ Services }}
+        msg: "{{ Services }}"
