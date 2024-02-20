@@ -1,16 +1,9 @@
 ---
 - name: Run PowerShell script on Windows servers
-  hosts: jax-task001.evorigin.com
+  hosts: all
   gather_facts: no
   connection: winrm
 
   tasks:
     - name: Execute PowerShell script
-      win_shell: |
-        # Your PowerShell script content goes here
-        # For example:
-        Invoke-Command -ScriptBlock {
-          # Your PowerShell script commands here
-          # For example:
-          Get-Service
-        }
+      win_shell: Get-Service
