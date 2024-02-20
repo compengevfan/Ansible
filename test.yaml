@@ -1,6 +1,5 @@
 ---
 - name: Run PowerShell script on Windows servers
-  hosts: localhost
   gather_facts: no
   connection: winrm
 
