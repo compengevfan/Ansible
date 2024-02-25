@@ -9,4 +9,4 @@
       win_shell: |
         Import-Module DupreeFunctions
         Import-DfCredentials
-        Invoke-DfDracReset -DracToReset 1
+        Invoke-DfDracReset -DracToReset All
