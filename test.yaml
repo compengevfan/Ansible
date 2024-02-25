@@ -6,9 +6,6 @@
 
   tasks:
     - name: Execute PowerShell script
-      win_shell: Get-Service
-      register: Services
-
-    - name: Show Info
-      debug:
-        msg: "{{ Services }}"
+      win_shell: |
+        Import-Module DupreeFunctions
+        Invoke-DfDracReset -DracToReset 1
