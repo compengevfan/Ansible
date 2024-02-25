@@ -10,4 +10,5 @@
       register: Services
 
     - name: Show info
-      debug: "{{ Services }}"
+      debug: 
+        msg: "{{ Services }}"
