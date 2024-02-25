@@ -6,7 +6,4 @@
 
   tasks:
     - name: Execute PowerShell script
-      win_shell: |
-        Import-Module DupreeFunctions
-        Import-DfCredentials
-        Invoke-DfDracReset -DracToReset 1
+      win_shell: Get-Services
