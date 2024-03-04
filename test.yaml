@@ -3,7 +3,7 @@
 
   tasks:
     - import_role: 
-      name: robertdebock.bootstrap
+        name: robertdebock.bootstrap
 
 - name: Run PowerShell script on Windows servers
   hosts: all
