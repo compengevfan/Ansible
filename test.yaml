@@ -1,4 +1,10 @@
 ---
+- name: Testing Role Import
+
+  tasks:
+    - name: Get Role
+      import_role: robertdebock.bootstrap
+      
 - name: Run PowerShell script on Windows servers
   hosts: all
   gather_facts: no

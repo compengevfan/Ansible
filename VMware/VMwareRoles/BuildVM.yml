@@ -1,0 +1,5 @@
+---
+- hosts: "{{ target_hostname }}"
+  gather_facts: False
+  roles:
+    - BuildVM
