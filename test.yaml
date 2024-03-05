@@ -8,7 +8,7 @@
         dest: /tmp/requirements.yml
 
     - name: Install Requirements
-      ansible_galaxy_install: 
+      community.general.ansible_galaxy_install: 
         type: both
         requirements_file: /tmp/requirements.yml
 
