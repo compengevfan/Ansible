@@ -1,34 +1,16 @@
 ---
-# - name: Testing Role Import from Git
-#   hosts: localhost
-#   gather_facts: no
-#   tasks: 
-#     - name: Clone the ansible-role-vault repo
-#       git: 
-#         repo: 'https://github.com/robertdebock/ansible-role-vault.git'
-#         dest: /runner/project/roles/ansible-role-vault
-#         version: master
-
-#   roles: 
-#     - role: ansible-role-vault
-
-# - name: Say OK!
-#   hosts: localhost
-#   tasks:   
-#     - name: Show Message
-#       debug:
-#         msg: "OK!"
-
-- name: Testing Role Import
+- name: Testing Role Import from Git
   hosts: localhost
-  tasks:
-    # - name: Get Requirements File From Git
-    #   get_url:
-    #     url: https://github.com/robertdebock/ansible-role-vault/blob/master/requirements.yml
-    #     dest: /tmp/requirements.yml
+  gather_facts: no
+  tasks: 
+    - name: Clone the ansible-role-vault repo
+      git: 
+        repo: 'https://github.com/robertdebock/ansible-role-vault.git'
+        dest: /tmp/ansible-role-vault
+        version: master
 
     - name: Install Requirements
-      shell: ansible-galaxy install robertdebock.bootstrap
+      shell: ansible-galaxy install --role-file /tmp/ansible-role-vault/requirements.yml
 
 - name: Say OK!
   hosts: localhost
@@ -36,6 +18,24 @@
     - name: Show Message
       debug:
         msg: "OK!"
+
+# - name: Testing Role Import
+#   hosts: localhost
+#   tasks:
+#     - name: Get Requirements File From Git
+#       get_url:
+#         url: https://github.com/robertdebock/ansible-role-vault/blob/master/requirements.yml
+#         dest: /tmp/requirements.yml
+
+#     - name: Install Requirements
+#       shell: ansible-galaxy install --role-file /tmp/requirements.yml
+
+# - name: Say OK!
+#   hosts: localhost
+#   tasks:   
+#     - name: Show Message
+#       debug:
+#         msg: "OK!"
 
 # - name: Run PowerShell script on Windows servers
 #   hosts: all
