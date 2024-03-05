@@ -1,6 +1,6 @@
 ---
 - name: Testing Role Import
-
+  hosts: localhost
   tasks:
     - name: Get Requirements File From Git
       get_url:
