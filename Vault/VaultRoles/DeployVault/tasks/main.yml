@@ -1,7 +1,6 @@
 ---
 # tasks file for DeployVault
 - name: Import Vault Roles from Git
-  hosts: localhost
   tasks: 
     - name: Clone the ansible-role-vault repo
       git: 
@@ -13,7 +12,6 @@
       shell: ansible-galaxy install --role-file /tmp/ansible-role-vault/requirements.yml
 
 - name: Say OK!
-  hosts: localhost
   tasks:   
     - name: Show Message
       debug:
