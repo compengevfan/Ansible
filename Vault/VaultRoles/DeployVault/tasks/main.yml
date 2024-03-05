@@ -18,13 +18,6 @@
 - name: Test Command
   shell: systemctl status firewalld
 
-- name: install vault?
-  roles:
-    - role: robertdebock.bootstrap
-    - role: robertdebock.core_dependencies
-    - role: robertdebock.common
-    - role: robertdebock.digitalocean_agent
-
 - name: Say OK!
   debug:
     msg: "OK!"
