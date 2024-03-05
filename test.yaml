@@ -3,7 +3,6 @@
 
   tasks:
     - name: Get Requirements File From Git
-      hosts: localhost
       get_url:
         url: https://github.com/robertdebock/ansible-role-vault/blob/master/requirements.yml
         dest: /tmp/requirements.yml
@@ -11,16 +10,16 @@
     #- name: Install Requirements
 
 
-- name: Run PowerShell script on Windows servers
-  hosts: all
-  gather_facts: no
-  connection: winrm
+# - name: Run PowerShell script on Windows servers
+#   hosts: all
+#   gather_facts: no
+#   connection: winrm
 
-  tasks:
-    - name: Execute PowerShell script
-      win_shell: Get-Service
-      register: Services
+#   tasks:
+#     - name: Execute PowerShell script
+#       win_shell: Get-Service
+#       register: Services
 
-    - name: Show info
-      debug: 
-        msg: "{{ Services }}"
+#     - name: Show info
+#       debug: 
+#         msg: "{{ Services }}"
