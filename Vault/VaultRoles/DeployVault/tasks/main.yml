@@ -17,10 +17,10 @@
 
 - name: install vault?
   roles:
-    - robertdebock.bootstrap
-    - robertdebock.core_dependencies
-    - robertdebock.hashicorp
-    - robertdebock.vault
+    - role: robertdebock.bootstrap
+    - role: robertdebock.core_dependencies
+    - role: robertdebock.hashicorp
+    - role: robertdebock.vault
 
 - name: Say OK!
   debug:
