@@ -22,17 +22,13 @@
 - name: Testing Role Import
   hosts: localhost
   tasks:
-    # - name: Get Requirements File From Git
-    #   get_url:
-    #     url: https://github.com/robertdebock/ansible-role-vault/blob/master/requirements.yml
-    #     dest: /tmp/requirements.yml
+    - name: Get Requirements File From Git
+      get_url:
+        url: https://github.com/robertdebock/ansible-role-vault/blob/master/requirements.yml
+        dest: /tmp/requirements.yml
 
     - name: Install Requirements
-      community.general.collection: 
-        name: robertdebock.roles
-        action: install
-        force: yes
-        requirements_file: requirements.yml
+      shell: ansible-galaxy install --role-file /tmp/requirements.yaml
 
 - name: Say OK!
   hosts: localhost
