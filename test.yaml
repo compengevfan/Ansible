@@ -5,8 +5,8 @@
     - name: Clone the ansible-role-vault repo
       git: 
         repo: https://github.com/robertdebock/ansible-role-vault.git
-        dest: /runner/project/roles
-        version: main
+        dest: /runner/project/roles/ansible-role-vault
+        version: master
 
   roles: 
     - role: ansible-role-vault
