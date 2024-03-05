@@ -1,5 +1,5 @@
 ---
-- hosts: VaultServers
+- hosts: all
   gather_facts: False
   roles:
     - DeployVault
