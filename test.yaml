@@ -1,12 +1,19 @@
 ---
 - name: Testing Role Import from Git
   hosts: localhost
-  roles: 
-    - name: ansible-role-vault
-      src: https://github.com/robertdebock/ansible-role-vault.git
-      version: main
-      scm: git
   tasks: 
+    - name: Clone the ansible-role-vault repo
+      git: 
+        repo: https://github.com/robertdebock/ansible-role-vault.git
+        dest: /usr/share/ansible/roles/ansible-role-vault
+        version: main
+
+  roles: 
+    - role: ansible-role-vault
+
+- name: Say OK!
+  hosts: localhost
+  tasks:   
     - name: Show Message
       debug:
         msg: "OK!"
