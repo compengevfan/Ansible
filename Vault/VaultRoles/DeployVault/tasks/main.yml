@@ -1,18 +1,14 @@
 ---
 # tasks file for DeployVault
-- name: Import Vault Roles from Git
-  tasks: 
-    - name: Clone the ansible-role-vault repo
-      git: 
-        repo: 'https://github.com/robertdebock/ansible-role-vault.git'
-        dest: /tmp/ansible-role-vault
-        version: master
+- name: Clone the ansible-role-vault repo
+  git: 
+    repo: 'https://github.com/robertdebock/ansible-role-vault.git'
+    dest: /tmp/ansible-role-vault
+    version: master
 
-    - name: Install Requirements
-      shell: ansible-galaxy install --role-file /tmp/ansible-role-vault/requirements.yml
+- name: Install Requirements
+  shell: ansible-galaxy install --role-file /tmp/ansible-role-vault/requirements.yml
 
 - name: Say OK!
-  tasks:   
-    - name: Show Message
-      debug:
-        msg: "OK!"
+  debug:
+    msg: "OK!"
