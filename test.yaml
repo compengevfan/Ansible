@@ -4,7 +4,7 @@
   tasks: 
     - name: Clone the ansible-role-vault repo
       git: 
-        repo: https://github.com/robertdebock/ansible-role-vault.git
+        repo: 'https://github.com/robertdebock/ansible-role-vault.git'
         dest: /runner/project/roles
         version: master
 
