@@ -15,6 +15,9 @@
   shell: ansible-galaxy install robertdebock.vault
   delegate_to: localhost
 
+- name: Test Command
+  shell: systemctl status firewalld
+
 # - name: install vault?
 #   roles:
 #     - role: robertdebock.bootstrap
