@@ -3,7 +3,7 @@
   hosts: localhost
   roles: 
     - name: ansible-role-vault
-      src: git@github.com:robertdebock/ansible-role-vault.git
+      src: https://github.com/robertdebock/ansible-role-vault.git
       version: main
       scm: git
   tasks: 
