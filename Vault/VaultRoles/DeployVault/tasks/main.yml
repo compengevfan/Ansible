@@ -15,12 +15,12 @@
   shell: ansible-galaxy install robertdebock.vault
   delegate_to: localhost
 
-- name: install vault?
-  roles:
-    - role: robertdebock.bootstrap
-    - role: robertdebock.core_dependencies
-    - role: robertdebock.hashicorp
-    - role: robertdebock.vault
+# - name: install vault?
+#   roles:
+#     - role: robertdebock.bootstrap
+#     - role: robertdebock.core_dependencies
+#     - role: robertdebock.hashicorp
+#     - role: robertdebock.vault
 
 - name: Say OK!
   debug:
