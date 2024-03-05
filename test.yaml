@@ -1,5 +1,5 @@
 ---
-- name: Testing Role Import from Git
+- name: Import Vault Roles from Git
   hosts: localhost
   gather_facts: no
   tasks: 
@@ -14,6 +14,7 @@
 
 - name: Say OK!
   hosts: localhost
+  gather_facts: no
   tasks:   
     - name: Show Message
       debug:
