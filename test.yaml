@@ -7,8 +7,10 @@
         url: https://github.com/robertdebock/ansible-role-vault/blob/master/requirements.yml
         dest: /tmp/requirements.yml
 
-    #- name: Install Requirements
-
+    - name: Install Requirements
+      ansible_galaxy_install: 
+        type: both
+        requirements_file: /tmp/requirements.yml
 
 # - name: Run PowerShell script on Windows servers
 #   hosts: all
