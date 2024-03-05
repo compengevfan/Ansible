@@ -2,7 +2,6 @@
 # tasks file for DeployVault
 - name: Import Vault Roles from Git
   hosts: localhost
-  gather_facts: no
   tasks: 
     - name: Clone the ansible-role-vault repo
       git: 
@@ -15,7 +14,6 @@
 
 - name: Say OK!
   hosts: localhost
-  gather_facts: no
   tasks:   
     - name: Show Message
       debug:
