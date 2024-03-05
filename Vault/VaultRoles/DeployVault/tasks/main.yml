@@ -21,7 +21,6 @@
     - robertdebock.core_dependencies
     - robertdebock.hashicorp
     - robertdebock.vault
-  
 
 - name: Say OK!
   debug:
