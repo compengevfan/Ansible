@@ -1,2 +1,6 @@
 ---
 # handlers file for DeployVault
+- name: vault_restart
+  ansible.builtin.service:
+    name: vault
+    state: restarted

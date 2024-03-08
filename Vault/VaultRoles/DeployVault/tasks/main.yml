@@ -4,7 +4,7 @@
   ansible.builtin.yum:
     name: unzip
     state: present
-    
+
 - name: Download and extract vault
   ansible.builtin.unarchive:
     src: https://hashicorp-releases.yandexcloud.net/vault/1.15.5/vault_1.15.5_linux_amd64.zip
@@ -23,8 +23,15 @@
 
 - name: Copy vault config file from template 
   ansible.builtin.template:
-    src: templates/config.hcl
+    src: templates/config.hcl.j2
     dest: "/etc/vault/config.hcl"
+
+- name: Copy vault systemd service file from template
+  ansible.builtin.template:
+    src: templates/vault.service.j2
+    dest: "{{ vault_servise_path }}"
+  notify:
+    - vault_restart
 
 - name: Test Command
   shell: systemctl status firewalld
