@@ -5,6 +5,7 @@
     name: unzip
     state: present
 
+#Figure out how to not run this every time...
 - name: Download and extract vault
   ansible.builtin.unarchive:
     src: https://hashicorp-releases.yandexcloud.net/vault/1.15.5/vault_1.15.5_linux_amd64.zip
@@ -29,7 +30,7 @@
 - name: Copy vault systemd service file from template
   ansible.builtin.template:
     src: templates/vault.service.j2
-    dest: "{{ vault_servise_path }}"
+    dest: /etc/systemd/system/vault.service
   notify:
     - vault_restart
 
