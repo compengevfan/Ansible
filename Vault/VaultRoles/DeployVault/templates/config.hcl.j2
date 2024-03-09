@@ -1,6 +1,6 @@
 storage "raft" {
-  path    = "./vault/data"
-  node_id = "node1"
+  path    = "/var/lib/vault/data"
+  node_id = "{{ ansible_hostname }}"
 }
 
 listener "tcp" {
