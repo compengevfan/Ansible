@@ -5,4 +5,5 @@
 
   tasks:
     - name: Drac Reset Loop
-      shell: racadm racreset soft
+      shell: 
+        cmd: racadm racreset soft
