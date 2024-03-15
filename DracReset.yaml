@@ -2,7 +2,7 @@
 - name: Run PowerShell script on Windows servers
   hosts: all
   gather_facts: yes
-  connection: winrm
+  # connection: winrm
   vars:
     ansible_connection: winrm
     ansible_winrm_server_cert_validation: true
