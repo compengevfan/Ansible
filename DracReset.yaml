@@ -1,16 +1,8 @@
 ---
-- name: Run PowerShell script on Windows servers
+- name: Reset iDRACs
   hosts: all
-  gather_facts: yes
-  # connection: winrm
-  vars:
-    ansible_connection: winrm
-    ansible_winrm_transport: ntlm
-    ansible_winrm_port: 5985
+  gather_facts: no
 
   tasks:
-    - name: Execute PowerShell script
-      win_shell: |
-        Import-Module DupreeFunctions
-        Import-DfCredentials
-        Invoke-DfDracReset -DracToReset All
+    - name: Drac Reset Loop
+      raw: racadm racreset soft
