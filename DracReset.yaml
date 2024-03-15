@@ -1,8 +1,13 @@
 ---
 - name: Run PowerShell script on Windows servers
   hosts: all
-  gather_facts: no
+  gather_facts: yes
   connection: winrm
+  vars:
+    ansible_connection: winrm
+    ansible_winrm_server_cert_validation: true
+    ansible_winrm_transport: basic
+    ansible_winrm_port: 5985
 
   tasks:
     - name: Execute PowerShell script
