@@ -4,8 +4,12 @@
   gather_facts: no
 
   tasks:
-    - name: Drac Reset Loop
-      raw: racadm racreset soft
+    - name: Install Module
+      shell: ansible-galaxy collection install dellemc.openmanage
+      delegate_to: localhost
 
-    - name: exit
-      raw: exit
+    - name: Drac Reset
+      dellemc.openmanage.idrac_reset:
+        idrac_ip: "{{ inventory_hostname }}"
+        idrac_user: "{{ ansible_user }}"
+        idrac_password: "{{ ansible_password }}"
