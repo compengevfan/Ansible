@@ -31,6 +31,8 @@
 
 - name: Reset iDRACs
   hosts: all
+  environment:
+    ANSIBLE_COLLECTIONS_PATHS: "/runner/requirements_collections"
   gather_facts: no
 
   tasks:
