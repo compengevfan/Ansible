@@ -7,13 +7,13 @@
     - name: Run ansible-galaxy command
       shell: ansible-galaxy collection install dellemc.openmanage
 
-    - name: Show Collections
-      shell: ansible-galaxy collection list
-      register: Output
+    # - name: Show Collections
+    #   shell: ansible-galaxy collection list
+    #   register: Output
 
-    - name: Display
-      debug:
-        msg: "{{ Output }}"  
+    # - name: Display
+    #   debug:
+    #     msg: "{{ Output }}"  
 
 - name: Reset iDRACs
   hosts: all
