@@ -2,13 +2,11 @@
 - name: Reset iDRACs
   hosts: all
   gather_facts: no
+  collections:
+    - dellemc.openmanage
 
   tasks:
-    - name: Install Module
-      shell: ansible-galaxy collection install dellemc.openmanage
-      delegate_to: localhost
-
-    - name: Drac Reset
+    - name: iDrac Reset
       dellemc.openmanage.idrac_reset:
         idrac_ip: "{{ inventory_hostname }}"
         idrac_user: "{{ ansible_user }}"
