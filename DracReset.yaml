@@ -1,15 +1,18 @@
 ---
+- name: Install Dell Collection
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: Install Dell Collection
+      shell: ansible-galaxy collection install dellemc.openmanage    
+
 - name: Reset iDRACs
   hosts: all
   gather_facts: no
 
   tasks:
-    - name: Install Dell Collection
-      hosts: localhost
-      shell: ansible-galaxy collection install dellemc.openmanage
-
     - name: Show Collections
-      hosts: localhost
       shell: ansible-galaxy collection list
       register: Output
 
