@@ -7,6 +7,7 @@
     - name: Show Collections
       shell: ansible-galaxy collection list
       register: Output
+      delegate_to: localhost
 
     - name: Display
       debug:
