@@ -4,7 +4,7 @@
   gather_facts: no
 
   tasks:
-    - name: Install Dell Collection
+    - name: Run ansible-galaxy command
       shell: ansible-galaxy collection install dellemc.openmanage    
 
 - name: Reset iDRACs
