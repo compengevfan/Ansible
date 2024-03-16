@@ -5,13 +5,13 @@
 
   tasks:
     - name: Install Dell Collection
+      hosts: localhost
       shell: ansible-galaxy collection install dellemc.openmanage
-      delegate_to: localhost
-      
+
     - name: Show Collections
+      hosts: localhost
       shell: ansible-galaxy collection list
       register: Output
-      delegate_to: localhost
 
     - name: Display
       debug:
