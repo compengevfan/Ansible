@@ -4,6 +4,10 @@
   gather_facts: no
 
   tasks:
+    - name: Install Dell Collection
+      shell: ansible-galaxy collection install dellemc.openmanage
+      delegate_to: localhost
+      
     - name: Show Collections
       shell: ansible-galaxy collection list
       register: Output
