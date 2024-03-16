@@ -1,11 +1,19 @@
 ---
 - name: Reset iDRACs
   hosts: all
-  gather_facts: noS
+  gather_facts: no
 
   tasks:
-    - name: iDrac Reset
-      dellemc.openmanage.idrac_reset:
-        idrac_ip: "{{ inventory_hostname }}"
-        idrac_user: "{{ ansible_user }}"
-        idrac_password: "{{ ansible_password }}"
+    - name: Show Collections
+      shell: ansible-galaxy collection list
+      register: Output
+
+    - name: Display
+      debug:
+        msg: "{{ Output }}"
+
+    # - name: iDrac Reset
+    #   dellemc.openmanage.idrac_reset:
+    #     idrac_ip: "{{ inventory_hostname }}"
+    #     idrac_user: "{{ ansible_user }}"
+    #     idrac_password: "{{ ansible_password }}"
