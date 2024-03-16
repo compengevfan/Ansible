@@ -1,9 +1,7 @@
 ---
 - name: Reset iDRACs
   hosts: all
-  gather_facts: no
-  collections:
-    - dellemc.openmanage
+  gather_facts: noS
 
   tasks:
     - name: iDrac Reset
