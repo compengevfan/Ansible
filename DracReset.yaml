@@ -22,7 +22,7 @@
       shell: ansible-galaxy collection install dellemc.openmanage
 
     - name: Install Role?
-      shell: ansible-galaxy install dellemc.openmanage.idrac_reset
+      shell: ansible-galaxy install dellemc.openmanage
 
     # - name: Show Collections
     #   shell: ansible-galaxy collection list
