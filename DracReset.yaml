@@ -10,7 +10,7 @@
         state: latest
       run_once: true
       # delegate_to: "{{ groups['controller'][0] }}"
-      become: true
+      # become: true
       
     - name: install omsdk
       ansible.builtin.pip:
