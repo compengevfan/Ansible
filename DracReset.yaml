@@ -21,6 +21,9 @@
     - name: Run ansible-galaxy command
       shell: ansible-galaxy collection install dellemc.openmanage
 
+    - name: Install Role?
+      shell: ansible-galaxy install dellemc.openmanage.idrac_reset
+
     # - name: Show Collections
     #   shell: ansible-galaxy collection list
     #   register: Output
@@ -31,8 +34,6 @@
 
 - name: Reset iDRACs
   hosts: all
-  environment:
-    ANSIBLE_COLLECTIONS_PATHS: "/runner/requirements_collections"
   gather_facts: no
 
   tasks:
