@@ -32,8 +32,6 @@
 - name: Reset iDRACs
   hosts: all
   gather_facts: no
-  ansible.builtin.include_role: 
-    name: dellemc.openmanage.idrac_reset 
 
   tasks:
   #   - name: Say OK!
