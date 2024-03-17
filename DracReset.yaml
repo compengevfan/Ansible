@@ -40,12 +40,12 @@
   #     debug:
   #       msg: "OK!"
 
-  # - name: Import a role
-  #   ansible.builtin.import_role: 
-  #     name: idrac_reset
+  - name: Import a role
+    ansible.builtin.import_role: 
+      name: idrac_reset
 
   - name: iDrac Reset
-    idrac_reset:
+    dellemc.openmanage.idrac_reset:
       idrac_ip: "{{ inventory_hostname }}"
       idrac_user: "{{ ansible_user }}"
       idrac_password: "{{ ansible_password }}"
