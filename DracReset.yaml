@@ -4,19 +4,19 @@
   gather_facts: yes
 
   tasks:
-    - name: install pip
-      package:
-        name: python3-pip
-        state: latest
-      run_once: true
-      # delegate_to: "{{ groups['controller'][0] }}"
-      # become: true
+    # - name: install pip
+    #   package:
+    #     name: python3-pip
+    #     state: latest
+    #   run_once: true
+    #   # delegate_to: "{{ groups['controller'][0] }}"
+    #   # become: true
       
-    - name: install omsdk
-      ansible.builtin.pip:
-        name: omsdk
-      run_once: true
-      # delegate_to: "{{ groups['controller'][0] }}"
+    # - name: install omsdk
+    #   ansible.builtin.pip:
+    #     name: omsdk
+    #   run_once: true
+    #   # delegate_to: "{{ groups['controller'][0] }}"
 
     - name: Run ansible-galaxy command
       shell: ansible-galaxy collection install dellemc.openmanage
