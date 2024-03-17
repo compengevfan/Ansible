@@ -19,7 +19,7 @@
       # delegate_to: "{{ groups['controller'][0] }}"
 
     - name: Run ansible-galaxy command
-      shell: ansible-galaxy install dellemc.openmanage.idrac_reset
+      shell: ansible-galaxy collection install dellemc.openmanage
 
     # - name: Show Collections
     #   shell: ansible-galaxy collection list
@@ -32,6 +32,8 @@
 - name: Reset iDRACs
   hosts: all
   gather_facts: no
+  ansible.builtin.include_role: 
+    name: dellemc.openmanage.idrac_reset 
 
   tasks:
   #   - name: Say OK!
