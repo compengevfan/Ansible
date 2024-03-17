@@ -19,7 +19,7 @@
     #   # delegate_to: "{{ groups['controller'][0] }}"
 
     - name: Run ansible-galaxy command
-      shell: ansible-galaxy collection install dellemc.openmanage
+      shell: ansible-galaxy collection install dellemc.openmanage -p /usr/share/ansible/collections
 
     - name: Show Collections
       shell: ansible-galaxy collection list
