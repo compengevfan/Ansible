@@ -29,17 +29,20 @@
       debug:
         msg: "{{ Output }}"
 
-- name: Reset iDRACs
-  hosts: all
-  gather_facts: no
-
-  tasks:
-    - name: Say OK!
-      debug:
-        msg: "OK!"
-
     - name: iDrac Reset
       dellemc.openmanage.idrac_reset:
-        idrac_ip: "{{ inventory_hostname }}"
+        idrac_ip: "{{ item }}"
         idrac_user: "{{ ansible_user }}"
         idrac_password: "{{ ansible_password }}"
+      loop: "{{ ansible_play_hosts }}"
+      when: item != "localhost"
+
+# - name: Reset iDRACs
+#   hosts: all
+#   gather_facts: no
+
+#   tasks:
+#     - name: Say OK!
+#       debug:
+#         msg: "OK!"
+
