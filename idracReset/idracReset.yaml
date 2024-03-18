@@ -13,7 +13,7 @@
         name: omsdk
 
 - name: Run idracReset Role
-  hosts: all
+  hosts: localhost
   gather_facts: no
   tasks: 
     - name: Run the Role
