@@ -19,3 +19,5 @@
     - name: Run the Role
       include_role:
         name: idracReset
+      vars:
+        all_hosts: "{{ ansible_play_hosts_all }}"
