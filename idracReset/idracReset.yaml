@@ -10,9 +10,8 @@
   hosts: localhost
   tasks:
     - ansible.builtin.pip:
-      name: omsdk
-      state: present
-      run_once: true
+        name: omsdk
+
 
 - name: Run idracReset Role
   hosts: all
