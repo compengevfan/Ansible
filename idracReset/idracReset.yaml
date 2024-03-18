@@ -7,7 +7,7 @@
     - shell: ansible-galaxy collection install dellemc.openmanage
 
 - name: Run idracReset Role
-  hosts: iDRACs
+  hosts: all
   gather_facts: yes
   tasks: 
     - name: Run the Role
