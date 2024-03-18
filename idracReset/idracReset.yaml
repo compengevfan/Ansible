@@ -6,6 +6,11 @@
   tasks:
     - shell: ansible-galaxy collection install dellemc.openmanage
 
+- name: install omsdk
+  ansible.builtin.pip:
+    name: omsdk
+  run_once: true
+
 - name: Run idracReset Role
   hosts: all
   gather_facts: yes

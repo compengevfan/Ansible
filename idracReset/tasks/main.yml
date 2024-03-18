@@ -1,18 +1,5 @@
 ---
 # tasks file for idracReset
-- name: install omsdk
-  ansible.builtin.pip:
-    name: omsdk
-  run_once: true
-
-# - name: Show Collections
-#   shell: ansible-galaxy collection list
-#   register: Output
-
-# - name: Display
-#   debug:
-#     msg: "{{ Output }}"
-
 - name: iDrac Reset
   dellemc.openmanage.idrac_reset:
     idrac_ip: "{{ item }}"
@@ -20,3 +7,4 @@
     idrac_password: "{{ ansible_password }}"
   loop: "{{ ansible_play_hosts }}"
   when: item != "localhost"
+  delegate_to: localhost
