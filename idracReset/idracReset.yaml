@@ -13,9 +13,12 @@
         name: omsdk
 
 - name: Run idracReset Role
-  hosts: localhost
+  hosts: "{{ item }}"
   gather_facts: no
   tasks: 
     - name: Run the Role
       include_role:
         name: idracReset
+  loop: "{{ ansible_play_hosts }}"
+  when: item != "localhost"
+  delegate_to: localhost
