@@ -12,7 +12,6 @@
     - ansible.builtin.pip:
         name: omsdk
 
-
 - name: Run idracReset Role
   hosts: all
   gather_facts: yes
