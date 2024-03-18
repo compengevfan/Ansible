@@ -9,4 +9,4 @@
   loop: "{{ ansible_play_hosts_all }}"
   when: item != "localhost"
   delegate_to: localhost
-  # run_once: true
+  run_once: true
