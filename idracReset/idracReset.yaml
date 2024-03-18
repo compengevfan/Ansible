@@ -8,7 +8,7 @@
 
 - name: Run idracReset Role
   hosts: all
-  gather_facts: no
+  gather_facts: yes
   tasks: 
     - name: Run the Role
       include_role:
