@@ -38,8 +38,8 @@
       debug:
         msg: "OK!"
 
-  # - name: iDrac Reset
-  #   dellemc.openmanage.idrac_reset:
-  #     idrac_ip: "{{ inventory_hostname }}"
-  #     idrac_user: "{{ ansible_user }}"
-  #     idrac_password: "{{ ansible_password }}"
+    - name: iDrac Reset
+      dellemc.openmanage.idrac_reset:
+        idrac_ip: "{{ inventory_hostname }}"
+        idrac_user: "{{ ansible_user }}"
+        idrac_password: "{{ ansible_password }}"
