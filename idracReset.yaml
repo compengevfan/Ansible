@@ -1,0 +1,15 @@
+---
+- name: Run ansible-galaxy command
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - shell: ansible-galaxy collection install dellemc.openmanage
+
+- name: Run idracReset Role
+  hosts: localhost
+  gather_facts: yes
+  tasks: 
+    - name: Run the Role
+      include_role:
+        name: idracReset
