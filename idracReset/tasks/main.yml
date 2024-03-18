@@ -14,3 +14,7 @@
 - name: debug
   debug:
     msg: "{{ all_hosts }}"
+
+- name: debug
+  debug:
+    msg: "{{ groups }}"
