@@ -13,4 +13,4 @@
 
 - name: debug
   debug:
-    msg: ansible_play_hosts_all
+    msg: "{{ ansible_play_hosts_all }}"
