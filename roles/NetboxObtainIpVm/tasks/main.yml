@@ -1,0 +1,12 @@
+---
+# tasks file for NetboxObtainIP
+- name: Get IP address
+  netbox.netbox.netbox_ip_address:
+    netbox_url: https://jax-nbx001.evorigin.com
+    netbox_token: "{{ ansible_password }}"
+    validate_certs: no
+  register: IpOutput
+
+- name: Show Info
+  debug:
+    msg: "{{ IpOutput }}"

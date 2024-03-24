@@ -1,0 +1,5 @@
+---
+- hosts: LocalHost
+  gather_facts: yes
+  roles:
+    - NetboxObtainIpVm
