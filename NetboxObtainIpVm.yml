@@ -1,4 +1,11 @@
 ---
+- name: Run ansible-galaxy command
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - shell: ansible-galaxy collection install netbox.netbox
+
 - hosts: LocalHost
   gather_facts: yes
   roles:
