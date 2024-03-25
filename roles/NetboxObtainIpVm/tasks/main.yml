@@ -4,6 +4,8 @@
   netbox.netbox.netbox_ip_address:
     netbox_url: https://jax-nbx001.evorigin.com
     netbox_token: "{{ ansible_password }}"
+    data:
+      address: 10.10.10.1
     validate_certs: no
   register: IpOutput
 
