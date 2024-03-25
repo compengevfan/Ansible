@@ -8,6 +8,7 @@
 
 - name: Install pynetbox
   hosts: localhost
+  gather_facts: no
   tasks:
     - ansible.builtin.pip:
         name: pynetbox
