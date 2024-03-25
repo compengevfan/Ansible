@@ -9,12 +9,3 @@
   loop: "{{ groups['all'] }}"
   when: item != "localhost"
   delegate_to: localhost
-  # run_once: true
-
-# - name: debug
-#   debug:
-#     msg: "{{ all_hosts }}"
-
-# - name: debug
-#   debug:
-#     msg: "{{ groups }}"
