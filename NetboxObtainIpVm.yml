@@ -1,4 +1,10 @@
 ---
+- name: Install pynetbox
+  hosts: localhost
+  tasks:
+    - ansible.builtin.pip:
+        name: pynetbox
+
 - name: Run ansible-galaxy command
   hosts: localhost
   connection: local
@@ -6,7 +12,10 @@
   tasks:
     - shell: ansible-galaxy collection install netbox.netbox
 
-- hosts: LocalHost
+- name: Run 
+  hosts: localhost
   gather_facts: yes
-  roles:
-    - NetboxObtainIpVm
+  tasks:
+    - name: Run the Role
+      include_role:
+        name: NetboxObtainIpVm
