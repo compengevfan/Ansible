@@ -6,6 +6,7 @@
     netbox_token: "{{ ansible_password }}"
     data:
       address: 10.10.10.1
+    state: present
     validate_certs: no
   register: IpOutput
 
