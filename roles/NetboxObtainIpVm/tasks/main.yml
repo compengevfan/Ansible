@@ -14,3 +14,21 @@
 - name: Show Info
   debug:
     msg: "{{ IpOutput }}"
+
+- name: Create IP in TestTenant1
+  netbox.netbox.netbox_ip_address:
+    netbox_url: https://jax-nbx001.evorigin.com
+    netbox_token: "{{ ansible_password }}"
+    data:
+      prefix: 10.10.10.0/23
+      tenant: TestTenant1
+    state: new
+
+- name: Create IP in TestTenant2
+  netbox.netbox.netbox_ip_address:
+    netbox_url: https://jax-nbx001.evorigin.com
+    netbox_token: "{{ ansible_password }}"
+    data:
+      prefix: 10.10.10.0/23
+      tenant: TestTenant2
+    state: new
