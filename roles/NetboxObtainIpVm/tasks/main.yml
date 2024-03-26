@@ -5,8 +5,7 @@
     netbox_url: https://jax-nbx001.evorigin.com
     netbox_token: "{{ ansible_password }}"
     data:
-      address: 10.10.10.1
-      tenant: TestTenant1
+      dns_name: esx1.evorigin.com
     state: present
     validate_certs: no
   register: IpOutput
@@ -15,22 +14,3 @@
   debug:
     msg: "{{ IpOutput }}"
 
-- name: Create IP in TestTenant1
-  netbox.netbox.netbox_ip_address:
-    netbox_url: https://jax-nbx001.evorigin.com
-    netbox_token: "{{ ansible_password }}"
-    data:
-      prefix: 10.10.10.0/23
-      tenant: TestTenant1
-    validate_certs: no
-    state: new
-
-- name: Create IP in TestTenant2
-  netbox.netbox.netbox_ip_address:
-    netbox_url: https://jax-nbx001.evorigin.com
-    netbox_token: "{{ ansible_password }}"
-    data:
-      prefix: 10.10.10.0/23
-      tenant: TestTenant2
-    validate_certs: no
-    state: new
