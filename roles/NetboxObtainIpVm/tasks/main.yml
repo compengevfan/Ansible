@@ -5,7 +5,7 @@
     netbox_url: https://jax-nbx001.evorigin.com
     netbox_token: "{{ ansible_password }}"
     data:
-      dns_name: esx1.evorigin.com
+      address: 10.10.10.1
     state: present
     validate_certs: no
   register: IpOutput
