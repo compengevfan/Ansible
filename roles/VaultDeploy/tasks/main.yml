@@ -42,6 +42,16 @@
     owner: vault
     group: vault
 
+- name: Insert VAULT_ADDR in to /etc/profile
+  lineinfile:
+    path: /etc/profile
+    line: export VAULT_ADDR="https://$(hostname):8200"
+
+- name: Insert VAULT_ADDR in to .bashrc
+  lineinfile:
+    path: /etc/bashrc
+    line: export VAULT_ADDR="https://$(hostname):8200"
+
 - name: Start Vault Service
   ansible.builtin.service:
     name: vault
