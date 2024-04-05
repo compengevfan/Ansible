@@ -1,0 +1,7 @@
+---
+- name: This is a test
+  hosts: localhost
+  gather_facts: yes
+  tasks:
+    - debug:
+        msg: "{{ HC-Vault }}"
