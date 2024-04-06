@@ -3,5 +3,6 @@
   hosts: localhost
   gather_facts: no
   tasks:
-    - debug:
-        msg: "{{ HC-Vault }}"
+    - name: Get Cred
+      debug:
+        msg: "{{ lookup('community.hashi_vault.hashi_vault','secret=/homelabsecrets/data/dell/iDRAC') }}"

@@ -12,13 +12,6 @@
     - ansible.builtin.pip:
         name: omsdk
 
-- name: Run ansible-galaxy command install community.hashi_vault
-  hosts: localhost
-  connection: local
-  gather_facts: yes
-  tasks:
-    - shell: ansible-galaxy collection install community.hashi_vault
-
 - name: Run idracReset Role
   hosts: localhost
   gather_facts: no
