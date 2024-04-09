@@ -5,7 +5,7 @@
   connection: local
   gather_facts: yes
   tasks:
-    - shell: ansible-galaxy collection install dellemc.openmanage
+    - shell: ansible-galaxy collection install dellemc.openmanage:8.7.0
 
 - name: install omsdk
   hosts: localhost
