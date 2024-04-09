@@ -13,10 +13,6 @@
     - ansible.builtin.pip:
         name: omsdk
 
-- name: Obtain iDrac Credential
-  include_role:
-    name: GetVaultCreds
-
 - name: Run idracReset Role
   hosts: localhost
   gather_facts: no
