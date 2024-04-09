@@ -3,15 +3,16 @@
 - name: Obtain iDrac Credential
   include_role:
     name: GetVaultCreds
-  tags:
-  - idrac
+  vars:
+    tag:
+      - idrac
 
-# - name: iDrac Reset
-#   dellemc.openmanage.idrac_reset:
-#     idrac_ip: "{{ item }}"
-#     idrac_user: "{{ ansible_user }}"
-#     idrac_password: "{{ ansible_password }}"
-#     validate_certs: false
-#   loop: "{{ groups['all'] }}"
-#   when: item != "localhost"
-#   delegate_to: localhost
+- name: iDrac Reset
+  dellemc.openmanage.idrac_reset:
+    idrac_ip: "{{ item }}"
+    idrac_user: "{{ idrac_cred.username }}"
+    idrac_password: "{{ idrac_cred.password }}"
+    validate_certs: false
+  loop: "{{ groups['all'] }}"
+  when: item != "localhost"
+  delegate_to: localhost

@@ -3,12 +3,8 @@
 - name: Get iDrac cred from Vault
   set_fact:
     idrac_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=homelabsecrets/data/dell/iDRAC validate_certs=False') }}"
-  # no_log: true
-  when: ('idrac' in ansible_run_tags)
-  # tags: idrac
-
+  no_log: true
+  
 - name: This should not run
   debug:
     msg: "This should not run..."
-  when: ('norun' in ansible_run_tags)
-  # tags: norun
