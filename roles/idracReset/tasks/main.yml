@@ -3,8 +3,8 @@
 - name: Obtain iDrac Credential
   include_role:
     name: GetVaultCreds
-    tags:
-    - idrac
+  tags:
+  - idrac
 
 # - name: iDrac Reset
 #   dellemc.openmanage.idrac_reset:
