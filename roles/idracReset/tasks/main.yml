@@ -3,12 +3,12 @@
 - name: FML
   shell: ansible-galaxy collection list
 
-- name: iDrac Reset
-  dellemc.openmanage.idrac_reset:
-    idrac_ip: "{{ item }}"
-    idrac_user: "{{ ansible_user }}"
-    idrac_password: "{{ ansible_password }}"
-    validate_certs: false
-  loop: "{{ groups['all'] }}"
-  when: item != "localhost"
-  delegate_to: localhost
+# - name: iDrac Reset
+#   dellemc.openmanage.idrac_reset:
+#     idrac_ip: "{{ item }}"
+#     idrac_user: "{{ ansible_user }}"
+#     idrac_password: "{{ ansible_password }}"
+#     validate_certs: false
+#   loop: "{{ groups['all'] }}"
+#   when: item != "localhost"
+#   delegate_to: localhost
