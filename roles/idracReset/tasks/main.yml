@@ -1,12 +1,5 @@
 ---
 # tasks file for idracReset
-- name: Obtain iDrac Credential
-  include_role:
-    name: GetVaultCreds
-  vars:
-    tag:
-      - idrac
-
 - name: iDrac Reset
   dellemc.openmanage.idrac_reset:
     idrac_ip: "{{ item }}"
