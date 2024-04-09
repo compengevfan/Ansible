@@ -1,11 +1,17 @@
 ---
 # tasks file for idracReset
-- name: iDrac Reset
-  dellemc.openmanage.idrac_reset:
-    idrac_ip: "{{ item }}"
-    idrac_user: "{{ ansible_user }}"
-    idrac_password: "{{ ansible_password }}"
-    validate_certs: false
-  loop: "{{ groups['all'] }}"
-  when: item != "localhost"
-  delegate_to: localhost
+- name: Obtain iDrac Credential
+  include_role:
+    name: GetVaultCreds
+    tags:
+    - idrac
+
+# - name: iDrac Reset
+#   dellemc.openmanage.idrac_reset:
+#     idrac_ip: "{{ item }}"
+#     idrac_user: "{{ ansible_user }}"
+#     idrac_password: "{{ ansible_password }}"
+#     validate_certs: false
+#   loop: "{{ groups['all'] }}"
+#   when: item != "localhost"
+#   delegate_to: localhost

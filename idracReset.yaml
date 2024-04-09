@@ -1,10 +1,11 @@
 ---
-- name: Run ansible-galaxy command install dellemc.openmanage
-  hosts: localhost
-  connection: local
-  gather_facts: yes
-  tasks:
-    - shell: ansible-galaxy collection install dellemc.openmanage
+# using a custom EE which includes this collection so commenting out.
+# - name: Run ansible-galaxy command install dellemc.openmanage
+#   hosts: localhost
+#   connection: local
+#   gather_facts: yes
+#   tasks:
+#     - shell: ansible-galaxy collection install dellemc.openmanage
 
 - name: install omsdk
   hosts: localhost

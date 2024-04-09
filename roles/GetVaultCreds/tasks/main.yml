@@ -1,0 +1,12 @@
+---
+# tasks file for GetVaultCreds
+- name: "idrac"
+  set_fact:
+    idrac_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=homelabsecrets/data/dell/iDRAC validate_certs=False') }}"
+  no_log: true
+  tags: idrac
+
+- name: This should not run
+  debug:
+    msg: "This should not run..."
+  tags: norun
