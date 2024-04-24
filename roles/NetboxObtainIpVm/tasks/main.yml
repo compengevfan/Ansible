@@ -3,7 +3,7 @@
 - name: Get IP address
   netbox.netbox.netbox_ip_address:
     netbox_url: https://jax-nbx001.evorigin.com
-    netbox_token: "{{ ansible_password }}"
+    netbox_token: "{{ netbox_cred.token }}"
     data:
       address: 10.10.10.1
     state: present
