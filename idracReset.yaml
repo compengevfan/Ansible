@@ -21,36 +21,18 @@
     - name: Obtain iDrac Credential
       include_role:
         name: GetVaultCreds
-        
-    - name: "Add RHEL Prod HC Vault hosts to inventory"
-      add_host:
-        name: "{{ item  }}"
-        group: idracs
-        # ansible_user: "{{ idrac_cred.username }}"
-        # ansible_ssh_pass: "{{ idrac_cred.password }}"
-        # ansible_port: 22
-        # ansible_connection: ssh
-      # no_log: true
-      loop:
-        - rac-esx1.evorigin.com
-        - rac-esx2.evorigin.com
-        - rac-esx3.evorigin.com
 
-# - name: List things
-#   hosts: idracs
-#   # strategy: free
-#   gather_facts: no
-#   tasks:
-#     - name: output something
-#       debug:
-#         var: groups.idracs
-
-- name: Run idracReset Role
-  hosts: idracs
-  gather_facts: no
-  tasks: 
-    - name: Run the Role
-      include_role:
-        name: idracReset
-      # vars:
-      #   all_hosts: "{{ ansible_play_hosts_all }}"
+- name: iDrac Reset
+  dellemc.openmanage.idrac_reset:
+    idrac_ip: "{{ item.Host }}"
+    idrac_user: "{{ idrac_cred.username }}"
+    idrac_password: "{{ idrac_cred.password }}"
+    validate_certs: false
+  loop: iDracs
+  vars: 
+    iDracs:
+      - "rac-esx1.evorigin.com"
+      - "rac-esx2.evorigin.com"
+      - "rac-esx3.evorigin.com"
+#   when: item != "localhost"
+  delegate_to: localhost
