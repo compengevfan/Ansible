@@ -7,16 +7,16 @@
 # - name: FML
 #   shell: ansible-galaxy collection list
 
-# - name: List things
-#   debug:
-#     var: groups.idracs
+- name: List things
+  debug:
+    var: ansible_play_hosts
 
-- name: iDrac Reset
-  dellemc.openmanage.idrac_reset:
-    idrac_ip: "{{ item.Host }}"
-    idrac_user: "{{ idrac_cred.username }}"
-    idrac_password: "{{ idrac_cred.password }}"
-    validate_certs: false
-  loop: ansible_play_hosts
-#   when: item != "localhost"
-  delegate_to: localhost
+# - name: iDrac Reset
+#   dellemc.openmanage.idrac_reset:
+#     idrac_ip: "{{ item.Host }}"
+#     idrac_user: "{{ idrac_cred.username }}"
+#     idrac_password: "{{ idrac_cred.password }}"
+#     validate_certs: false
+#   loop: ansible_play_hosts
+# #   when: item != "localhost"
+#   delegate_to: localhost
