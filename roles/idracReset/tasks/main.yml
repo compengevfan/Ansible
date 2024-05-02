@@ -17,6 +17,6 @@
     idrac_user: "{{ idrac_cred.username }}"
     idrac_password: "{{ idrac_cred.password }}"
     validate_certs: false
-  loop: hostvars
+  loop: ansible_host
 #   when: item != "localhost"
   delegate_to: localhost
