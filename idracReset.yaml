@@ -13,12 +13,31 @@
     - ansible.builtin.pip:
         name: omsdk
 
-- name: Run idracReset Role
+- name: "Job Setup"
   hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: "Add RHEL Prod HC Vault hosts to inventory"
+      add_host:
+        name: "{{ item  }}"
+        group: idracs
+        ansible_user: "{{ root_cred.username }}"
+        ansible_ssh_pass: "{{ root_cred.password }}"
+        ansible_port: 22
+        ansible_connection: ssh
+      no_log: true
+      loop:
+        - rac-esx1.evorigin.com
+        - rac-esx2.evorigin.com
+        - rac-esx3.evorigin.com
+
+- name: Run idracReset Role
+  hosts: idracs
   gather_facts: no
   tasks: 
     - name: Run the Role
       include_role:
         name: idracReset
-      vars:
-        all_hosts: "{{ ansible_play_hosts_all }}"
+      # vars:
+      #   all_hosts: "{{ ansible_play_hosts_all }}"

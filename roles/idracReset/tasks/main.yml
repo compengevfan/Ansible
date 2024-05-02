@@ -1,18 +1,22 @@
 ---
 # tasks file for idracReset
-- name: FML
-  shell: ansible-galaxy collection list
+- name: List hosts
+  debug:
+    var: "{{ ansible_inventory }}"
+    
+# - name: FML
+#   shell: ansible-galaxy collection list
 
-- name: Obtain iDrac Credential
-  include_role:
-    name: GetVaultCreds
+# - name: Obtain iDrac Credential
+#   include_role:
+#     name: GetVaultCreds
 
-- name: iDrac Reset
-  dellemc.openmanage.idrac_reset:
-    idrac_ip: "{{ item }}"
-    idrac_user: "{{ idrac_cred.username }}"
-    idrac_password: "{{ idrac_cred.password }}"
-    validate_certs: false
-  loop: "{{ groups['all'] }}"
-  when: item != "localhost"
-  delegate_to: localhost
+# - name: iDrac Reset
+#   dellemc.openmanage.idrac_reset:
+#     idrac_ip: "{{ item }}"
+#     idrac_user: "{{ idrac_cred.username }}"
+#     idrac_password: "{{ idrac_cred.password }}"
+#     validate_certs: false
+#   loop: "{{ groups['all'] }}"
+#   when: item != "localhost"
+#   delegate_to: localhost
