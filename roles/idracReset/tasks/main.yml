@@ -7,10 +7,6 @@
 # - name: FML
 #   shell: ansible-galaxy collection list
 
-# - name: Obtain iDrac Credential
-#   include_role:
-#     name: GetVaultCreds
-
 # - name: iDrac Reset
 #   dellemc.openmanage.idrac_reset:
 #     idrac_ip: "{{ item }}"
