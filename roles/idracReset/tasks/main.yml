@@ -13,6 +13,6 @@
     idrac_user: "{{ idrac_cred.username }}"
     idrac_password: "{{ idrac_cred.password }}"
     validate_certs: false
-  loop: "{{ idracs }}"
+  loop: "{{ hostvars.host_name }}"
 #   when: item != "localhost"
   delegate_to: localhost
