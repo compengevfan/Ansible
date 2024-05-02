@@ -7,7 +7,3 @@
     - name: Run the Role
       include_role:
         name: GetVaultCreds
-
-    - name: Bleh
-      debug:
-          var: idrac_cred
