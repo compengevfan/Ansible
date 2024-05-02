@@ -26,11 +26,11 @@
       add_host:
         name: "{{ item  }}"
         group: idracs
-        ansible_user: "{{ idrac_cred.username }}"
-        ansible_ssh_pass: "{{ idrac_cred.password }}"
-        ansible_port: 22
-        ansible_connection: ssh
-      no_log: true
+        # ansible_user: "{{ idrac_cred.username }}"
+        # ansible_ssh_pass: "{{ idrac_cred.password }}"
+        # ansible_port: 22
+        # ansible_connection: ssh
+      # no_log: true
       loop:
         - rac-esx1.evorigin.com
         - rac-esx2.evorigin.com
