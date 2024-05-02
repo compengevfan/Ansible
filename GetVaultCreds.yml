@@ -1,12 +1,13 @@
 ---
-- hosts: localhost
-  gather_facts: yes
-  roles:
-    - GetVaultCreds
-
-- name: Bleh
+- name: Run 
   hosts: localhost
-  gather_facts: no
+  connection: local
+  gather_facts: yes
   tasks:
-    debug:
-      var: "{{ idrac_cred }}"
+    - name: Run the Role
+      include_role:
+        name: GetVaultCreds
+
+    - name: Bleh
+      debug:
+          var: idrac_cred
