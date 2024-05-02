@@ -38,7 +38,7 @@
 
 - name: List things
   hosts: idracs
-  strategy: free
+  # strategy: free
   gather_facts: no
   tasks:
     - name: output something
