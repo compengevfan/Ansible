@@ -22,8 +22,8 @@
       add_host:
         name: "{{ item  }}"
         group: idracs
-        ansible_user: "{{ root_cred.username }}"
-        ansible_ssh_pass: "{{ root_cred.password }}"
+        # ansible_user: "{{ root_cred.username }}"
+        # ansible_ssh_pass: "{{ root_cred.password }}"
         ansible_port: 22
         ansible_connection: ssh
       no_log: true
