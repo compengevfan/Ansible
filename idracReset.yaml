@@ -38,5 +38,3 @@
           - rac-esx1.evorigin.com
           - rac-esx2.evorigin.com
           - rac-esx3.evorigin.com
-  # when: item != "localhost"
-  # delegate_to: localhost
