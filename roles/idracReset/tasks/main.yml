@@ -1,8 +1,8 @@
 ---
 # tasks file for idracReset
-- name: List hosts
-  debug:
-    var: hostvars
+# - name: List hosts
+#   debug:
+#     var: hostvars
 
 # - name: FML
 #   shell: ansible-galaxy collection list
@@ -11,12 +11,12 @@
 #   debug:
 #     var: groups.idracs
 
-# - name: iDrac Reset
-#   dellemc.openmanage.idrac_reset:
-#     idrac_ip: "{{ item.Host }}"
-#     idrac_user: "{{ idrac_cred.username }}"
-#     idrac_password: "{{ idrac_cred.password }}"
-#     validate_certs: false
-#   loop: "{{ hostvars.Host }}"
-# #   when: item != "localhost"
-#   delegate_to: localhost
+- name: iDrac Reset
+  dellemc.openmanage.idrac_reset:
+    idrac_ip: "{{ item.Host }}"
+    idrac_user: "{{ idrac_cred.username }}"
+    idrac_password: "{{ idrac_cred.password }}"
+    validate_certs: false
+  loop: "{{ hostvars.Host }}"
+#   when: item != "localhost"
+  delegate_to: localhost
