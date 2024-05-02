@@ -36,21 +36,21 @@
         - rac-esx2.evorigin.com
         - rac-esx3.evorigin.com
 
-- name: List things
-  hosts: idracs
-  # strategy: free
-  gather_facts: no
-  tasks:
-    - name: output something
-      debug:
-        var: groups.idracs
-
-# - name: Run idracReset Role
+# - name: List things
 #   hosts: idracs
+#   # strategy: free
 #   gather_facts: no
-#   tasks: 
-#     - name: Run the Role
-#       include_role:
-#         name: idracReset
-#       # vars:
-#       #   all_hosts: "{{ ansible_play_hosts_all }}"
+#   tasks:
+#     - name: output something
+#       debug:
+#         var: groups.idracs
+
+- name: Run idracReset Role
+  hosts: idracs
+  gather_facts: no
+  tasks: 
+    - name: Run the Role
+      include_role:
+        name: idracReset
+      # vars:
+      #   all_hosts: "{{ ansible_play_hosts_all }}"
