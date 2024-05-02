@@ -2,14 +2,14 @@
 # tasks file for idracReset
 - name: List hosts
   debug:
-    var: "{{ hostvars }}"
+    var: hostvars
 
 # - name: FML
 #   shell: ansible-galaxy collection list
 
-- name: List things
-  debug:
-    var: groups.idracs
+# - name: List things
+#   debug:
+#     var: groups.idracs
 
 # - name: iDrac Reset
 #   dellemc.openmanage.idrac_reset:
