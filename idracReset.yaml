@@ -28,7 +28,7 @@
   gather_facts: no
   tasks:
     - dellemc.openmanage.idrac_reset:
-        idrac_ip: "{{ item.Host }}"
+        idrac_ip: "{{ item }}"
         idrac_user: "{{ idrac_cred.username }}"
         idrac_password: "{{ idrac_cred.password }}"
         validate_certs: false
