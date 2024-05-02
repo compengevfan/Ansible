@@ -2,8 +2,8 @@
 # tasks file for idracReset
 - name: List hosts
   debug:
-    var: "{{ ansible_inventory }}"
-    
+    var: "{{ hostvars }}"
+
 # - name: FML
 #   shell: ansible-galaxy collection list
 
