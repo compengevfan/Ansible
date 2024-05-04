@@ -10,3 +10,4 @@
       vars:
         includecred:
           - idrac
+          - netbox
