@@ -13,6 +13,8 @@
     - name: Obtain iDrac Credential
       include_role:
         name: GetVaultCreds
+      vars:
+        - idrac
 
 - name: iDrac Reset
   hosts: localhost
