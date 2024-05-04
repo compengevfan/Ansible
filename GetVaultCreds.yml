@@ -7,3 +7,6 @@
     - name: Run the Role
       include_role:
         name: GetVaultCreds
+      vars:
+        includecred:
+          - idrac
