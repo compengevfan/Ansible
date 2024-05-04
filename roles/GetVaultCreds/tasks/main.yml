@@ -4,7 +4,7 @@
   set_fact:
     idrac_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=homelabsecrets/data/dell/iDRAC validate_certs=False') }}"
   # no_log: true
-  when: idrac in includecred
+  when: "'idrac' in includecred"
 
 # - name: Get Netbox cred from Vault
 #   set_fact:
