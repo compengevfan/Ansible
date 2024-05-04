@@ -14,7 +14,8 @@
       include_role:
         name: GetVaultCreds
       vars:
-        - idrac
+        includecred:
+          - idrac
 
 - name: iDrac Reset
   hosts: localhost
