@@ -10,17 +10,8 @@
       vars:
         includecred:
           - test
-    - name: Show Modules
-      shell: ansible-galaxy collection list
-    # - name: Run Powershell
-    #   ansible.windows.win_powershell:
-    #     script: |
-    #       [CmdletBinding()]
-    #       param (
-    #           [String]
-    #           $parameter
-    #       )
-
-    #       write-host $parameter
-    #     parameters:
-    #       parameter: "{{ test_cred }}"
+    # - name: Show Modules
+    #   shell: ansible-galaxy collection list
+    - name: Run Powershell
+      ansible.windows.win_shell:
+        script: Write-Host "{{ test_cred }}"
