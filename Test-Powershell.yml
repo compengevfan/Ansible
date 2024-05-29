@@ -12,7 +12,7 @@
           - test
     - name: Run Powershell
       shell: |
-        $Temp = "{{ test_cred }}" | ConvertTo-JSON
+        $Temp = "{{ test_cred }}"
         write-host "The username is $($Temp.username)
         write-host "The password is $($Temp.password)
       args:
