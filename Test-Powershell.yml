@@ -12,8 +12,7 @@
           - test
     - name: Run Powershell
       shell: |
-        $Temp = "{{ test_cred }}"
-        write-host "The username is $($Temp.username)
-        write-host "The password is $($Temp.password)
+        $TempCred = New-PSCredential -Username "{{ test_cred }}.username" -Password "{{ test_cred }}.password"
+        $TempCred        
       args:
         executable: /usr/bin/pwsh
