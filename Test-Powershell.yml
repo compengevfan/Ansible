@@ -1,0 +1,24 @@
+---
+- name: Testing Creds to Powershell in AWX 
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - name: Get Creds from Vault
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - test
+    - name: Run Powershell
+      ansible.windows.win_powershell:
+        script: |
+          [CmdletBinding()]
+          param (
+              [String]
+              $parameter
+          )
+
+          write-host $parameter
+        parameters:
+          parameter: {{ test_cred }}
