@@ -11,6 +11,9 @@
         includecred:
           - test
     - name: Run Powershell
-      shell: Write-Host $("{{ test_cred }}".username)
+      shell: |
+        $Temp = "{{ test_cred }}" | ConvertTo-JSON
+        write-host "The username is $($Temp.username)
+        write-host "The password is $($Temp.password)
       args:
         executable: /usr/bin/pwsh
