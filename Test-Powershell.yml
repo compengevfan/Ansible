@@ -10,9 +10,7 @@
       vars:
         includecred:
           - test
-    # - name: Show Modules
-    #   shell: ansible-galaxy collection list
     - name: Run Powershell
-      shell: Write-Host "{{ test_cred }}"
+      shell: Write-Host "{{ test_cred.username }}"
       args:
         executable: /usr/bin/pwsh
