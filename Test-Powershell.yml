@@ -13,5 +13,6 @@
     # - name: Show Modules
     #   shell: ansible-galaxy collection list
     - name: Run Powershell
-      ansible.windows.win_shell:
-        script: Write-Host "{{ test_cred }}"
+      shell: Write-Host "{{ test_cred }}"
+      args:
+        executable: /usr/bin/pwsh
