@@ -21,4 +21,4 @@
 
           write-host $parameter
         parameters:
-          parameter: {{ test_cred }}
+          parameter: "{{ test_cred }}"
