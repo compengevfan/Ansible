@@ -11,6 +11,6 @@
         includecred:
           - test
     - name: Run Powershell
-      shell: Write-Host "{{ test_cred.username }}"
+      shell: Write-Host $("{{ test_cred }}".username)
       args:
         executable: /usr/bin/pwsh
