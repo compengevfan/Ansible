@@ -14,5 +14,5 @@
 
 - name: Test Credential
   set_fact:
-    test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=homelabsecrets/test validate_certs=False') }}"
+    test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=homelabsecrets/data/test validate_certs=False') }}"
   when: "'test' in includecred"
