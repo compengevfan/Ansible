@@ -12,7 +12,8 @@
           - test
     - name: Run Powershell
       shell: |
-        $TempCred = New-PSCredential -Username "{{ test_cred }}.username" -Password "{{ test_cred }}.password"
+        [securestring]$secStringPassword = ConvertTo-SecureString "{{ test_cred }}.password" -AsPlainText -Force
+        $TempCred = New-Object System.Management.Automation.PSCredential ("{{ test_cred }}.username", $secStringPassword)
         $TempCred        
       args:
         executable: /usr/bin/pwsh
