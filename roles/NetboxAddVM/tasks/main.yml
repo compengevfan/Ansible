@@ -38,7 +38,7 @@
       dns_name: Create-Test-VM.evorigin.com
       assigned_object: 
         name: eth1
-        device: Create-Test-VM
+        virtual_machine: Create-Test-VM
     state: present
     validate_certs: no
   # register: IpOutput
