@@ -18,6 +18,15 @@
     state: present
     validate_certs: no
 
+- name: Create interface
+  netbox.netbox.netbox_vm_interface:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      virtual_machine: Create-Test-VM
+      name: eth1
+    state: present
+
 # - name: Get IP address
 #   netbox.netbox.netbox_ip_address:
 #     netbox_url: "{{ netbox_cred.url }}"
