@@ -1,0 +1,9 @@
+---
+- name: Run 
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Run the Role
+      include_role:
+        name: NetboxAddVM
