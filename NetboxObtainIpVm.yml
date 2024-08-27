@@ -13,11 +13,15 @@
 #   tasks:
 #     - shell: cat /etc/os-release
 
-- name: install NC
-  shell: dnf install netcat -y
+# - name: install NC
+#   shell: dnf install netcat -y
 
 - name: Test Connectivity with nc
-  shell: nc -zv 192.168.1.140 443
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - shell: nc -zv 192.168.1.140 443
 
 # - name: Install pynetbox
 #   hosts: localhost
