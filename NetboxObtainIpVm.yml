@@ -18,7 +18,7 @@
   connection: local
   gather_facts: yes
   tasks:
-    - shell: dnf install netcat -y
+    - shell: sudo dnf install netcat -y
 
 - name: Test Connectivity with nc
   hosts: localhost
