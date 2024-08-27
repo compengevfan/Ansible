@@ -1,5 +1,12 @@
 ---
 # tasks file for NetboxObtainIP
+- name: Obtain netbox api token
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - netbox
+
 - name: Get IP address
   netbox.netbox.netbox_ip_address:
     netbox_url: https://jax-nbx001.evorigin.com
@@ -13,4 +20,3 @@
 - name: Show Info
   debug:
     msg: "{{ IpOutput }}"
-
