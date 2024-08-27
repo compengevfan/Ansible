@@ -9,9 +9,12 @@
 
 - name: Create VM
   netbox.netbox.netbox_virtual_machine:
-    name: Create-Test-VM
-  state: present
-  validate_certs: no
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      name: Create-Test-VM
+    state: present
+    validate_certs: no
 
 # - name: Get IP address
 #   netbox.netbox.netbox_ip_address:
