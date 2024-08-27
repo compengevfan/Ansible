@@ -1,5 +1,8 @@
 ---
 # tasks file for NetboxObtainIP
+- name: Test Connectivity
+  shell: ping jax-nbx001.evorigin.com -c 3
+
 - name: Obtain netbox api token
   include_role:
     name: GetVaultCreds
