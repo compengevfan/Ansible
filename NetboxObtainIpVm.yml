@@ -13,8 +13,12 @@
 #   tasks:
 #     - shell: cat /etc/os-release
 
-# - name: install NC
-#   shell: dnf install netcat -y
+- name: install NC
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - shell: dnf install netcat -y
 
 - name: Test Connectivity with nc
   hosts: localhost
