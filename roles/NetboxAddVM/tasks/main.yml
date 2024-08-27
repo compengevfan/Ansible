@@ -25,7 +25,9 @@
     data:
       virtual_machine: Create-Test-VM
       name: eth1
+      enabled: true
     state: present
+    validate_certs: no
 
 # - name: Get IP address
 #   netbox.netbox.netbox_ip_address:
