@@ -13,6 +13,8 @@
     netbox_token: "{{ netbox_cred.token }}"
     data:
       name: Create-Test-VM
+      site: Amberly
+      cluster: C1
     state: present
     validate_certs: no
 
