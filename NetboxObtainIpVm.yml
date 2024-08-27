@@ -6,13 +6,13 @@
 #   tasks:
 #     - shell: ansible-galaxy collection install netbox.netbox
 
-# - name: Install pynetbox
-#   hosts: localhost
-#   connection: local
-#   gather_facts: no
-#   tasks:
-#     - ansible.builtin.pip:
-#         name: pynetbox
+- name: Install pynetbox
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - ansible.builtin.pip:
+        name: pynetbox
 
 - name: Run 
   hosts: localhost
