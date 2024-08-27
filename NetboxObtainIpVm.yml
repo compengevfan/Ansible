@@ -6,40 +6,19 @@
 #   tasks:
 #     - shell: ansible-galaxy collection install netbox.netbox
 
-# - name: WTF am I running?
-#   hosts: localhost
-#   connection: local
-#   gather_facts: yes
-#   tasks:
-#     - shell: cat /etc/os-release
-
-- name: install NC
+- name: Install pynetbox
   hosts: localhost
   connection: local
-  gather_facts: yes
+  gather_facts: no
   tasks:
-    - shell: sudo dnf install netcat -y
+    - ansible.builtin.pip:
+        name: pynetbox
 
-- name: Test Connectivity with nc
+- name: Run 
   hosts: localhost
   connection: local
-  gather_facts: yes
+  gather_facts: no
   tasks:
-    - shell: nc -zv 192.168.1.140 443
-
-# - name: Install pynetbox
-#   hosts: localhost
-#   connection: local
-#   gather_facts: no
-#   tasks:
-#     - ansible.builtin.pip:
-#         name: pynetbox
-
-# - name: Run 
-#   hosts: localhost
-#   connection: local
-#   gather_facts: no
-#   tasks:
-#     - name: Run the Role
-#       include_role:
-#         name: NetboxObtainIpVm
+    - name: Run the Role
+      include_role:
+        name: NetboxObtainIpVm
