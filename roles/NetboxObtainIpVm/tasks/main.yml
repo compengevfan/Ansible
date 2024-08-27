@@ -1,7 +1,10 @@
 ---
 # tasks file for NetboxObtainIP
-- name: Test Connectivity
+- name: Test Connectivity with Ping
   shell: ping jax-nbx001.evorigin.com -c 3
+
+- name: Test Connectivity with nc
+  shell: nc -zv 192.168.1.140 443
 
 - name: Obtain netbox api token
   include_role:
