@@ -6,14 +6,14 @@
 #   tasks:
 #     - shell: ansible-galaxy collection install netbox.netbox
 
-- name: Install pynetbox
-  hosts: localhost
-  connection: local
-  gather_facts: no
-  tasks:
-    - ansible.builtin.pip:
-        name: pynetbox
-        version: 7.3.4
+# - name: Install pynetbox
+#   hosts: localhost
+#   connection: local
+#   gather_facts: no
+#   tasks:
+#     - ansible.builtin.pip:
+#         name: pynetbox
+#         version: 7.3.4
 
 - name: Run 
   hosts: localhost
@@ -22,4 +22,4 @@
   tasks:
     - name: Run the Role
       include_role:
-        name: NetboxObtainIpVm
+        name: NetboxVmIp
