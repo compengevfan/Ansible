@@ -9,7 +9,7 @@
 - name: Get Netbox cred from Vault
   set_fact:
     netbox_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/netbox validate_certs=False') }}"
-  no_log: true
+  # no_log: true
   when: "'netbox' in includecred"
 
 - name: Test Credential
