@@ -13,6 +13,7 @@
   tasks:
     - ansible.builtin.pip:
         name: pynetbox
+        version: 7.3.4
 
 - name: Run 
   hosts: localhost
