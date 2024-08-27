@@ -1,7 +1,7 @@
 ---
 # tasks file for NetboxObtainIP
-- name: Test Connectivity with Ping
-  shell: sudo ping jax-nbx001.evorigin.com -c 3
+- name: WTF am I running?
+  shell: hostnamectl
 
 # - name: install NC
 #   shell: dnf install netcat -y
