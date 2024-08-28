@@ -5,10 +5,13 @@
     url: https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/ansible/JAX-TST001.json
     dest: /tmp/JAX-TST001.json
 
-- name: Obtain contents of downloaded file and convert to JSON
-  set_fact:
-    FileContents: "{{ lookup('file'), '/tmp/JAX-TST001.json' }}"
+- name: Check with cat
+  shell: cat /tmp/JAX-TST001.json
 
-- name: Show me the contents
-  debug:
-    msg: "{{ FileContents }}"
+# - name: Obtain contents of downloaded file and convert to JSON
+#   set_fact:
+#     FileContents: "{{ lookup('file'), '/tmp/JAX-TST001.json' }}"
+
+# - name: Show me the contents
+#   debug:
+#     msg: "{{ FileContents }}"
