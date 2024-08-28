@@ -39,5 +39,5 @@
       assigned_object: 
         name: eth1
         virtual_machine: Create-Test-VM
-    state: new
+    state: present
     validate_certs: no
