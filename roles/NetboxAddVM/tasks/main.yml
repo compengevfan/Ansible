@@ -41,3 +41,15 @@
         virtual_machine: Create-Test-VM
     state: present
     validate_certs: no
+
+- name: Set IP as primary
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      name: Create-Test-VM
+      site: Amberly
+      cluster: C1
+      primary_ip4: 10.10.10.2
+    state: present
+    validate_certs: no
