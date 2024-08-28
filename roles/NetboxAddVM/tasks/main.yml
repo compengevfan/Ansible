@@ -41,22 +41,3 @@
         virtual_machine: Create-Test-VM
     state: new
     validate_certs: no
-
-# - name: Assign the IP address
-#   netbox.netbox.netbox_ip_address:
-#     netbox_url: "{{ netbox_cred.url }}"
-#     netbox_token: "{{ netbox_cred.token }}"
-#     data:
-#       # address: 10.10.10.2
-#       prefix: 10.10.10.2/24
-#       dns_name: Create-Test-VM.evorigin.com
-#       assigned_object: 
-#         name: eth1
-#         virtual_machine: Create-Test-VM
-#     state: present
-#     validate_certs: no
-  # register: IpOutput
-
-# - name: Show Info
-#   debug:
-#     msg: "{{ IpOutput }}"
