@@ -34,7 +34,7 @@
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      prefix: 10.10.10.2/24
+      address: 10.10.10.2/24
       dns_name: Create-Test-VM.evorigin.com
       assigned_object: 
         name: eth1
