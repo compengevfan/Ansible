@@ -7,4 +7,4 @@
 
 - name: Obtain contents of downloaded file and convert to JSON
   set_fact:
-    FileContents: "{{lookup('file'), /tmp/JAX-TST001.json}}"
+    FileContents: "{{lookup('file'), '/tmp/JAX-TST001.json'}}"
