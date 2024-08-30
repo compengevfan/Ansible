@@ -14,4 +14,4 @@
 
 - name: Show me the contents
   debug:
-    msg: "{{ FileContents_JSON.VMInfo.vCPUs }}"
+    msg: "{{ FileContents_JSON.VMInfo }}"
