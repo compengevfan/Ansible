@@ -22,6 +22,7 @@
       site: Amberly
       vcpus: "{{ FileContents_JSON.VMInfo.vCPUs }}"
       memory: "{{ FileContents_JSON.VMInfo.RAM }}"
+      platform: "{{ FileContents_JSON.VMInfo.OperatingSystem }}"
       cluster: C1
     state: present
     validate_certs: no
