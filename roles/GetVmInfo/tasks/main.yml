@@ -3,7 +3,7 @@
 - name: Get raw JSON file from github
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/ansible/{{ ServerName }}.json"
-    dest: /tmp/JAX-TST001.json
+    dest: "/tmp/{{ ServerName }}.json"
 
 - name: Obtain contents of downloaded file and convert to JSON
   set_fact:
