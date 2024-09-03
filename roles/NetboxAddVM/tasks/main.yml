@@ -3,7 +3,9 @@
 - name: Get VM Info
   include_role:
     name: GetVmInfo
-    
+    vars:
+      ServerName: "{{ ServerName }}"
+
 - name: Obtain netbox api token
   include_role:
     name: GetVaultCreds
@@ -16,7 +18,7 @@
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      name: Create-Test-VM
+      name: "{{ ServerName }}"
       site: Amberly
       cluster: C1
     state: present
