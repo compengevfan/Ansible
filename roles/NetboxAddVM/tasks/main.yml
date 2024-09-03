@@ -47,6 +47,7 @@
         virtual_machine: "{{ ServerName }}"
     state: present
     validate_certs: no
+  ignore_errors: true
 
 - name: Set IP as primary
   netbox.netbox.netbox_virtual_machine:
