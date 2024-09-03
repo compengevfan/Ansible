@@ -3,8 +3,8 @@
 - name: Get VM Info
   include_role:
     name: GetVmInfo
-    vars:
-      ServerName: "{{ ServerName }}"
+  vars:
+    ServerName: "{{ ServerName }}"
 
 - name: Obtain netbox api token
   include_role:
