@@ -29,7 +29,7 @@
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      virtual_machine: Create-Test-VM
+      virtual_machine: "{{ ServerName }}"
       name: eth1
       enabled: true
     state: present
@@ -40,7 +40,7 @@
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      address: 10.10.10.2/24
+      address: "{{ FileContents_JSON.VMInfo.IPAddress }}/24"
       dns_name: Create-Test-VM.evorigin.com
       assigned_object: 
         name: eth1
