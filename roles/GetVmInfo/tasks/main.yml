@@ -2,12 +2,12 @@
 # tasks file for GetVmInfo
 - name: Get raw JSON file from github
   ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/ansible/JAX-TST001.json
+    url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/ansible/{{ ServerName }}.json"
     dest: /tmp/JAX-TST001.json
 
 - name: Obtain contents of downloaded file and convert to JSON
   set_fact:
-    FileContents_JSON: "{{ lookup('file', '/tmp/JAX-TST001.json') | from_json }}"
+    FileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
 
 - name: Show me the contents
   debug:

@@ -1,5 +1,9 @@
 ---
 # tasks file for NetboxAddVM
+- name: Get VM Info
+  include_role:
+    name: GetVmInfo
+    
 - name: Obtain netbox api token
   include_role:
     name: GetVaultCreds
