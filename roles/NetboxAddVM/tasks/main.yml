@@ -41,10 +41,10 @@
     netbox_token: "{{ netbox_cred.token }}"
     data:
       address: "{{ FileContents_JSON.VMInfo.IPAddress }}/24"
-      dns_name: Create-Test-VM.evorigin.com
+      dns_name: "{{ ServerName }}.evorigin.com"
       assigned_object: 
         name: eth1
-        virtual_machine: Create-Test-VM
+        virtual_machine: "{{ ServerName }}"
     state: present
     validate_certs: no
 
@@ -53,9 +53,9 @@
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      name: Create-Test-VM
+      name: "{{ ServerName }}"
       site: Amberly
       cluster: C1
-      primary_ip4: 10.10.10.2
+      primary_ip4: "{{ FileContents_JSON.VMInfo.IPAddress }}"
     state: present
     validate_certs: no
