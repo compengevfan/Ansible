@@ -9,6 +9,6 @@
   set_fact:
     FileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
 
-- name: Show me the contents
-  debug:
-    msg: "{{ FileContents_JSON.VMInfo.vCPUs }}"
+# - name: Show me the contents
+#   debug:
+#     msg: "{{ FileContents_JSON.VMInfo.vCPUs }}"
