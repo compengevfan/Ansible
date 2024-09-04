@@ -8,10 +8,6 @@
       set_fact:
         ServerName_List: "{{ ServerNames.split(',') }}"
 
-# - name: Show me the contents
-#   debug:
-#     var: ServerName_List
-
 - name: Run 
   hosts: localhost
   connection: local

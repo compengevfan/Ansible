@@ -1,16 +1,5 @@
 ---
 # tasks file for NetboxAddVM
-
-# - name: Show me the contents
-#   debug:
-#     var: ServerName
-
-# - name: Get VM Info
-#   include_role:
-#     name: GetVmInfo
-#   vars:
-#     ServerName: "{{ ServerName }}"
-
 - name: Get raw JSON file from github
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/ansible/{{ ServerName }}.json"
@@ -37,7 +26,7 @@
       vcpus: "{{ FileContents_JSON.VMInfo.vCPUs }}"
       memory: "{{ FileContents_JSON.VMInfo.RAM }}"
       platform: "{{ FileContents_JSON.VMInfo.OperatingSystem }}"
-      cluster: C1
+      cluster: "{{ FileContents_JSON.VMInfo.Cluster }}"
     state: present
     validate_certs: no
 
