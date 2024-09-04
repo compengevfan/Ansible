@@ -27,6 +27,8 @@
       memory: "{{ FileContents_JSON.VMInfo.RAM }}"
       platform: "{{ FileContents_JSON.VMInfo.OperatingSystem }}"
       cluster: "{{ FileContents_JSON.VMInfo.Cluster }}"
+      custom_fields:
+        Datastore: "{{ FileContents_JSON.VMInfo.Datastore }}"
     state: present
     validate_certs: no
 
