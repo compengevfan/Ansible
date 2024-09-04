@@ -1,7 +1,11 @@
 ---
 - name: Create list of server names
-  set_fact:
-    ServerName_List: "{{ ServerNames.split(',') }}"
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks: 
+    set_fact:
+      ServerName_List: "{{ ServerNames.split(',') }}"
 
 # - name: Show me the contents
 #   debug:
