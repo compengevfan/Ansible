@@ -62,7 +62,7 @@
     data:
       name: "{{ ServerName }}"
       site: Amberly
-      cluster: C1
+      cluster: "{{ FileContents_JSON.VMInfo.Cluster }}"
       primary_ip4: "{{ FileContents_JSON.VMInfo.IPAddress }}"
     state: present
     validate_certs: no
