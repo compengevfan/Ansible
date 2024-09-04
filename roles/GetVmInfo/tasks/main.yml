@@ -1,14 +1,14 @@
 ---
 # tasks file for GetVmInfo
-- name: Show me the contents inside GetVmInfo
-  debug:
-    var: ServerName
+# - name: Show me the contents inside GetVmInfo
+#   debug:
+#     var: ServerName
 
-# - name: Get raw JSON file from github
-#   ansible.builtin.get_url:
-#     url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/ansible/{{ ServerName }}.json"
-#     dest: "/tmp/{{ ServerName }}.json"
+- name: Get raw JSON file from github
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/ansible/{{ ServerName }}.json"
+    dest: "/tmp/{{ ServerName }}.json"
 
-# - name: Obtain contents of downloaded file and convert to JSON
-#   set_fact:
-#     FileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
+- name: Obtain contents of downloaded file and convert to JSON
+  set_fact:
+    FileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
