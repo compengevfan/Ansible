@@ -1,70 +1,70 @@
 ---
 # tasks file for NetboxAddVM
 
-- name: Show me the contents
-  debug:
-    var: ServerName
+# - name: Show me the contents
+#   debug:
+#     var: ServerName
 
-# - name: Get VM Info
-#   include_role:
-#     name: GetVmInfo
-#   vars:
-#     ServerName: "{{ ServerName }}"
+- name: Get VM Info
+  include_role:
+    name: GetVmInfo
+  vars:
+    ServerName: "{{ ServerName }}"
 
-# - name: Obtain netbox api token
-#   include_role:
-#     name: GetVaultCreds
-#   vars:
-#     includecred:
-#       - netbox
+- name: Obtain netbox api token
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - netbox
 
-# - name: Create VM
-#   netbox.netbox.netbox_virtual_machine:
-#     netbox_url: "{{ netbox_cred.url }}"
-#     netbox_token: "{{ netbox_cred.token }}"
-#     data:
-#       name: "{{ ServerName }}"
-#       site: Amberly
-#       vcpus: "{{ FileContents_JSON.VMInfo.vCPUs }}"
-#       memory: "{{ FileContents_JSON.VMInfo.RAM }}"
-#       platform: "{{ FileContents_JSON.VMInfo.OperatingSystem }}"
-#       cluster: C1
-#     state: present
-#     validate_certs: no
+- name: Create VM
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      name: "{{ ServerName }}"
+      site: Amberly
+      vcpus: "{{ FileContents_JSON.VMInfo.vCPUs }}"
+      memory: "{{ FileContents_JSON.VMInfo.RAM }}"
+      platform: "{{ FileContents_JSON.VMInfo.OperatingSystem }}"
+      cluster: C1
+    state: present
+    validate_certs: no
 
-# - name: Create interface
-#   netbox.netbox.netbox_vm_interface:
-#     netbox_url: "{{ netbox_cred.url }}"
-#     netbox_token: "{{ netbox_cred.token }}"
-#     data:
-#       virtual_machine: "{{ ServerName }}"
-#       name: eth1
-#       enabled: true
-#     state: present
-#     validate_certs: no
+- name: Create interface
+  netbox.netbox.netbox_vm_interface:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      virtual_machine: "{{ ServerName }}"
+      name: eth1
+      enabled: true
+    state: present
+    validate_certs: no
 
-# - name: Create an IP address
-#   netbox.netbox.netbox_ip_address:
-#     netbox_url: "{{ netbox_cred.url }}"
-#     netbox_token: "{{ netbox_cred.token }}"
-#     data:
-#       address: "{{ FileContents_JSON.VMInfo.IPAddress }}{{FileContents_JSON.VMInfo.Subnet}}"
-#       dns_name: "{{ ServerName }}.evorigin.com"
-#       assigned_object: 
-#         name: eth1
-#         virtual_machine: "{{ ServerName }}"
-#     state: present
-#     validate_certs: no
-#   # ignore_errors: true
+- name: Create an IP address
+  netbox.netbox.netbox_ip_address:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      address: "{{ FileContents_JSON.VMInfo.IPAddress }}{{FileContents_JSON.VMInfo.Subnet}}"
+      dns_name: "{{ ServerName }}.evorigin.com"
+      assigned_object: 
+        name: eth1
+        virtual_machine: "{{ ServerName }}"
+    state: present
+    validate_certs: no
+  # ignore_errors: true
 
-# - name: Set IP as primary
-#   netbox.netbox.netbox_virtual_machine:
-#     netbox_url: "{{ netbox_cred.url }}"
-#     netbox_token: "{{ netbox_cred.token }}"
-#     data:
-#       name: "{{ ServerName }}"
-#       site: Amberly
-#       cluster: C1
-#       primary_ip4: "{{ FileContents_JSON.VMInfo.IPAddress }}"
-#     state: present
-#     validate_certs: no
+- name: Set IP as primary
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      name: "{{ ServerName }}"
+      site: Amberly
+      cluster: C1
+      primary_ip4: "{{ FileContents_JSON.VMInfo.IPAddress }}"
+    state: present
+    validate_certs: no
