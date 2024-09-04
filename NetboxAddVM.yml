@@ -1,4 +1,12 @@
 ---
+- name: Create list of server names
+  set_fact:
+    ServerName_List: "{{ ServerNames.split(',') }}"
+
+# - name: Show me the contents
+#   debug:
+#     var: ServerName_List
+
 - name: Run 
   hosts: localhost
   connection: local
@@ -7,3 +15,6 @@
     - name: Run the Role
       include_role:
         name: NetboxAddVM
+      vars:
+        ServerName: "{{ item }}"
+      loop: "{{ ServerName_List }}"

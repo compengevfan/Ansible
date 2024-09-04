@@ -1,14 +1,10 @@
 ---
-# convert ServerNames csv into list
-- name: Create list of server names
-  set_fact:
-    ServerName_List: "{{ ServerNames.split(',') }}"
+# tasks file for NetboxAddVM
 
 - name: Show me the contents
   debug:
-    var: ServerName_List
+    var: ServerName
 
-# # tasks file for NetboxAddVM
 # - name: Get VM Info
 #   include_role:
 #     name: GetVmInfo
