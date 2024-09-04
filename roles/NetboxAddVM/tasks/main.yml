@@ -5,11 +5,20 @@
 #   debug:
 #     var: ServerName
 
-- name: Get VM Info
-  include_role:
-    name: GetVmInfo
-  vars:
-    ServerName: "{{ ServerName }}"
+# - name: Get VM Info
+#   include_role:
+#     name: GetVmInfo
+#   vars:
+#     ServerName: "{{ ServerName }}"
+
+- name: Get raw JSON file from github
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/ansible/{{ ServerName }}.json"
+    dest: "/tmp/{{ ServerName }}.json"
+
+- name: Obtain contents of downloaded file and convert to JSON
+  set_fact:
+    FileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
 
 # - name: Obtain netbox api token
 #   include_role:
