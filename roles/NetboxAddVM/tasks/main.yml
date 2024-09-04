@@ -9,12 +9,12 @@
   set_fact:
     FileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
 
-- name: Obtain netbox api token
-  include_role:
-    name: GetVaultCreds
-  vars:
-    includecred:
-      - netbox
+# - name: Obtain netbox api token
+#   include_role:
+#     name: GetVaultCreds
+#   vars:
+#     includecred:
+#       - netbox
 
 - name: Create VM
   netbox.netbox.netbox_virtual_machine:
