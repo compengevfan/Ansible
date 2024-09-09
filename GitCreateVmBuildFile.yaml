@@ -1,0 +1,24 @@
+---
+- name: Obtain netbox api token
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Obtain netbox api token
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - netbox
+
+- name: Run 
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Run the Role
+      include_role:
+        name: GitCreateVmBuildFile
+      vars:
+        ServerName: "{{ item }}"
+      loop: "{{ ServerName_List }}"

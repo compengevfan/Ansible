@@ -1,6 +1,6 @@
 ---
-# tasks file for GetVmInfo
-# - name: Show me the contents inside GetVmInfo
+# tasks file for GitGetVmInfo
+# - name: Show me the contents inside GitGetVmInfo
 #   debug:
 #     var: ServerName
 
