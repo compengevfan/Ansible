@@ -18,6 +18,12 @@
   # no_log: true
   when: "'git' in includecred"
 
+- name: Get vCenter cred from Vault
+  set_fact:
+    netbox_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/vmware/vcenter validate_certs=False') }}"
+  # no_log: true
+  when: "'vcenter' in includecred"
+
 # - name: Test Credential
 #   set_fact:
 #     test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test validate_certs=False') }}"

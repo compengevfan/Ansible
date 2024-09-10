@@ -1,4 +1,12 @@
 ---
 # tasks file for BuildVM
-- name: Get Credentials
+- name: Obtain Credentials
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - netbox
+      - vcenter
+
+- name: Get VM Info from Netbox
   
