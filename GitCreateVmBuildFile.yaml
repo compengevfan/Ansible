@@ -4,11 +4,12 @@
   connection: local
   gather_facts: no
   tasks:
-    - name: Obtain netbox api token
+    - name: Obtain credentials from vault
       include_role:
         name: GetVaultCreds
       vars:
         includecred:
+          - git
           - netbox
 
 - name: Run 

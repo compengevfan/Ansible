@@ -12,7 +12,13 @@
   # no_log: true
   when: "'netbox' in includecred"
 
-- name: Test Credential
+- name: Get Git cred from Vault
   set_fact:
-    test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test validate_certs=False') }}"
-  when: "'test' in includecred"
+    netbox_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/git validate_certs=False') }}"
+  # no_log: true
+  when: "'git' in includecred"
+
+# - name: Test Credential
+#   set_fact:
+#     test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test validate_certs=False') }}"
+#   when: "'test' in includecred"
