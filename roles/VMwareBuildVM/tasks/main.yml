@@ -9,4 +9,10 @@
       - vcenter
 
 - name: Get VM Info from Netbox
-  
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      name: "{{ ServerName }}"
+    state: present
+    validate_certs: no
