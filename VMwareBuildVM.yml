@@ -1,5 +1,8 @@
 ---
-- hosts: all
-  gather_facts: False
-  roles:
-    - VmwareBuildVm
+- name: Run
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Run the Role
+      include_role:
+        name: VmwareBuildVm
