@@ -55,6 +55,10 @@
   register: subnetReturn
   delegate_to: localhost
 
+- name: Show me the contents
+  debug:
+    msg: "{{ subnetReturn }}"
+
 # - name: Clone a virtual machine from Windows template and customize
 #   community.vmware.vmware_guest:
 #     hostname: "{{ vcenter_cred.servername }}"
