@@ -33,6 +33,10 @@
 - name: Get Template Name
   ansible.builtin.uri:
     url: "{{ netbox_cred.url }}/api/dcim/platforms/{{ vmInfo.json.results[0].platform.id }}/"
+    headers:
+      Content-Type: application/json
+      Authorization: "{{ netbox_cred.api_token }}"
+    validate_certs: no
   register: platform
 
 # - name: Clone a virtual machine from Windows template and customize
