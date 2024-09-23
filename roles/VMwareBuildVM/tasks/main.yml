@@ -23,7 +23,7 @@
 
 - name: Get VM Info from Netbox API
   ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/virtualization/virtual-machines?name=JAX-K3S002"
+    url: "{{ netbox_cred.url }}/api/virtualization/virtual-machines?name={{ ServerName }}"
     headers:
       Content-Type: application/json
       Authorization: "{{ netbox_cred.api_token }}"
