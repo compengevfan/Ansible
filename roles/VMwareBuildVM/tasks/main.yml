@@ -39,6 +39,15 @@
     validate_certs: no
   register: platform
 
+- name: Get Prefix
+  ansible.builtin.url:
+    url: "{{ netbox_cred.url }}/api/ipam/prefixes?contains={{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
+    headers:
+      Content-Type: application/json
+      Authorization: "{{ netbox_cred.api_token }}"
+    validate_certs: no
+  register: prefix
+
 # - name: Clone a virtual machine from Windows template and customize
 #   community.vmware.vmware_guest:
 #     hostname: "{{ vcenter_cred.servername }}"
