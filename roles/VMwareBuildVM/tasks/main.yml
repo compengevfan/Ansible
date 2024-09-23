@@ -53,6 +53,7 @@
   args: 
     executable: /usr/bin/python
   register: subnetReturn
+  delegate_to: localhost
 
 # - name: Clone a virtual machine from Windows template and customize
 #   community.vmware.vmware_guest:
