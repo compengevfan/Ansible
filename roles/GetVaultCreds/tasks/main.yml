@@ -3,28 +3,28 @@
 - name: Get iDrac cred from Vault
   set_fact:
     idrac_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/dell/iDRAC validate_certs=False') }}"
-  # no_log: true
+  no_log: true
   when: "'idrac' in includecred"
 
 - name: Get Netbox cred from Vault
   set_fact:
     netbox_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/netbox validate_certs=False') }}"
-  # no_log: true
+  no_log: true
   when: "'netbox' in includecred"
 
 - name: Get Git cred from Vault
   set_fact:
     git_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/git validate_certs=False') }}"
-  # no_log: true
+  no_log: true
   when: "'git' in includecred"
 
 - name: Get vCenter cred from Vault
   set_fact:
     vcenter_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/vmware/vcenter validate_certs=False') }}"
-  # no_log: true
+  no_log: true
   when: "'vcenter' in includecred"
 
-# - name: Test Credential
-#   set_fact:
-#     test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test validate_certs=False') }}"
-#   when: "'test' in includecred"
+- name: Test Credential
+  set_fact:
+    test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test validate_certs=False') }}"
+  when: "'test' in includecred"
