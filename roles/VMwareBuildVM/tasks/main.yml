@@ -29,3 +29,37 @@
       Authorization: "{{ netbox_cred.api_token }}"
     validate_certs: no
   register: vmInfo
+
+- name: Get Template Name
+  ansible.builtin.uri:
+    url: "{{ netbox_cred.url }}/api/dcim/platforms/{{ vmInfo.json.results.platform.id }}/"
+  register: platform
+
+# - name:  Clone a virtual machine from Linux template and customize
+#   community.vmware.vmware_guest:
+#     hostname: "{{ vcenter_hostname }}"
+#     username: "{{ vcenter_username }}"
+#     password: "{{ vcenter_password }}"
+#     datacenter: "{{ datacenter }}"
+#     state: present
+#     folder: /DC1/vm
+#     template: "{{ template }}"
+#     name: "{{ vm_name }}"
+#     cluster: DC1_C1
+#     networks:
+#       - name: VM Network
+#         ip: 192.168.10.11
+#         netmask: 255.255.255.0
+#     wait_for_ip_address: true
+#     customization:
+#       domain: "{{ guest_domain }}"
+#       dns_servers:
+#         - 8.9.9.9
+#         - 7.8.8.9
+#       dns_suffix:
+#         - example.com
+#         - example2.com
+#       script_text: |
+#         #!/bin/bash
+#         touch /tmp/touch-from-playbook
+#   delegate_to: localhost
