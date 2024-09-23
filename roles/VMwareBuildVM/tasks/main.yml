@@ -48,6 +48,12 @@
     validate_certs: no
   register: prefix
 
+- name: Get Subnet
+  script: Subnet.py {{ vmInfo.json.results[0].primary_ip.address.split('/')[1] }}
+  args: 
+    executable: /usr/bin/python
+  register: subnetReturn
+
 # - name: Clone a virtual machine from Windows template and customize
 #   community.vmware.vmware_guest:
 #     hostname: "{{ vcenter_cred.servername }}"
@@ -90,8 +96,8 @@
 #     name: "{{ ServerName }}"
 #     cluster: DC1_C1
 #     networks:
-#       - name: VM Network
-#         ip: {{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}
+#       - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
+#         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}
 #         netmask: 255.255.255.0
 #     wait_for_ip_address: true
 #     customization:
