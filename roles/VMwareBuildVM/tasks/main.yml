@@ -26,5 +26,5 @@
     url: "{{ netbox_cred.url }}/api/virtualization/virtual-machines/"
     headers:
       Content-Type: application/json
-      Authorization: "Token {{ netbox_cred.token }}"
+      Authorization: "{{ netbox_cred.api_token }}"
     validate_certs: no
