@@ -20,3 +20,9 @@
       name: "{{ ServerName }}"
     state: present
     validate_certs: no
+
+- name: Get Platforms to find VM template name
+  netbox.netbox.netbox_platform:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+  register: platforms
