@@ -57,7 +57,7 @@
 
 - name: Show me the contents
   debug:
-    msg: "{{ subnetReturn }}"
+    msg: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[1] }}"
 
 # - name: Clone a virtual machine from Windows template and customize
 #   community.vmware.vmware_guest:
