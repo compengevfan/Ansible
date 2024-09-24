@@ -94,7 +94,7 @@
     networks:
       - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
-        netmask: "{{ subnetReturn }}"
+        netmask: "{{ subnetReturn.stdout_lines[0] }}"
         gateway: 192.168.1.254
     wait_for_ip_address: true
     customization:
