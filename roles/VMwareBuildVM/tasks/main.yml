@@ -12,9 +12,12 @@
 #   debug:
 #     msg: "{{ netbox_cred }}"
 
+- name: Make sure ServerName is all upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
+
 - name: Get VM Info from Netbox API
   ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/virtualization/virtual-machines?name={{ ServerName | upper }}"
+    url: "{{ netbox_cred.url }}/api/virtualization/virtual-machines?name={{ ServerNameUpper }}"
     headers:
       Content-Type: application/json
       Authorization: "{{ netbox_cred.api_token }}"
@@ -89,7 +92,7 @@
     state: present
     folder: /EvOrigin/Workers
     template: "{{ platform.json.custom_fields.VM_Template }}"
-    name: "{{ ServerName }}"
+    name: "{{ ServerNameUpper }}"
     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
     networks:
       - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
