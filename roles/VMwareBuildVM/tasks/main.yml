@@ -104,4 +104,5 @@
       script_text: |
         #!/bin/bash
         touch /tmp/touch-from-playbook
+    validate_certs: no
   delegate_to: localhost
