@@ -89,7 +89,7 @@
     username: "{{ vcenter_cred.username }}"
     password: "{{ vcenter_cred.password }}"
     datacenter: DC1
-    state: present
+    state: poweredoff
     folder: /EvOrigin/Workers
     template: "{{ platform.json.custom_fields.VM_Template }}"
     name: "{{ ServerNameUpper }}"
@@ -99,8 +99,6 @@
         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
         netmask: "{{ subnetReturn.stdout_lines[0] }}"
         gateway: 192.168.1.254
-        start_connected: true
-        # connected: true
     wait_for_ip_address: true
     customization:
       dns_servers:
@@ -111,3 +109,24 @@
         touch /tmp/touch-from-playbook
     validate_certs: no
   delegate_to: localhost
+
+- name: Set network adaper to connected and connect on power on
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_cred.servername }}"
+    username: "{{ vcenter_cred.username }}"
+    password: "{{ vcenter_cred.password }}"
+    name: "{{ ServerNameUpper }}"
+    state: poweredoff
+    networks:
+      - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
+        connected: true
+        start_connected: true
+    validate_certs: no
+
+- name: Power the VM on
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_cred.servername }}"
+    username: "{{ vcenter_cred.username }}"
+    password: "{{ vcenter_cred.password }}"
+    name: "{{ ServerNameUpper }}"
+    state: poweredon
