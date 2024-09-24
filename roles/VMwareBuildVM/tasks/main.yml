@@ -130,4 +130,4 @@
     datacenter: DC1
     name: "{{ ServerNameUpper }}"
     state: poweredon
-  validate_certs: no
+    validate_certs: no
