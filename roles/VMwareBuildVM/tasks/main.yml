@@ -130,3 +130,4 @@
     password: "{{ vcenter_cred.password }}"
     name: "{{ ServerNameUpper }}"
     state: poweredon
+  validate_certs: no
