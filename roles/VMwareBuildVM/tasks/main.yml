@@ -87,7 +87,7 @@
     password: "{{ vcenter_cred.password }}"
     datacenter: DC1
     state: present
-    folder: DC1/EvOrigin/Workers
+    folder: /EvOrigin/Workers
     template: "{{ platform.json.custom_fields.VM_Template }}"
     name: "{{ ServerName }}"
     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
