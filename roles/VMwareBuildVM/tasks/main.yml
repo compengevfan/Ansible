@@ -12,14 +12,15 @@
 #   debug:
 #     msg: "{{ netbox_cred }}"
 
-# - name: Get VM Info from Netbox
-#   netbox.netbox.netbox_virtual_machine:
-#     netbox_url: "{{ netbox_cred.url }}"
-#     netbox_token: "{{ netbox_cred.token }}"
-#     data:
-#       name: "{{ ServerName }}"
-#     state: present
-#     validate_certs: no
+- name: Get VM Info from Netbox
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      name: "{{ ServerName }}"
+    state: present
+    validate_certs: no
+  register: vmInfoModule
 
 - name: Get VM Info from Netbox API
   ansible.builtin.uri:
@@ -28,32 +29,32 @@
       Content-Type: application/json
       Authorization: "{{ netbox_cred.api_token }}"
     validate_certs: no
-  register: vmInfo
+  register: vmInfoApi
 
-- name: Get Template Name
-  ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/dcim/platforms/{{ vmInfo.json.results[0].platform.id }}/"
-    headers:
-      Content-Type: application/json
-      Authorization: "{{ netbox_cred.api_token }}"
-    validate_certs: no
-  register: platform
+# - name: Get Template Name
+#   ansible.builtin.uri:
+#     url: "{{ netbox_cred.url }}/api/dcim/platforms/{{ vmInfo.json.results[0].platform.id }}/"
+#     headers:
+#       Content-Type: application/json
+#       Authorization: "{{ netbox_cred.api_token }}"
+#     validate_certs: no
+#   register: platform
 
-- name: Get Prefix
-  ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/ipam/prefixes?contains={{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
-    headers:
-      Content-Type: application/json
-      Authorization: "{{ netbox_cred.api_token }}"
-    validate_certs: no
-  register: prefix
+# - name: Get Prefix
+#   ansible.builtin.uri:
+#     url: "{{ netbox_cred.url }}/api/ipam/prefixes?contains={{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
+#     headers:
+#       Content-Type: application/json
+#       Authorization: "{{ netbox_cred.api_token }}"
+#     validate_certs: no
+#   register: prefix
 
-- name: Get Subnet
-  script: Subnet.py {{ vmInfo.json.results[0].primary_ip.address.split('/')[1] }}
-  args: 
-    executable: /usr/bin/python
-  register: subnetReturn
-  delegate_to: localhost
+# - name: Get Subnet
+#   script: Subnet.py {{ vmInfo.json.results[0].primary_ip.address.split('/')[1] }}
+#   args: 
+#     executable: /usr/bin/python
+#   register: subnetReturn
+#   delegate_to: localhost
 
 # - name: Show me the contents
 #   debug:
