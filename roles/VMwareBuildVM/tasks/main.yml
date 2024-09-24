@@ -19,7 +19,7 @@
       Content-Type: application/json
       Authorization: "{{ netbox_cred.api_token }}"
     validate_certs: no
-  register: vmInfoApi
+  register: vmInfo
 
 - name: Get Template Name API
   ansible.builtin.uri:
