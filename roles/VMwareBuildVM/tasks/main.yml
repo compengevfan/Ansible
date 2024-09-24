@@ -55,12 +55,12 @@
 #     hostname: "{{ vcenter_cred.servername }}"
 #     username: "{{ vcenter_cred.username }}"
 #     password: "{{ vcenter_cred.password }}"
-#     datacenter: datacenter1
-#     cluster: cluster
+#     datacenter: DC1
+#     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
 #     name: {{ ServerName }}
 #     template: "{{ platform.json.custom_fields.VM_Template }}"
 #     networks:
-#     - name: VM Network
+#     - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
 #       ip: {{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}
 #       netmask: "{{ subnetReturn }}"
 #       gateway: 192.168.1.1
@@ -80,31 +80,28 @@
 #       - powershell.exe -ExecutionPolicy Unrestricted -File C:\Windows\Temp\ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP
 #   delegate_to: localhost
 
-# - name:  Clone a virtual machine from Linux template and customize
-#   community.vmware.vmware_guest:
-#     hostname: "{{ vcenter_cred.servername }}"
-#     username: "{{ vcenter_cred.username }}"
-#     password: "{{ vcenter_cred.password }}"
-#     datacenter: "{{ datacenter }}"
-#     state: present
-#     folder: /DC1/vm
-#     template: "{{ platform.json.custom_fields.VM_Template }}"
-#     name: "{{ ServerName }}"
-#     cluster: DC1_C1
-#     networks:
-#       - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
-#         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}
-#         netmask: "{{ subnetReturn }}"
-#     wait_for_ip_address: true
-#     customization:
-#       domain: "{{ guest_domain }}"
-#       dns_servers:
-#         - 8.9.9.9
-#         - 7.8.8.9
-#       dns_suffix:
-#         - example.com
-#         - example2.com
-#       script_text: |
-#         #!/bin/bash
-#         touch /tmp/touch-from-playbook
-#   delegate_to: localhost
+- name:  Clone a virtual machine from Linux template and customize
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_cred.servername }}"
+    username: "{{ vcenter_cred.username }}"
+    password: "{{ vcenter_cred.password }}"
+    datacenter: DC1
+    state: present
+    folder: DC1/EvOrigin/Workers
+    template: "{{ platform.json.custom_fields.VM_Template }}"
+    name: "{{ ServerName }}"
+    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
+    networks:
+      - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
+        ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
+        netmask: "{{ subnetReturn }}"
+        gateway: 192.168.1.254
+    wait_for_ip_address: true
+    customization:
+      dns_servers:
+        - 192.168.1.125
+        - 192.168.1.126
+      script_text: |
+        #!/bin/bash
+        touch /tmp/touch-from-playbook
+  delegate_to: localhost
