@@ -90,11 +90,11 @@
     password: "{{ vcenter_cred.password }}"
     validate_certs: no
     datacenter: DC1
+    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
     state: poweredoff
     folder: /EvOrigin/Workers
     template: "{{ platform.json.custom_fields.VM_Template }}"
     name: "{{ ServerNameUpper }}"
-    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
     datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
     hardware:
       num_cpus: "{{ vmInfo.json.results[0].vcpus | int }}"
@@ -126,12 +126,18 @@
     state: present
     start_connected: true
 
-# - name: Power the VM on
-#   community.vmware.vmware_guest:
-#     hostname: "{{ vcenter_cred.servername }}"
-#     username: "{{ vcenter_cred.username }}"
-#     password: "{{ vcenter_cred.password }}"
-#     validate_certs: no
-#     datacenter: DC1
-#     name: "{{ ServerNameUpper }}"
-#     state: poweredon
+- name:  Customize the new VM
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_cred.servername }}"
+    username: "{{ vcenter_cred.username }}"
+    password: "{{ vcenter_cred.password }}"
+    validate_certs: no
+    datacenter: DC1
+    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
+    customization:
+      dns_servers:
+        - 192.168.1.125
+        - 192.168.1.126
+      script_text: |
+        #!/bin/bash
+        touch /tmp/touch-from-playbook
