@@ -83,7 +83,7 @@
 #       - powershell.exe -ExecutionPolicy Unrestricted -File C:\Windows\Temp\ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP
 #   delegate_to: localhost
 
-- name:  Clone a virtual machine from Linux template and customize
+- name:  Clone a virtual machine from Linux template
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_cred.servername }}"
     username: "{{ vcenter_cred.username }}"
@@ -96,11 +96,14 @@
     name: "{{ ServerNameUpper }}"
     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
     datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
-  #   networks:
-  #     - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
-  #       ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
-  #       netmask: "{{ subnetReturn.stdout_lines[0] }}"
-  #       gateway: 192.168.1.254
+    hardware:
+      num_cpus: "{{ vmInfo.json.results[0].vcpus }}"
+      memory_mb: "{{ vmInfo.json.results[0].memory }}"
+    networks:
+      - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
+        ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
+        netmask: "{{ subnetReturn.stdout_lines[0] }}"
+        gateway: 192.168.1.254
   #   wait_for_ip_address: true
   #   customization:
   #     dns_servers:
@@ -121,7 +124,6 @@
     name: "{{ ServerNameUpper }}"
     label: Network adapter 1
     state: present
-    # connected: true
     start_connected: true
 
 # - name: Power the VM on
