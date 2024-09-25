@@ -106,6 +106,7 @@
         gateway: 192.168.1.254
         connected: true
         start_connected: true
+        type: static
     wait_for_ip_address: true
     wait_for_customization: true
     customization:
