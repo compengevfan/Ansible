@@ -104,6 +104,8 @@
         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
         netmask: "{{ subnetReturn.stdout_lines[0] }}"
         gateway: 192.168.1.254
+        connected: true
+        start_connected: true
   #   wait_for_ip_address: true
   #   customization:
   #     dns_servers:
@@ -114,32 +116,32 @@
   #       touch /tmp/touch-from-playbook
   # delegate_to: localhost
 
-- name: Set network adaper to connect at power on
-  community.vmware.vmware_guest_network:
-    hostname: "{{ vcenter_cred.servername }}"
-    username: "{{ vcenter_cred.username }}"
-    password: "{{ vcenter_cred.password }}"
-    validate_certs: no
-    datacenter: DC1
-    name: "{{ ServerNameUpper }}"
-    label: Network adapter 1
-    state: present
-    start_connected: true
+# - name: Set network adaper to connect at power on
+#   community.vmware.vmware_guest_network:
+#     hostname: "{{ vcenter_cred.servername }}"
+#     username: "{{ vcenter_cred.username }}"
+#     password: "{{ vcenter_cred.password }}"
+#     validate_certs: no
+#     datacenter: DC1
+#     name: "{{ ServerNameUpper }}"
+#     label: Network adapter 1
+#     state: present
+#     start_connected: true
 
-- name:  Customize and power on the new VM
-  community.vmware.vmware_guest:
-    hostname: "{{ vcenter_cred.servername }}"
-    username: "{{ vcenter_cred.username }}"
-    password: "{{ vcenter_cred.password }}"
-    validate_certs: no
-    datacenter: DC1
-    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
-    name: "{{ ServerNameUpper }}"
-    state: poweredon
-    customization:
-      dns_servers:
-        - 192.168.1.125
-        - 192.168.1.126
-      script_text: |
-        #!/bin/bash
-        touch /tmp/touch-from-playbook
+# - name:  Customize and power on the new VM
+#   community.vmware.vmware_guest:
+#     hostname: "{{ vcenter_cred.servername }}"
+#     username: "{{ vcenter_cred.username }}"
+#     password: "{{ vcenter_cred.password }}"
+#     validate_certs: no
+#     datacenter: DC1
+#     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
+#     name: "{{ ServerNameUpper }}"
+#     state: poweredon
+#     customization:
+#       dns_servers:
+#         - 192.168.1.125
+#         - 192.168.1.126
+#       script_text: |
+#         #!/bin/bash
+#         touch /tmp/touch-from-playbook
