@@ -88,6 +88,7 @@
     hostname: "{{ vcenter_cred.servername }}"
     username: "{{ vcenter_cred.username }}"
     password: "{{ vcenter_cred.password }}"
+    validate_certs: no
     datacenter: DC1
     state: poweredoff
     folder: /EvOrigin/Workers
@@ -108,7 +109,6 @@
   #     script_text: |
   #       #!/bin/bash
   #       touch /tmp/touch-from-playbook
-  #   validate_certs: no
   # delegate_to: localhost
 
 # - name: Set network adaper to connected and connect on power on
