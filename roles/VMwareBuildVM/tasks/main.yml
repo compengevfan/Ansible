@@ -97,8 +97,8 @@
     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
     datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
     hardware:
-      num_cpus: "{{ vmInfo.json.results[0].vcpus }}"
-      memory_mb: "{{ vmInfo.json.results[0].memory }}"
+      num_cpus: "{{ vmInfo.json.results[0].vcpus | int }}"
+      memory_mb: "{{ vmInfo.json.results[0].memory | int }}"
     networks:
       - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
