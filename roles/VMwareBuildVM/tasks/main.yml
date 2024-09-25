@@ -111,7 +111,7 @@
   #       touch /tmp/touch-from-playbook
   # delegate_to: localhost
 
-- name: Set network adaper to connected and connect on power on
+- name: Set network adaper to connect at power on
   community.vmware.vmware_guest_network:
     hostname: "{{ vcenter_cred.servername }}"
     username: "{{ vcenter_cred.username }}"
@@ -119,6 +119,7 @@
     validate_certs: no
     datacenter: DC1
     name: "{{ ServerNameUpper }}"
+    label: Network adapter 1
     state: present
     # connected: true
     start_connected: true
