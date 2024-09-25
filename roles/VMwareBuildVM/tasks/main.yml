@@ -91,7 +91,7 @@
     validate_certs: no
     datacenter: DC1
     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
-    state: poweredon
+    state: present
     folder: /EvOrigin/Workers
     template: "{{ platform.json.custom_fields.VM_Template }}"
     name: "{{ ServerNameUpper }}"
@@ -106,15 +106,16 @@
         gateway: 192.168.1.254
         connected: true
         start_connected: true
-  #   wait_for_ip_address: true
-  #   customization:
-  #     dns_servers:
-  #       - 192.168.1.125
-  #       - 192.168.1.126
-  #     script_text: |
-  #       #!/bin/bash
-  #       touch /tmp/touch-from-playbook
-  # delegate_to: localhost
+    wait_for_ip_address: true
+    wait_for_customization: true
+    customization:
+      dns_servers:
+        - 192.168.1.125
+        - 192.168.1.126
+      script_text: |
+        #!/bin/bash
+        touch /tmp/touch-from-playbook
+  delegate_to: localhost
 
 # - name: Set network adaper to connect at power on
 #   community.vmware.vmware_guest_network:
