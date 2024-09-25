@@ -120,7 +120,7 @@
     datacenter: DC1
     name: "{{ ServerNameUpper }}"
     state: present
-    connected: true
+    # connected: true
     start_connected: true
 
 # - name: Power the VM on
