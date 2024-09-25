@@ -134,6 +134,7 @@
     validate_certs: no
     datacenter: DC1
     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
+    name: "{{ ServerNameUpper }}"
     customization:
       dns_servers:
         - 192.168.1.125
