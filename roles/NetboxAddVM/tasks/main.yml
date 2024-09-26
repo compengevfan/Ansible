@@ -28,11 +28,11 @@
 #     validate_certs: no
 
 - name: Find the prefix to get an IP
-  netbox.netbox.netbox_prefix:
+  netbox.netbox.netbox_vlan:
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      vlan: "{{ Network }}"
+      name: "{{ Network }}"
     validate_certs: no
 
 # - name: Create an IP address
