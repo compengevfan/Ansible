@@ -28,12 +28,15 @@
 #     validate_certs: no
 
 - name: Find the prefix to get an IP
-  netbox.netbox.netbox_vlan:
-    netbox_url: "{{ netbox_cred.url }}"
-    netbox_token: "{{ netbox_cred.token }}"
-    data:
-      name: "{{ Network }}"
+  ansible.builtin.uri:
+    url: "{{ netbox_cred.url }}/api/ipam/prefixes?name={{ Network }}"
+    headers:
+      Content-Type: application/json
+      Authorization: "{{ netbox_cred.api_token }}"
     validate_certs: no
+  register: prefix
+
+
 
 # - name: Create an IP address
 #   netbox.netbox.netbox_ip_address:
