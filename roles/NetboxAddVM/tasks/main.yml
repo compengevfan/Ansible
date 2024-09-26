@@ -33,6 +33,7 @@
     netbox_token: "{{ netbox_cred.token }}"
     data:
       vlan: "{{ Network }}"
+    validate_certs: no
 
 # - name: Create an IP address
 #   netbox.netbox.netbox_ip_address:
