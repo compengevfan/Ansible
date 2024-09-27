@@ -52,7 +52,7 @@
 
 - name: Get the available IPs in the prefix
   ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/ipam/{{ prefix.json.results[0].id }}/available-ips/"
+    url: "{{ netbox_cred.url }}/api/ipam/prefixes/{{ prefix.json.results[0].id }}/available-ips/"
     headers:
       Content-Type: application/json
       Authorization: "{{ netbox_cred.api_token }}"
