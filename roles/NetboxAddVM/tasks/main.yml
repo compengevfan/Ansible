@@ -29,7 +29,7 @@
 
 - name: Find the prefix to get an IP
   ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/ipam/prefixes?q={{ Network }}"
+    url: "{{ netbox_cred.url }}/api/ipam/vlans"
     headers:
       Content-Type: application/json
       Authorization: "{{ netbox_cred.api_token }}"
