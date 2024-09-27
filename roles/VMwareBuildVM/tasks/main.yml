@@ -113,6 +113,7 @@
   #       #!/bin/bash
   #       touch /tmp/touch-from-playbook
   # delegate_to: localhost
+  when: not platform.json.name is search("Windows")
 
 - name: Set network adaper to connect at power on
   community.vmware.vmware_guest_network:
