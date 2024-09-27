@@ -37,6 +37,10 @@
   set_fact:
     selectedPrefix: "{{ subnetPrefixMap.get(Network) }}"
 
+- name: What am I getting?
+  debug:
+    msg: "The contents of the selectedPrefix variable are {{ selectedPrefix }}"
+
 - name: Find the prefix to get an IP
   ansible.builtin.uri:
     url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix=selectedPrefix"
