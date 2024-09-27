@@ -59,9 +59,9 @@
     validate_certs: no
   register: availableIps
 
-- name: Show me the address?
-  debug:
-    msg: "{{ availableIps.json[0].address }}"
+# - name: Show me the address?
+#   debug:
+#     msg: "{{ availableIps.json[0].address }}"
 
 - name: Create an IP address
   netbox.netbox.netbox_ip_address:
