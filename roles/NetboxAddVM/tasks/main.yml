@@ -1,11 +1,14 @@
 ---
 # tasks file for NetboxAddVM
+- name: Make sure ServerName is all upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
+
 - name: Create VM
   netbox.netbox.netbox_virtual_machine:
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      name: "{{ ServerName }}"
+      name: "{{ ServerNameUpper }}"
       site: Amberly
       vcpus: "{{ vCPUs | int }}"
       memory: "{{ RAM | int }}"
@@ -21,7 +24,7 @@
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      virtual_machine: "{{ ServerName }}"
+      virtual_machine: "{{ ServerNameUpper }}"
       name: eth1
       enabled: true
     state: present
@@ -69,10 +72,10 @@
     netbox_token: "{{ netbox_cred.token }}"
     data:
       address: "{{ availableIps.json[0].address }}"
-      dns_name: "{{ ServerName }}.evorigin.com"
+      dns_name: "{{ ServerNameUpper }}.evorigin.com"
       assigned_object: 
         name: eth1
-        virtual_machine: "{{ ServerName }}"
+        virtual_machine: "{{ ServerNameUpper }}"
     state: present
     validate_certs: no
   # ignore_errors: true
@@ -83,10 +86,10 @@
 #     netbox_token: "{{ netbox_cred.token }}"
 #     data:
 #       address: "{{ FileContents_JSON.VMInfo.IPAddress }}{{FileContents_JSON.VMInfo.Subnet}}"
-#       dns_name: "{{ ServerName }}.evorigin.com"
+#       dns_name: "{{ ServerNameUpper }}.evorigin.com"
 #       assigned_object: 
 #         name: eth1
-#         virtual_machine: "{{ ServerName }}"
+#         virtual_machine: "{{ ServerNameUpper }}"
 #     state: present
 #     validate_certs: no
 #   # ignore_errors: true
@@ -96,7 +99,7 @@
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"
     data:
-      name: "{{ ServerName }}"
+      name: "{{ ServerNameUpper }}"
       site: Amberly
       cluster: C1
       primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
