@@ -41,7 +41,7 @@
 #   debug:
 #     msg: "The contents of the selectedPrefix variable are {{ selectedPrefix }}"
 
-- name: Find the prefix to get an IP
+- name: Find the prefix
   ansible.builtin.uri:
     url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix={{ selectedPrefix }}"
     headers:
@@ -49,6 +49,15 @@
       Authorization: "{{ netbox_cred.api_token }}"
     validate_certs: no
   register: prefix
+
+- name: Get the available IPs in the prefix
+  ansible.buitin.url:
+    url: "{{ netbox_cred.url }}/api/ipam/{{ prefix.json.results[0].id }}/available-ips/"
+    headers:
+      Content-Type: application/json
+      Authorization: "{{ netbox_cred.api_token }}"
+    validate_certs: no
+  register: availableIps
 
 # - name: Create an IP address
 #   netbox.netbox.netbox_ip_address:
