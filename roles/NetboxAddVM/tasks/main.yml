@@ -51,7 +51,7 @@
   register: prefix
 
 - name: Get the available IPs in the prefix
-  ansible.buitin.url:
+  ansible.buitin.uri:
     url: "{{ netbox_cred.url }}/api/ipam/{{ prefix.json.results[0].id }}/available-ips/"
     headers:
       Content-Type: application/json
