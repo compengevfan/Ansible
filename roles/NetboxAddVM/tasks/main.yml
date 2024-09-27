@@ -27,16 +27,24 @@
 #     state: present
 #     validate_certs: no
 
+- name: Convert subnet name to prefix
+  set_fact:
+    subnetPrefixMap:
+      JAX-EvOrigin: "192.168.0.0"
+      Test: "10.10.10.0"
+
+- name: Select correct prefix
+  set_fact:
+    selectedPrefix: "{{ subnetPrefixMap.get(Network) }}"
+
 - name: Find the prefix to get an IP
   ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/ipam/vlans"
+    url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix=selectedPrefix"
     headers:
       Content-Type: application/json
       Authorization: "{{ netbox_cred.api_token }}"
     validate_certs: no
   register: prefix
-
-
 
 # - name: Create an IP address
 #   netbox.netbox.netbox_ip_address:
