@@ -59,12 +59,16 @@
     validate_certs: no
   register: availableIps
 
+- name: Show me the address?
+  debug:
+    msg: "{{ availableIps.json[0].address }}"
+
 # - name: Create an IP address
 #   netbox.netbox.netbox_ip_address:
 #     netbox_url: "{{ netbox_cred.url }}"
 #     netbox_token: "{{ netbox_cred.token }}"
 #     data:
-#       address: "{{ FileContents_JSON.VMInfo.IPAddress }}{{FileContents_JSON.VMInfo.Subnet}}"
+#       address: "{{ availableIps.json[0].address }}"
 #       dns_name: "{{ ServerName }}.evorigin.com"
 #       assigned_object: 
 #         name: eth1
