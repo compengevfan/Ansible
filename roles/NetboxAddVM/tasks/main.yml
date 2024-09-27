@@ -98,7 +98,7 @@
     data:
       name: "{{ ServerName }}"
       site: Amberly
-      cluster: "{{ FileContents_JSON.VMInfo.Cluster }}"
-      primary_ip4: "{{ FileContents_JSON.VMInfo.IPAddress }}"
+      cluster: C1
+      primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
     state: present
     validate_certs: no
