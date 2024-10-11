@@ -127,7 +127,7 @@
     state: present
     start_connected: true
 
-- name:  Customize and power on the new VM
+- name:  Customize and power on the new VM (Linux)
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_cred.servername }}"
     username: "{{ vcenter_cred.username }}"
@@ -144,3 +144,4 @@
       script_text: |
         #!/bin/bash
         touch /tmp/touch-from-playbook
+  when: not platform.json.name is search("Windows")
