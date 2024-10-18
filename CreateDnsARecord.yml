@@ -1,0 +1,21 @@
+---
+- name: Obtain svcDNS service account cred
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Obtain svcDNS service account cred
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - dns
+
+- name: Run 
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Run the Role
+      include_role:
+        name: CreateDnsARecord

@@ -105,3 +105,5 @@
       primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
     state: present
     validate_certs: no
+
+- name: Call the role to add IP to DNS
