@@ -6,7 +6,7 @@
 
 - name: Get raw JSON file from github
   ansible.builtin.get_url:
-    url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/refs/main/v2/main/ansible/{{ ServerName }}.json"
+    url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/refs/heads/main/v2/{{ ServerName }}.json"
     dest: "/tmp/{{ ServerName }}.json"
 
 - name: Obtain contents of downloaded file and convert to JSON
