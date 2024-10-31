@@ -3,6 +3,12 @@
 - name: Make sure ServerName is all upper
   set_fact: ServerNameUpper="{{ ServerName | upper }}"
 
+- name: Get VM Info
+  include_role:
+    name: GetVmInfo
+  vars:
+    ServerName: "{{ ServerNameUpper }}"
+
 - name: Create VM
   netbox.netbox.netbox_virtual_machine:
     netbox_url: "{{ netbox_cred.url }}"
@@ -10,12 +16,12 @@
     data:
       name: "{{ ServerNameUpper }}"
       site: Amberly
-      vcpus: "{{ vCPUs | int }}"
-      memory: "{{ RAM | int }}"
-      platform: "{{ OperatingSystem }}"
+      vcpus: "{{ FileContents_JSON.VMInfo.vCPUs | int }}"
+      memory: "{{ FileContents_JSON.VMInfo.RAM | int }}"
+      platform: "{{ FileContents_JSON.VMInfo.OperatingSystem }}"
       cluster: C1
       custom_fields:
-        Datastore: "{{ Datastore }}"
+        Datastore: "{{ FileContents_JSON.VMInfo.Datastore }}"
     state: present
     validate_certs: no
 
@@ -38,7 +44,7 @@
 
 - name: Select correct prefix
   set_fact:
-    selectedPrefix: "{{ subnetPrefixMap.get(Network) }}"
+    selectedPrefix: "{{ subnetPrefixMap.get(FileContents_JSON.VMInfo.Network) }}"
 
 # - name: What am I getting?
 #   debug:
