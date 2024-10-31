@@ -26,7 +26,11 @@
         OU: "{{ FileContents_JSON.VMInfo.OU }}"
     state: present
     validate_certs: no
-  register: VirualMachine
+  register: VirtualMachine
+
+- name: What am I getting?
+  debug:
+    msg: "The contents of the VirtualMachine variable are {{ VirtualMachine }}"
 
 - name: Create the interface and IP if it doesn't exist
   block: 
@@ -50,10 +54,6 @@
     - name: Select correct prefix
       set_fact:
         selectedPrefix: "{{ subnetPrefixMap.get(FileContents_JSON.VMInfo.Network) }}"
-
-    # - name: What am I getting?
-    #   debug:
-    #     msg: "The contents of the selectedPrefix variable are {{ selectedPrefix }}"
 
     - name: Find the prefix
       ansible.builtin.uri:
@@ -99,4 +99,4 @@
         validate_certs: no
 
     # - name: Call the role to add IP to DNS
-  when: VirualMachine.virtual_machine.primary_ip is not defined
+  when: VirtualMachine.virtual_machine.primary_ip is not defined
