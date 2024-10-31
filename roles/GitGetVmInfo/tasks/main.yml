@@ -4,6 +4,9 @@
 #   debug:
 #     var: ServerName
 
+- name: Make sure ServerName is all upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
+
 - name: Get raw JSON file from github
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/V2/{{ ServerNameUpper }}.json"

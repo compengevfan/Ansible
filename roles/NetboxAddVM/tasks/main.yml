@@ -7,7 +7,7 @@
   include_role:
     name: GitGetVmInfo
   vars:
-    ServerName: "{{ ServerNameUpper }}"
+    ServerName: "{{ ServerName }}"
 
 - name: Create VM
   netbox.netbox.netbox_virtual_machine:
@@ -17,7 +17,7 @@
       name: "{{ ServerNameUpper }}"
       site: Amberly
       vcpus: "{{ FileContents_JSON.VMInfo.vCPUs | int }}"
-      memory: "{{ FileContents_JSON.VMInfo.RAM | int }}"
+      memory: "{{ FileContents_JSON.VMInfo.RAM | int * 1024 }}"
       platform: "{{ FileContents_JSON.VMInfo.OperatingSystem }}"
       cluster: C1
       custom_fields:
