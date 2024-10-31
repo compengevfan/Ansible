@@ -28,9 +28,13 @@
     validate_certs: no
   register: VirtualMachine
 
+- name: Convert VirtualMachine to JSON
+  set_fact: 
+    VirtualMachine_JSON: {{ VirtualMachine | to_json }}
+
 - name: What am I getting?
   debug:
-    msg: "{{ VirtualMachine | to_json }}"
+    msg: "{{ VirtualMachine_JSON }}"
 
 - name: Create the interface and IP if it doesn't exist
   block: 
