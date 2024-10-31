@@ -112,4 +112,4 @@
     state: present
     validate_certs: no
 
-- name: Call the role to add IP to DNS
+# - name: Call the role to add IP to DNS
