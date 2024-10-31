@@ -30,7 +30,7 @@
 
 - name: Convert VirtualMachine to JSON
   set_fact: 
-    VirtualMachine_JSON: {{ VirtualMachine | to_json }}
+    VirtualMachine_JSON: "{{ VirtualMachine | to_json }}"
 
 - name: What am I getting?
   debug:
