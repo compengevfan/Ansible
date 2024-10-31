@@ -99,4 +99,4 @@
         validate_certs: no
 
     # - name: Call the role to add IP to DNS
-  when: VirualMachine.virtual_machine.primary_ip == "null"
+  when: VirualMachine.virtual_machine.primary_ip is not defined
