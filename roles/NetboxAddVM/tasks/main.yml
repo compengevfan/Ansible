@@ -26,92 +26,77 @@
         OU: "{{ FileContents_JSON.VMInfo.OU }}"
     state: present
     validate_certs: no
+  register: VirualMachine
 
-- name: Create interface
-  netbox.netbox.netbox_vm_interface:
-    netbox_url: "{{ netbox_cred.url }}"
-    netbox_token: "{{ netbox_cred.token }}"
-    data:
-      virtual_machine: "{{ ServerNameUpper }}"
-      name: eth1
-      enabled: true
-    state: present
-    validate_certs: no
+# - name: Create the interface and IP if it doesn't exist
+#   block: 
+#     - name: Create interface
+#       netbox.netbox.netbox_vm_interface:
+#         netbox_url: "{{ netbox_cred.url }}"
+#         netbox_token: "{{ netbox_cred.token }}"
+#         data:
+#           virtual_machine: "{{ ServerNameUpper }}"
+#           name: eth1
+#           enabled: true
+#         state: present
+#         validate_certs: no
 
-- name: Convert subnet name to prefix
-  set_fact:
-    subnetPrefixMap:
-      JAX-EvOrigin: "192.168.0.0/23"
-      Test: "10.10.10.0/24"
+#     - name: Convert subnet name to prefix
+#       set_fact:
+#         subnetPrefixMap:
+#           JAX-EvOrigin: "192.168.0.0/23"
+#           Test: "10.10.10.0/24"
 
-- name: Select correct prefix
-  set_fact:
-    selectedPrefix: "{{ subnetPrefixMap.get(FileContents_JSON.VMInfo.Network) }}"
+#     - name: Select correct prefix
+#       set_fact:
+#         selectedPrefix: "{{ subnetPrefixMap.get(FileContents_JSON.VMInfo.Network) }}"
 
-# - name: What am I getting?
-#   debug:
-#     msg: "The contents of the selectedPrefix variable are {{ selectedPrefix }}"
+#     # - name: What am I getting?
+#     #   debug:
+#     #     msg: "The contents of the selectedPrefix variable are {{ selectedPrefix }}"
 
-- name: Find the prefix
-  ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix={{ selectedPrefix }}"
-    headers:
-      Content-Type: application/json
-      Authorization: "{{ netbox_cred.api_token }}"
-    validate_certs: no
-  register: prefix
+#     - name: Find the prefix
+#       ansible.builtin.uri:
+#         url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix={{ selectedPrefix }}"
+#         headers:
+#           Content-Type: application/json
+#           Authorization: "{{ netbox_cred.api_token }}"
+#         validate_certs: no
+#       register: prefix
 
-- name: Get the available IPs in the prefix
-  ansible.builtin.uri:
-    url: "{{ netbox_cred.url }}/api/ipam/prefixes/{{ prefix.json.results[0].id }}/available-ips/"
-    headers:
-      Content-Type: application/json
-      Authorization: "{{ netbox_cred.api_token }}"
-    validate_certs: no
-  register: availableIps
+#     - name: Get the available IPs in the prefix
+#       ansible.builtin.uri:
+#         url: "{{ netbox_cred.url }}/api/ipam/prefixes/{{ prefix.json.results[0].id }}/available-ips/"
+#         headers:
+#           Content-Type: application/json
+#           Authorization: "{{ netbox_cred.api_token }}"
+#         validate_certs: no
+#       register: availableIps
 
-# - name: Show me the address?
-#   debug:
-#     msg: "{{ availableIps.json[0].address }}"
+#     - name: Create an IP address
+#       netbox.netbox.netbox_ip_address:
+#         netbox_url: "{{ netbox_cred.url }}"
+#         netbox_token: "{{ netbox_cred.token }}"
+#         data:
+#           address: "{{ availableIps.json[0].address }}"
+#           dns_name: "{{ ServerNameUpper }}.evorigin.com"
+#           assigned_object: 
+#             name: eth1
+#             virtual_machine: "{{ ServerNameUpper }}"
+#         state: present
+#         validate_certs: no
 
-- name: Create an IP address
-  netbox.netbox.netbox_ip_address:
-    netbox_url: "{{ netbox_cred.url }}"
-    netbox_token: "{{ netbox_cred.token }}"
-    data:
-      address: "{{ availableIps.json[0].address }}"
-      dns_name: "{{ ServerNameUpper }}.evorigin.com"
-      assigned_object: 
-        name: eth1
-        virtual_machine: "{{ ServerNameUpper }}"
-    state: present
-    validate_certs: no
-  # ignore_errors: true
+#     - name: Set IP as primary
+#       netbox.netbox.netbox_virtual_machine:
+#         netbox_url: "{{ netbox_cred.url }}"
+#         netbox_token: "{{ netbox_cred.token }}"
+#         data:
+#           name: "{{ ServerNameUpper }}"
+#           site: Amberly
+#           cluster: C1
+#           primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
+#         state: present
+#         validate_certs: no
 
-# - name: Create an IP address
-#   netbox.netbox.netbox_ip_address:
-#     netbox_url: "{{ netbox_cred.url }}"
-#     netbox_token: "{{ netbox_cred.token }}"
-#     data:
-#       address: "{{ FileContents_JSON.VMInfo.IPAddress }}{{FileContents_JSON.VMInfo.Subnet}}"
-#       dns_name: "{{ ServerNameUpper }}.evorigin.com"
-#       assigned_object: 
-#         name: eth1
-#         virtual_machine: "{{ ServerNameUpper }}"
-#     state: present
-#     validate_certs: no
-#   # ignore_errors: true
-
-- name: Set IP as primary
-  netbox.netbox.netbox_virtual_machine:
-    netbox_url: "{{ netbox_cred.url }}"
-    netbox_token: "{{ netbox_cred.token }}"
-    data:
-      name: "{{ ServerNameUpper }}"
-      site: Amberly
-      cluster: C1
-      primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
-    state: present
-    validate_certs: no
-
-# - name: Call the role to add IP to DNS
+#     # - name: Call the role to add IP to DNS
+#   when: VirualMachine
