@@ -30,7 +30,7 @@
 
 - name: What am I getting?
   debug:
-    msg: "The contents of the VirtualMachine variable are {{ VirtualMachine }}"
+    msg: "The contents of the variable are {{ VirtualMachine.virtual_machine.primary_ip }}"
 
 - name: Create the interface and IP if it doesn't exist
   block: 
