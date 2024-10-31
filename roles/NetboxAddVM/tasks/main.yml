@@ -22,6 +22,8 @@
       cluster: C1
       custom_fields:
         Datastore: "{{ FileContents_JSON.VMInfo.Datastore }}"
+        vCenterFolderPath: "{{ FileContents_JSON.VMInfo.vCenterFolderPath }}"
+        OU: "{{ FileContents_JSON.VMInfo.OU }}"
     state: present
     validate_certs: no
 
