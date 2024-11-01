@@ -21,4 +21,4 @@
 
 - name: What am I getting (Cred)?
   debug:
-    var: evorigin-dns_cred
+    var: evorigindns_cred
