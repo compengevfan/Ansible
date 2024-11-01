@@ -75,7 +75,7 @@
         netbox_token: "{{ netbox_cred.token }}"
         data:
           address: "{{ availableIps.json[0].address }}"
-          dns_name: "{{ ServerNameUpper }}.evorigin.com"
+          dns_name: "{{ ServerNameUpper }}.{{ prefix.json.results[0].custom_fields.PrefixDomain }}"
           assigned_object: 
             name: eth1
             virtual_machine: "{{ ServerNameUpper }}"
@@ -99,5 +99,5 @@
         name: CreateDnsARecord
       vars:
         IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
-        Domain: "evorigin.com"
+        Domain: "{{ prefix.json.results[0].custom_fields.PrefixDomain }}"
   when: VirtualMachine.virtual_machine.primary_ip == None
