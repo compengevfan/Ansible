@@ -28,13 +28,13 @@
     validate_certs: no
   register: VirtualMachine
 
-- name: Convert VirtualMachine to JSON
-  set_fact: 
-    VirtualMachine_JSON: "{{ VirtualMachine | to_json }}"
+# - name: Convert VirtualMachine to JSON
+#   set_fact: 
+#     VirtualMachine_JSON: "{{ VirtualMachine | to_json }}"
 
-- name: What am I getting?
-  debug:
-    var: VirtualMachine.virtual_machine.primary_ip
+# - name: What am I getting?
+#   debug:
+#     var: VirtualMachine.virtual_machine.primary_ip
 
 - name: Create the interface and IP if it doesn't exist
   block: 
@@ -103,4 +103,4 @@
         validate_certs: no
 
     # - name: Call the role to add IP to DNS
-  when: VirtualMachine.virtual_machine.primary_ip is not defined
+  when: VirtualMachine.virtual_machine.primary_ip == ""
