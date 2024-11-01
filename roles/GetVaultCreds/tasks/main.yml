@@ -26,7 +26,7 @@
 
 - name: Get svcDNS evorigin cred from Vault
   set_fact:
-    vcenter_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/serviceaccounts/evorigin/svcdns validate_certs=False') }}"
+    evorigin-dns_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/serviceaccounts/evorigin/svcdns validate_certs=False') }}"
   no_log: true
   when: "'evorigin-dns' in includecred"
 

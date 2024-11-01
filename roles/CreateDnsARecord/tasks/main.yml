@@ -1,6 +1,6 @@
 ---
 # tasks file for CreateDnsARecord
-- name: Obtain svcDNS service account cred
+- name: Obtain evorigin.com svcDNS service account cred
   include_role:
     name: GetVaultCreds
   vars:
@@ -21,4 +21,4 @@
 
 - name: What am I getting (Cred)?
   debug:
-    var: evorigin-dns
+    var: evorigin-dns_cred
