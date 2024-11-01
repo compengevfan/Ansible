@@ -1,5 +1,13 @@
 ---
 # tasks file for CreateDnsARecord
-- name: What am I getting?
+- name: What am I getting (ServerName)?
+  debug:
+    var: ServerName
+
+- name: What am I getting (IpAddress)?
   debug:
     var: IpAddress
+
+- name: What am I getting (Domain)?
+  debug:
+    var: Domain

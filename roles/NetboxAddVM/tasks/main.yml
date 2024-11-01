@@ -99,6 +99,6 @@
         name: CreateDnsARecord
       vars:
         ServerName: "{{ ServerName }}"
-        IpAddress: "{{ availableIps.json[0].address }}"
+        IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
         Domain: "evorigin.com"
   when: VirtualMachine.virtual_machine.primary_ip == None
