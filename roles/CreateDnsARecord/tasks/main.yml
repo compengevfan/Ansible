@@ -1,2 +1,5 @@
 ---
 # tasks file for CreateDnsARecord
+- name: What am I getting?
+  debug:
+    var: IpAddress

@@ -24,11 +24,11 @@
   no_log: true
   when: "'vcenter' in includecred"
 
-- name: Get svcDNS cred from Vault
+- name: Get svcDNS evorigin cred from Vault
   set_fact:
     vcenter_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/serviceaccounts/evorigin/svcdns validate_certs=False') }}"
   no_log: true
-  when: "'dns' in includecred"
+  when: "'evorigin-dns' in includecred"
 
 - name: Test Credential
   set_fact:

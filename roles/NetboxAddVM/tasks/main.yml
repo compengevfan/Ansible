@@ -94,5 +94,11 @@
         state: present
         validate_certs: no
 
-    # - name: Call the role to add IP to DNS
+    - name: Call the role to add IP to DNS
+      include_role:
+        name: CreateDnsARecord
+      vars:
+        ServerName: "{{ ServerName }}"
+        IpAddress: "{{ availableIps.json[0].address }}"
+        Domain: "evorigin.com"
   when: VirtualMachine.virtual_machine.primary_ip == None

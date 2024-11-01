@@ -9,7 +9,7 @@
         name: GetVaultCreds
       vars:
         includecred:
-          - dns
+          - evorigin-dns
 
 - name: Run 
   hosts: localhost
