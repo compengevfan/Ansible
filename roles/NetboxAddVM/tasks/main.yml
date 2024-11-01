@@ -34,7 +34,7 @@
 
 - name: What am I getting?
   debug:
-    msg: "{{ VirtualMachine_JSON }}"
+    var: "{{ VirtualMachine }}"
 
 - name: Create the interface and IP if it doesn't exist
   block: 
