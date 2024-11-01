@@ -5,7 +5,7 @@
     name: GetVaultCreds
   vars:
     includecred:
-      - evorigin-dns
+      - evorigindns
 
 - name: What am I getting (ServerNameUpper)?
   debug:
