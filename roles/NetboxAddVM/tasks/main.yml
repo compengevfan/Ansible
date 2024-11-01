@@ -34,7 +34,7 @@
 
 - name: What am I getting?
   debug:
-    var: VirtualMachine.virtual_machine
+    var: VirtualMachine.virtual_machine.primary_ip
 
 - name: Create the interface and IP if it doesn't exist
   block: 
