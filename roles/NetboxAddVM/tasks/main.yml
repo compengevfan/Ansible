@@ -103,4 +103,4 @@
         validate_certs: no
 
     # - name: Call the role to add IP to DNS
-  when: VirtualMachine.virtual_machine.primary_ip | default('') == ""
+  when: VirtualMachine.virtual_machine.primary_ip == None
