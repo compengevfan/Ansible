@@ -29,3 +29,4 @@
     type: "A"
     value: "{{ IpAddress }}"
     zone: "{{ Domain }}"
+  delegate_to: "{{ evorigindns_cred.dnsservername }}"
