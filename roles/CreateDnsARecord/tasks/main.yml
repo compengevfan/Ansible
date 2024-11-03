@@ -7,13 +7,13 @@
     includecred:
       - evorigindns
 
-# - name: What am I getting (Cred)?
-#   debug:
-#     var: evorigindns_cred
+- name: What am I getting (Cred)?
+  debug:
+    var: evorigindns_cred.dnsservername
 
 - name: Setup the DNS server for evorigin domain
   add_host:
-    name: "{{ evorigindns_cred.dns-servername }}"
+    name: "{{ evorigindns_cred.dnsservername }}"
     groups: dns_host
     ansible_user: "{{ evorigindns_cred.username }}"
     ansible_password: "{{ evorigindns_cred.password }}"
