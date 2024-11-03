@@ -18,9 +18,8 @@
     ansible_user: "{{ evorigindns_cred.username }}"
     ansible_password: "{{ evorigindns_cred.password }}"
     ansible_connection: winrm
-    ansible_port: 5986
+    ansible_port: 5985
     ansible_winrm_transport: ntlm
-    ansible_winrm_server_cert_validation: ignore
   when: Domain == "evorigin.com"
 
 - name: Add the A Record
