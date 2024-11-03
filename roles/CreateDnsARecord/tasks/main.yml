@@ -7,18 +7,25 @@
     includecred:
       - evorigindns
 
-- name: What am I getting (ServerNameUpper)?
-  debug:
-    var: ServerNameUpper
+# - name: What am I getting (Cred)?
+#   debug:
+#     var: evorigindns_cred
 
-- name: What am I getting (IpAddress)?
-  debug:
-    var: IpAddress
+- name: Setup the DNS server for evorigin domain
+  add_host:
+    name: "{{ evorigindns_cred.dns-servername }}"
+    groups: dns_host
+    ansible_user: "{{ evorigindns_cred.username }}"
+    ansible_password: "{{ evorigindns_cred.password }}"
+    ansible_connection: winrm
+    ansible_port: 5986
+    ansible_winrm_transport: ntlm
+    ansible_winrm_server_cert_validation: ignore
+  when: Domain == "evorigin.com"
 
-- name: What am I getting (Domain)?
-  debug:
-    var: Domain
-
-- name: What am I getting (Cred)?
-  debug:
-    var: evorigindns_cred
+- name: Add the A Record
+  community.windows.win_dns_record:
+    name: "{{ ServerNameUpper }}"
+    type: "A"
+    value: "{{ IpAddress }}"
+    zone: "{{ Domain }}"
