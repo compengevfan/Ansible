@@ -64,7 +64,7 @@
 #     template: "{{ platform.json.custom_fields.VM_Template }}"
 #     networks:
 #     - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
-#       ip: {{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}
+#       ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
 #       netmask: "{{ subnetReturn }}"
 #       gateway: 192.168.1.1
 #       mac: aa:bb:dd:aa:00:14
@@ -82,6 +82,7 @@
 #       runonce:
 #       - powershell.exe -ExecutionPolicy Unrestricted -File C:\Windows\Temp\ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP
 #   delegate_to: localhost
+#   when: platform.json.name is search("Windows")
 
 - name:  Clone a virtual machine from Linux template
   community.vmware.vmware_guest:
