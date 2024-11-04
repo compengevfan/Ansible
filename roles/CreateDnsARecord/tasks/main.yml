@@ -7,9 +7,9 @@
     includecred:
       - evorigindns
 
-- name: What am I getting (Cred)?
-  debug:
-    var: evorigindns_cred.dnsservername
+# - name: What am I getting (Cred)?
+#   debug:
+#     var: evorigindns_cred.dnsservername
 
 - name: Setup the DNS server for evorigin domain
   add_host:
@@ -21,6 +21,7 @@
     ansible_port: 5985
     ansible_winrm_transport: ntlm
   when: Domain == "evorigin.com"
+  no_log: true
 
 - name: Add the A Record
   community.windows.win_dns_record:
