@@ -8,6 +8,14 @@
     name: GitGetVmInfo
   vars:
     ServerName: "{{ ServerName }}"
+  when: VmFileContents_JSON is not defined
+
+- name: Get Config Info
+  include_role:
+    name: GitConfigInfo
+  vars:
+    Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+  when: ConfigFileContents_JSON is not defined
 
 - name: Create VM
   netbox.netbox.netbox_virtual_machine:
@@ -16,14 +24,14 @@
     data:
       name: "{{ ServerNameUpper }}"
       site: Amberly
-      vcpus: "{{ FileContents_JSON.VMInfo.vCPUs | int }}"
-      memory: "{{ FileContents_JSON.VMInfo.RAM | int * 1024 }}"
-      platform: "{{ FileContents_JSON.VMInfo.OperatingSystem }}"
-      cluster: C1
+      vcpus: "{{ VmFileContents_JSON.VMInfo.vCPUs | int }}"
+      memory: "{{ VmFileContents_JSON.VMInfo.RAM | int * 1024 }}"
+      platform: "{{ VmFileContents_JSON.VMInfo.OperatingSystem }}"
+      cluster: "{{ ConfigFileContents_JSON.Cluster }}"
       custom_fields:
-        Datastore: "{{ FileContents_JSON.VMInfo.Datastore }}"
-        vCenterFolderPath: "{{ FileContents_JSON.VMInfo.vCenterFolderPath }}"
-        OU: "{{ FileContents_JSON.VMInfo.OU }}"
+        Datastore: "{{ VmFileContents_JSON.VMInfo.Datastore }}"
+        vCenterFolderPath: "{{ VmFileContents_JSON.VMInfo.vCenterFolderPath }}"
+        OU: "{{ VmFileContents_JSON.VMInfo.OU }}"
     state: present
     validate_certs: no
   register: VirtualMachine
@@ -53,7 +61,7 @@
 
     - name: Find the prefix
       ansible.builtin.uri:
-        url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix={{ selectedPrefix }}"
+        url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix={{ ConfigFileContents_JSON.Subnet }}"
         headers:
           Content-Type: application/json
           Authorization: "{{ netbox_cred.api_token }}"
@@ -75,7 +83,7 @@
         netbox_token: "{{ netbox_cred.token }}"
         data:
           address: "{{ availableIps.json[0].address }}"
-          dns_name: "{{ ServerNameUpper }}.{{ prefix.json.results[0].custom_fields.PrefixDomain }}"
+          dns_name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
           assigned_object: 
             name: eth1
             virtual_machine: "{{ ServerNameUpper }}"
@@ -99,5 +107,5 @@
         name: CreateDnsARecord
       vars:
         IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
-        Domain: "{{ prefix.json.results[0].custom_fields.PrefixDomain }}"
+        Domain: "{{ ConfigFileContents_JSON.Domain }}"
   when: VirtualMachine.virtual_machine.primary_ip == None

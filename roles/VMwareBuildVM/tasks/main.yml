@@ -8,6 +8,20 @@
       - netbox
       - vcenter
 
+- name: Get VM Info
+  include_role:
+    name: GitGetVmInfo
+  vars:
+    ServerName: "{{ ServerName }}"
+  when: VmFileContents_JSON is not defined
+
+- name: Get Config Info
+  include_role:
+    name: GitConfigInfo
+  vars:
+    Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+  when: ConfigFileContents_JSON is not defined
+
 # - name: Show me the contents
 #   debug:
 #     msg: "{{ netbox_cred }}"
@@ -63,7 +77,7 @@
 #     name: {{ ServerName }}
 #     template: "{{ platform.json.custom_fields.VM_Template }}"
 #     networks:
-#     - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
+#     - name: "{{ ConfigFileContents_JSON.PortGroup }}"
 #       ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
 #       netmask: "{{ subnetReturn }}"
 #       gateway: 192.168.1.1
@@ -91,7 +105,7 @@
     password: "{{ vcenter_cred.password }}"
     validate_certs: no
     datacenter: DC1
-    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
+    cluster: "{{ ConfigFileContents_JSON.Cluster }}"
     state: poweredoff
     folder: /EvOrigin/Workers
     template: "{{ platform.json.custom_fields.VM_Template }}"
@@ -101,10 +115,10 @@
       num_cpus: "{{ vmInfo.json.results[0].vcpus | int }}"
       memory_mb: "{{ vmInfo.json.results[0].memory | int }}"
     networks:
-      - name: "{{ prefix.json.results[0].custom_fields.Port_Group }}"
+      - name: "{{ ConfigFileContents_JSON.PortGroup }}"
         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
         netmask: "{{ subnetReturn.stdout_lines[0] }}"
-        gateway: 192.168.1.254
+        gateway: "{{ ConfigFileContents_JSON.Gateway }}"
     wait_for_ip_address: true
   #   customization:
   #     dns_servers:
@@ -140,8 +154,8 @@
     state: poweredon
     customization:
       dns_servers:
-        - 192.168.1.125
-        - 192.168.1.126
+        - "{{ ConfigFileContents_JSON.DNS1 }}"
+        - "{{ ConfigFileContents_JSON.DNS2 }}"
       script_text: |
         #!/bin/bash
         touch /tmp/touch-from-playbook

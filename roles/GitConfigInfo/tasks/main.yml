@@ -1,0 +1,10 @@
+---
+# tasks file for GitGetVmInfo
+- name: Get raw JSON file from github
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/V2/ConfigInfo/{{ Config }}.json"
+    dest: "/tmp/{{ ServerName }}.json"
+
+- name: Obtain contents of downloaded file and convert to JSON
+  set_fact:
+    ConfigFileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"

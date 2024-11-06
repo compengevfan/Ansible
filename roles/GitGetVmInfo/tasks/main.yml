@@ -14,4 +14,4 @@
 
 - name: Obtain contents of downloaded file and convert to JSON
   set_fact:
-    FileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
+    VmFileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
