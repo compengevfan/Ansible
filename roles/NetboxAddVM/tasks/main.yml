@@ -49,16 +49,6 @@
         state: present
         validate_certs: no
 
-    - name: Convert subnet name to prefix
-      set_fact:
-        subnetPrefixMap:
-          JAX-EvOrigin: "192.168.0.0/23"
-          Test: "10.10.10.0/24"
-
-    - name: Select correct prefix
-      set_fact:
-        selectedPrefix: "{{ subnetPrefixMap.get(FileContents_JSON.VMInfo.Network) }}"
-
     - name: Find the prefix
       ansible.builtin.uri:
         url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix={{ ConfigFileContents_JSON.Subnet }}"
