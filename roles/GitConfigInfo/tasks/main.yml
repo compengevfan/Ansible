@@ -1,13 +1,13 @@
 ---
 # tasks file for GitConfigInfo
-- name: Make sure ServerName is all upper
+- name: Make sure Config is all upper
   set_fact: ConfigUpper="{{ Config | upper }}"
 
 - name: Get raw JSON file from github
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/V2/ConfigInfo/{{ ConfigUpper }}.json"
-    dest: "/tmp/{{ ServerName }}.json"
+    dest: "/tmp/{{ Config }}.json"
 
 - name: Obtain contents of downloaded file and convert to JSON
   set_fact:
-    ConfigFileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
+    ConfigFileContents_JSON: "{{ lookup('file', '/tmp/{{ Config }}.json') | from_json }}"
