@@ -1,9 +1,5 @@
 ---
 # tasks file for GitGetVmInfo
-# - name: Show me the contents inside GitGetVmInfo
-#   debug:
-#     var: ServerName
-
 - name: Make sure ServerName is all upper
   set_fact: ServerNameUpper="{{ ServerName | upper }}"
 
