@@ -10,3 +10,6 @@
     ServerName: "{{ ServerName }}"
   when: VmFileContents_JSON is not defined
 
+- name: Update all currently installed packages
+  shell: dnf update -y
+  delegate_to: "{{ ServerNameUpper }}"
