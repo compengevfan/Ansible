@@ -10,6 +10,28 @@
     ServerName: "{{ ServerName }}"
   when: VmFileContents_JSON is not defined
 
+- name: Get Config Info
+  include_role:
+    name: GitConfigInfo
+  vars:
+    Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+  when: ConfigFileContents_JSON is not defined
+
+- name: Obtain Credentials
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - linuxroot
+
+- name: Add server to configure to temp inventory
+  add_host:
+    name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    groups: linuxconfigure
+    ansible_user: "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  no_log: true
+
 - name: Update all currently installed packages
   shell: dnf update -y
   delegate_to: "{{ ServerNameUpper }}"
