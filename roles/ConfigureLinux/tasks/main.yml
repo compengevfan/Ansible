@@ -55,7 +55,24 @@
 
 - name: Install PowerShell Modules
   shell: |
-    pwsh -Command "Install-Module Posh-SSH -Scope AllUsers -Force"
-    pwsh -Command "Install-Module DupreeFunctions -Scope AllUsers -Force"
-    pwsh -Command "Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber"
+    Install-Module Posh-SSH -Scope AllUsers -Force
+    Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
+  args:
+    executable: /usr/bin/pwsh
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Download my PowerShell repo
+  git:
+    repo: https://github.com/compengevfan/PowerShell.git
+    dest: /tmp/PowerShell
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install DupreeFunctions
+  shell: |
+    $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName /tmp/PowerShell/DupreeFunctions).Version.ToString()
+    New-Item -Path /usr/local/share/powershell/Modules -Name DupreeFunctions -ItemType Directory -Force
+    Copy-Item -Path /tmp/PowerShell/DupreeFunctions -Destination /usr/local/share/powershell/Modules/DupreeFunctions/$DfVersion -Recurse
+    Remove-Item /tmp/PowerShell -Recurse
+  args:
+    executable: /usr/bin/pwsh
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
