@@ -34,4 +34,4 @@
 
 - name: Update all currently installed packages
   shell: dnf update -y
-  delegate_to: "{{ ServerNameUpper }}"
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
