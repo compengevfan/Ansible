@@ -120,14 +120,13 @@
         netmask: "{{ subnetReturn.stdout_lines[0] }}"
         gateway: "{{ ConfigFileContents_JSON.Gateway }}"
     wait_for_ip_address: true
-  #   customization:
-  #     dns_servers:
-  #       - 192.168.1.125
-  #       - 192.168.1.126
+    customization:
+      dns_servers:
+        - "{{ ConfigFileContents_JSON.DNS1 }}"
+        - "{{ ConfigFileContents_JSON.DNS2 }}"
   #     script_text: |
   #       #!/bin/bash
   #       touch /tmp/touch-from-playbook
-  # delegate_to: localhost
   when: not platform.json.name is search("Windows")
 
 - name: Set network adaper to connect at power on
@@ -153,9 +152,6 @@
     name: "{{ ServerNameUpper }}"
     state: poweredon
     customization:
-      dns_servers:
-        - "{{ ConfigFileContents_JSON.DNS1 }}"
-        - "{{ ConfigFileContents_JSON.DNS2 }}"
       script_text: |
         #!/bin/bash
         touch /tmp/touch-from-playbook
