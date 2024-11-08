@@ -51,3 +51,10 @@
       - powershell
     state: latest
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install PowerShell Modules
+  shell: |
+    pwsh -Command "Install-Module Posh-SSH -Scope AllUsers -Force"
+    pwsh -Command "Install-Module DupreeFunctions -Scope AllUsers -Force"
+    pwsh -Command "Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber"
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
