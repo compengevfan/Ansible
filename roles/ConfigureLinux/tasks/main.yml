@@ -38,7 +38,7 @@
 
 - name: Add Microsoft RH repo
   shell: |
-    curl -sSL -O https://packages.microsoft.com/config/rhel/$majorver/packages-microsoft-prod.rpm
+    curl -sSL -O https://packages.microsoft.com/config/rhel/9/packages-microsoft-prod.rpm
     rpm -i packages-microsoft-prod.rpm
     rm packages-microsoft-prod.rpm
     dnf update
