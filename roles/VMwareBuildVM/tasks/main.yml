@@ -119,7 +119,7 @@
         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
         netmask: "{{ subnetReturn.stdout_lines[0] }}"
         gateway: "{{ ConfigFileContents_JSON.Gateway }}"
-    wait_for_ip_address: true
+    # wait_for_ip_address: true
     customization:
       dns_servers:
         - "{{ ConfigFileContents_JSON.DNS1 }}"
