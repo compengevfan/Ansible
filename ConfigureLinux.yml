@@ -1,0 +1,8 @@
+---
+- name: Run
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Run the Role
+      include_role:
+        name: ConfigureLinux

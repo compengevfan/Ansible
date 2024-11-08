@@ -1,0 +1,60 @@
+---
+# tasks file for ConfigureLinux
+- name: Make sure ServerName is all upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
+
+- name: Get VM Info
+  include_role:
+    name: GitGetVmInfo
+  vars:
+    ServerName: "{{ ServerName }}"
+  when: VmFileContents_JSON is not defined
+
+- name: Get Config Info
+  include_role:
+    name: GitConfigInfo
+  vars:
+    Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+  when: ConfigFileContents_JSON is not defined
+
+- name: Obtain Credentials
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - linuxroot
+
+- name: Add server to configure to temp inventory
+  add_host:
+    name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    groups: linuxconfigure
+    ansible_user: "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  no_log: true
+
+- name: Update all currently installed packages
+  shell: dnf update -y
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Add Microsoft RH repo
+  shell: |
+    curl -sSL -O https://packages.microsoft.com/config/rhel/9/packages-microsoft-prod.rpm
+    rpm -i packages-microsoft-prod.rpm
+    rm packages-microsoft-prod.rpm
+    dnf update
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install packages
+  dnf: 
+    name:
+      - git
+      - powershell
+    state: latest
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install PowerShell Modules
+  shell: |
+    pwsh -Command "Install-Module Posh-SSH -Scope AllUsers -Force"
+    pwsh -Command "Install-Module DupreeFunctions -Scope AllUsers -Force"
+    pwsh -Command "Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber"
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"

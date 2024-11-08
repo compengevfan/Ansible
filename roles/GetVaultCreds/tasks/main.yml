@@ -30,6 +30,12 @@
   no_log: true
   when: "'evorigindns' in includecred"
 
+- name: Get linux root cred from Vault
+  set_fact:
+    linuxroot_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/linuxroot validate_certs=False') }}"
+  no_log: true
+  when: "'linuxroot' in includecred"
+
 - name: Test Credential
   set_fact:
     test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test validate_certs=False') }}"
