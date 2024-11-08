@@ -35,3 +35,19 @@
 - name: Update all currently installed packages
   shell: dnf update -y
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Add Microsoft RH repo
+  shell: |
+    curl -sSL -O https://packages.microsoft.com/config/rhel/$majorver/packages-microsoft-prod.rpm
+    rpm -i packages-microsoft-prod.rpm
+    rm packages-microsoft-prod.rpm
+    dnf update
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install packages
+  dnf: 
+    name:
+      - git
+      - powershell
+    state: latest
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
