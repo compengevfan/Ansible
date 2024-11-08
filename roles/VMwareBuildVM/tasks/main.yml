@@ -106,7 +106,8 @@
     validate_certs: no
     datacenter: DC1
     cluster: "{{ ConfigFileContents_JSON.Cluster }}"
-    state: poweredoff
+    # state: poweredoff
+    state: present
     folder: /EvOrigin/Workers
     template: "{{ platform.json.custom_fields.VM_Template }}"
     name: "{{ ServerNameUpper }}"
@@ -124,35 +125,37 @@
       dns_servers:
         - "{{ ConfigFileContents_JSON.DNS1 }}"
         - "{{ ConfigFileContents_JSON.DNS2 }}"
-  #     script_text: |
-  #       #!/bin/bash
-  #       touch /tmp/touch-from-playbook
-  when: not platform.json.name is search("Windows")
-
-- name: Set network adaper to connect at power on
-  community.vmware.vmware_guest_network:
-    hostname: "{{ vcenter_cred.servername }}"
-    username: "{{ vcenter_cred.username }}"
-    password: "{{ vcenter_cred.password }}"
-    validate_certs: no
-    datacenter: DC1
-    name: "{{ ServerNameUpper }}"
-    label: Network adapter 1
-    state: present
-    start_connected: true
-
-- name:  Customize and power on the new VM (Linux)
-  community.vmware.vmware_guest:
-    hostname: "{{ vcenter_cred.servername }}"
-    username: "{{ vcenter_cred.username }}"
-    password: "{{ vcenter_cred.password }}"
-    validate_certs: no
-    datacenter: DC1
-    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
-    name: "{{ ServerNameUpper }}"
-    state: poweredon
-    customization:
+      dns_suffix:
+        - evorigin.com
       script_text: |
         #!/bin/bash
         touch /tmp/touch-from-playbook
   when: not platform.json.name is search("Windows")
+
+# - name: Set network adaper to connect at power on
+#   community.vmware.vmware_guest_network:
+#     hostname: "{{ vcenter_cred.servername }}"
+#     username: "{{ vcenter_cred.username }}"
+#     password: "{{ vcenter_cred.password }}"
+#     validate_certs: no
+#     datacenter: DC1
+#     name: "{{ ServerNameUpper }}"
+#     label: Network adapter 1
+#     state: present
+#     start_connected: true
+
+# - name:  Customize and power on the new VM (Linux)
+#   community.vmware.vmware_guest:
+#     hostname: "{{ vcenter_cred.servername }}"
+#     username: "{{ vcenter_cred.username }}"
+#     password: "{{ vcenter_cred.password }}"
+#     validate_certs: no
+#     datacenter: DC1
+#     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
+#     name: "{{ ServerNameUpper }}"
+#     state: poweredon
+#     customization:
+#       script_text: |
+#         #!/bin/bash
+#         touch /tmp/touch-from-playbook
+#   when: not platform.json.name is search("Windows")
