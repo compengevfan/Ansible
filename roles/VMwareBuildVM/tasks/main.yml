@@ -158,3 +158,8 @@
         #!/bin/bash
         touch /tmp/touch-from-playbook
   when: not platform.json.name is search("Windows")
+
+- name: Configure Linux VM
+  include_role:
+    name: ConfigureLinux
+  when: not platform.json.name is search("Windows")

@@ -2,6 +2,7 @@
 # tasks file for ConfigureLinux
 - name: Make sure ServerName is all upper
   set_fact: ServerNameUpper="{{ ServerName | upper }}"
+  when: ServerNameUpper is not defined
 
 - name: Get VM Info
   include_role:
