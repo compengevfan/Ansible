@@ -30,7 +30,7 @@
     groups: linuxconfigure
     ansible_user: "{{ linuxroot_cred.username }}"
     ansible_password: "{{ linuxroot_cred.password }}"
-  no_log: true
+  # no_log: true
 
 - name: Update all currently installed packages
   shell: dnf update -y
