@@ -72,7 +72,7 @@
     $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName /tmp/PowerShell/DupreeFunctions).Version.ToString()
     New-Item -Path /usr/local/share/powershell/Modules -Name DupreeFunctions -ItemType Directory -Force
     Copy-Item -Path /tmp/PowerShell/DupreeFunctions -Destination /usr/local/share/powershell/Modules/DupreeFunctions/$DfVersion -Recurse
-    Remove-Item /tmp/PowerShell -Recurse
+    Remove-Item /tmp/PowerShell -Recurse -Force
   args:
     executable: /usr/bin/pwsh
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
