@@ -7,6 +7,7 @@
     includecred:
       - netbox
       - vcenter
+      - evoriginda
 
 - name: Get VM Info
   include_role:
@@ -63,40 +64,33 @@
   register: subnetReturn
   delegate_to: localhost
 
-# - name: Show me the contents
-#   debug:
-#     msg: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[1] }}"
-
-# - name: Clone a virtual machine from Windows template and customize
-#   community.vmware.vmware_guest:
-#     hostname: "{{ vcenter_cred.servername }}"
-#     username: "{{ vcenter_cred.username }}"
-#     password: "{{ vcenter_cred.password }}"
-#     datacenter: DC1
-#     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
-#     name: {{ ServerName }}
-#     template: "{{ platform.json.custom_fields.VM_Template }}"
-#     networks:
-#     - name: "{{ ConfigFileContents_JSON.PortGroup }}"
-#       ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
-#       netmask: "{{ subnetReturn }}"
-#       gateway: 192.168.1.1
-#       mac: aa:bb:dd:aa:00:14
-#       domain: my_domain
-#       dns_servers:
-#       - 192.168.1.1
-#       - 192.168.1.2
-#     customization:
-#       autologon: true
-#       dns_servers:
-#       - 192.168.1.1
-#       - 192.168.1.2
-#       domain: my_domain
-#       password: new_vm_password
-#       runonce:
-#       - powershell.exe -ExecutionPolicy Unrestricted -File C:\Windows\Temp\ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP
-#   delegate_to: localhost
-#   when: platform.json.name is search("Windows")
+- name: Clone a virtual machine from Windows template and customize
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_cred.servername }}"
+    username: "{{ vcenter_cred.username }}"
+    password: "{{ vcenter_cred.password }}"
+    validate_certs: no
+    datacenter: DC1
+    cluster: "{{ ConfigFileContents_JSON.Cluster }}"
+    state: poweredoff
+    folder: /EvOrigin/Workers
+    template: "{{ platform.json.custom_fields.VM_Template }}"
+    name: "{{ ServerNameUpper }}"
+    datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
+    hardware:
+      num_cpus: "{{ vmInfo.json.results[0].vcpus | int }}"
+      memory_mb: "{{ vmInfo.json.results[0].memory | int }}"
+    networks:
+      - name: "{{ ConfigFileContents_JSON.PortGroup }}"
+        ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
+        netmask: "{{ subnetReturn.stdout_lines[0] }}"
+        gateway: "{{ ConfigFileContents_JSON.Gateway }}"
+    customization:
+      dns_servers:
+        - "{{ ConfigFileContents_JSON.DNS1 }}"
+        - "{{ ConfigFileContents_JSON.DNS2 }}"
+  delegate_to: localhost
+  when: platform.json.name is search("Windows")
 
 - name:  Clone a virtual machine from Linux template
   community.vmware.vmware_guest:
@@ -119,16 +113,12 @@
         ip: "{{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
         netmask: "{{ subnetReturn.stdout_lines[0] }}"
         gateway: "{{ ConfigFileContents_JSON.Gateway }}"
-    # wait_for_ip_address: true
     customization:
       dns_servers:
         - "{{ ConfigFileContents_JSON.DNS1 }}"
         - "{{ ConfigFileContents_JSON.DNS2 }}"
       dns_suffix:
-        - evorigin.com
-  #     script_text: |
-  #       #!/bin/bash
-  #       touch /tmp/touch-from-playbook
+        - "{{ ConfigFileContents_JSON.Domain }}"
   when: not platform.json.name is search("Windows")
 
 - name: Set network adaper to connect at power on
@@ -159,11 +149,34 @@
         touch /tmp/touch-from-playbook
   when: not platform.json.name is search("Windows")
 
+- name:  Customize and power on the new VM (Windows)
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_cred.servername }}"
+    username: "{{ vcenter_cred.username }}"
+    password: "{{ vcenter_cred.password }}"
+    validate_certs: no
+    datacenter: DC1
+    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
+    name: "{{ ServerNameUpper }}"
+    state: poweredon
+    customization:
+      joindomain: "{{ ConfigFileContents_JSON.Domain }}"
+      domainadmin: "{{ evoriginda_cred.username }}"
+      domainadminpassword: "{{ evoriginda_cred.password }}"
+      runonce:
+      - powershell.exe -ExecutionPolicy Unrestricted -File C:\Windows\Temp\ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP
+  when: platform.json.name is search("Windows")
+
 - name: Wait a bit for customization
   pause:
-    seconds: 30
+    minutes: 5
 
 - name: Configure Linux VM
   include_role:
     name: ConfigureLinux
   when: not platform.json.name is search("Windows")
+
+# - name: Configure Windows VM
+#   include_role:
+#     name: ConfigureLinux
+#   when: platform.json.name is search("Windows")
