@@ -32,7 +32,10 @@
     groups: windowsconfigure
     ansible_user: "{{ windowslocaladmin.username }}"
     ansible_password: "{{ windowslocaladmin.password }}"
-  # no_log: true
+    ansible_connection: winrm
+    ansible_port: 5985
+    ansible_winrm_transport: ntlm
+  no_log: true
 
 - name: Install all updates and reboot as many times as needed
   ansible.windows.win_updates:
