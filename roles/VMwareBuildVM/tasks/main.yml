@@ -177,6 +177,17 @@
     name: ConfigureLinux
   when: not platform.json.name is search("Windows")
 
+- name: Upgrade VMware tools (Windows)
+  community.vmware.vmware_guest_tools_upgrade:
+    hostname: "{{ vcenter_cred.servername }}"
+    username: "{{ vcenter_cred.username }}"
+    password: "{{ vcenter_cred.password }}"
+    validate_certs: no
+    datacenter: DC1
+    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
+    name: "{{ ServerNameUpper }}"
+  when: platform.json.name is search("Windows")
+
 # - name: Configure Windows VM
 #   include_role:
 #     name: ConfigureLinux
