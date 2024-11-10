@@ -184,7 +184,6 @@
     password: "{{ vcenter_cred.password }}"
     validate_certs: no
     datacenter: DC1
-    cluster: "{{ vmInfo.json.results[0].cluster.name }}"
     name: "{{ ServerNameUpper }}"
   when: platform.json.name is search("Windows")
 
