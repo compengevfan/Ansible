@@ -1,2 +1,41 @@
 ---
 # tasks file for ConfigureWindows
+- name: Make sure ServerName is all upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
+  when: ServerNameUpper is not defined
+
+- name: Get VM Info
+  include_role:
+    name: GitGetVmInfo
+  vars:
+    ServerName: "{{ ServerName }}"
+  when: VmFileContents_JSON is not defined
+
+- name: Get Config Info
+  include_role:
+    name: GitConfigInfo
+  vars:
+    Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+  when: ConfigFileContents_JSON is not defined
+
+- name: Obtain Credentials
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - windowslocaladmin
+      - evoriginda
+
+- name: Add server to configure to temp inventory
+  add_host:
+    name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    groups: windowsconfigure
+    ansible_user: "{{ windowslocaladmin.username }}"
+    ansible_password: "{{ windowslocaladmin.password }}"
+  no_log: true
+
+- name: Install all updates and reboot as many times as needed
+  ansible.windows.win_updates:
+    category_names: '*'
+    reboot: true
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"

@@ -24,6 +24,12 @@
   no_log: true
   when: "'vcenter' in includecred"
 
+- name: Get Local Windows Admin cred from Vault
+  set_fact:
+    windowslocaladmin_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/windowslocaladmin validate_certs=False') }}"
+  no_log: true
+  when: "'windowslocaladmin' in includecred"
+
 - name: Get svcDNS evorigin cred from Vault
   set_fact:
     evorigindns_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/serviceaccounts/evorigin/svcdns validate_certs=False') }}"
