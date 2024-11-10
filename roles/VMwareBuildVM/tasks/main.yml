@@ -72,10 +72,10 @@
     validate_certs: no
     datacenter: DC1
     cluster: "{{ ConfigFileContents_JSON.Cluster }}"
+    name: "{{ ServerNameUpper }}"
+    template: "{{ platform.json.custom_fields.VM_Template }}"
     state: poweredoff
     folder: /EvOrigin/Workers
-    template: "{{ platform.json.custom_fields.VM_Template }}"
-    name: "{{ ServerNameUpper }}"
     datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
     hardware:
       num_cpus: "{{ vmInfo.json.results[0].vcpus | int }}"
