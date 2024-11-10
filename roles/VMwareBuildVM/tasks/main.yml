@@ -7,7 +7,6 @@
     includecred:
       - netbox
       - vcenter
-      - evoriginda
 
 - name: Get VM Info
   include_role:
@@ -124,9 +123,6 @@
         - "{{ ConfigFileContents_JSON.DNS2 }}"
       dns_suffix:
         - "{{ ConfigFileContents_JSON.Domain }}"
-      joindomain: "{{ ConfigFileContents_JSON.Domain }}"
-      domainadmin: "{{ evoriginda_cred.username }}"
-      domainadminpassword: "{{ evoriginda_cred.password }}"
   when: not platform.json.name is search("Windows")
 
 - name: Set network adaper to connect at power on
