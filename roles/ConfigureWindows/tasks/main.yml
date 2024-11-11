@@ -38,8 +38,8 @@
   no_log: true
 
 - name: Set timezone
-  win_timezone: 
-    timezone: Eastern Standard Time
+  win_shell: Set-TimeZone -Id "Eastern Standard Time"
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Determine if windows is activated
   win_shell: |
