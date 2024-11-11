@@ -7,6 +7,7 @@
     includecred:
       - netbox
       - vcenter
+      - windowslocaladmin
 
 - name: Get VM Info
   include_role:
@@ -88,6 +89,7 @@
       dns_servers:
         - "{{ ConfigFileContents_JSON.DNS1 }}"
         - "{{ ConfigFileContents_JSON.DNS2 }}"
+      password: "{{ windowslocaladmin_cred.password }}"
   delegate_to: localhost
   when: platform.json.name is search("Windows")
 
