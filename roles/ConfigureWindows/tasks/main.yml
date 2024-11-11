@@ -61,7 +61,7 @@
 
 - name: Get the right license key
   set_fact:
-    license: licensekeys[ServerNameUpper]
+    license: "{{ licensekeys[ServerNameUpper] }}"
 
 - name: Update license key
   win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ license }} /AcceptEula /Quiet"
