@@ -37,9 +37,10 @@
     ansible_winrm_transport: ntlm
   no_log: true
 
-- name: Install all updates and reboot as many times as needed
-  ansible.windows.win_updates:
-    category_names: '*'
-    reboot: true
-    reboot_timeout: 3600
+- name: Set timezone
+  win_timezone: 
+    timezone: Eastern Standard Time
+
+- name: Update license key
+  win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ licensekey.key }} /AcceptEula /Quiet"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
