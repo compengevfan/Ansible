@@ -45,6 +45,7 @@
   win_shell: |
     $LicenseInfo = Get-CimInstance SoftwareLicensingProduct -Filter "Name like 'Windows%'" | where { $_.PartialProductKey } | select Description, LicenseStatus
     $LicenseInfo.LicenseStatus
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   register: LicenseCheck
 
 # - name: Update license key
