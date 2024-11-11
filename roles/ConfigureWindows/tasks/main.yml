@@ -41,6 +41,12 @@
   win_timezone: 
     timezone: Eastern Standard Time
 
-- name: Update license key
-  win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ licensekey.key }} /AcceptEula /Quiet"
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+- name: Determine if windows is activated
+  win_shell: |
+    $LicenseInfo = Get-CimInstance SoftwareLicensingProduct -Filter "Name like 'Windows%'" | where { $_.PartialProductKey } | select Description, LicenseStatus
+    $LicenseInfo.LicenseStatus
+  register: LicenseCheck
+
+# - name: Update license key
+#   win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ licensekey.key }} /AcceptEula /Quiet"
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
