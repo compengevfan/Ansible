@@ -59,6 +59,10 @@
 #   debug:
 #     var: licensekeys[ServerNameUpper]
 
+- name: Get the right license key
+  set_fact:
+    license: licensekeys[ServerNameUpper]
+
 - name: Update license key
-  win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ licensekeys[ServerNameUpper] }} /AcceptEula /Quiet"
+  win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ license }} /AcceptEula /Quiet"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
