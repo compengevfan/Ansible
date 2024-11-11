@@ -4,6 +4,13 @@
   set_fact: ServerNameUpper="{{ ServerName | upper }}"
   when: ServerNameUpper is not defined
 
+- name: Obtain Windows License Keys
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - licensekeys
+
 - name: Get VM Info
   include_role:
     name: GitGetVmInfo
@@ -47,6 +54,10 @@
     $LicenseInfo.LicenseStatus
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   register: LicenseCheck
+
+- name: What am I getting?
+  debug:
+    var: licensekeys
 
 # - name: Update license key
 #   win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ licensekey.key }} /AcceptEula /Quiet"
