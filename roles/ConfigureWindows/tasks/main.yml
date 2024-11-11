@@ -57,7 +57,7 @@
 
 - name: What am I getting?
   debug:
-    var: licensekeys.ServerNameUpper
+    var: licensekeys.{{ ServerNameUpper }}
 
 # - name: Update license key
 #   win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ licensekey.key }} /AcceptEula /Quiet"
