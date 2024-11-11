@@ -41,4 +41,5 @@
   ansible.windows.win_updates:
     category_names: '*'
     reboot: true
+    reboot_timeout: 3600
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
