@@ -4,13 +4,6 @@
   set_fact: ServerNameUpper="{{ ServerName | upper }}"
   when: ServerNameUpper is not defined
 
-- name: Obtain Windows License Keys
-  include_role:
-    name: GetVaultCreds
-  vars:
-    includecred:
-      - licensekeys
-
 - name: Get VM Info
   include_role:
     name: GitGetVmInfo
@@ -48,21 +41,17 @@
   win_shell: Set-TimeZone -Id "Eastern Standard Time"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Determine if windows is activated
+- name: Set execution policy
   win_shell: |
-    $LicenseInfo = Get-CimInstance SoftwareLicensingProduct -Filter "Name like 'Windows%'" | where { $_.PartialProductKey } | select Description, LicenseStatus
-    $LicenseInfo.LicenseStatus
+    $ExecPolicy = Get-ExecutionPolicy
+    if ($Execpolicy -ne "Unrestricted"){
+      Write-Host "Setting Execution Policy to Unrestricted."
+      Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope LocalMachine -Force
+    }
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  register: LicenseCheck
 
-# - name: What am I getting?
-#   debug:
-#     var: licensekeys[ServerNameUpper]
-
-- name: Get the right license key
-  set_fact:
-    license: "{{ licensekeys[ServerNameUpper] }}"
-
-- name: Update license key
-  win_shell: "DISM /Online /Set-Edition:ServerStandard /ProductKey:{{ license }} /AcceptEula /Quiet"
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+# - name: Install Chocolatey
+#   win_shell: |
+#     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+#     iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
