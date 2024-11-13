@@ -38,21 +38,27 @@
   no_log: true
 
 - name: Set timezone
-  win_shell: Set-TimeZone -Id "Eastern Standard Time"
+  win_shell: |
+    $TimeZone = Get-TimeZone
+    if ($TimeZone.Id -ne "Eastern Standard Time") {
+      Write-Output "Setting Time Zone to EST."
+      Set-TimeZone -Id "Eastern Standard Time"
+    }
+    else { Write-Output "TimeZone already set to EST." }
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Set execution policy
   win_shell: |
     $ExecPolicy = Get-ExecutionPolicy
-    if ($Execpolicy -ne "Unrestricted"){
+    if ($Execpolicy -ne "Unrestricted") {
       Write-Output "Setting Execution Policy to Unrestricted."
       Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope LocalMachine -Force
     }
     else { Write-Output "Execution Policy already set to Unrestricted." }
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-# - name: Install Chocolatey
-#   win_shell: |
-#     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-#     iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+- name: Install Chocolatey
+  win_shell: |
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+    iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
