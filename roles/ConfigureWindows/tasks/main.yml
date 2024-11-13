@@ -101,6 +101,11 @@
     set_fact:
       msi_url: "{{ release_info.json.assets | selectattr('name', 'match', '.*win-x64.msi$') | map(attribute='browser_download_url') | list | first }}"
 
+  - name: Make sure destination dir exists
+    file:
+      path: "C:\\Temp"
+      state: directory
+
   - name: Download latest PowerShell 7 MSI
     win_get_url:
       url: "{{ msi_url }}"
