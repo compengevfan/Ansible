@@ -87,4 +87,37 @@
   win_shell: choco install vscode -y
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-# - name: Install PowerShell 7
+- name: Install PowerShell 7
+  block:
+  - name: Get the latest PowerShell 7 release info from GitHub
+    uri:
+      url: "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
+      method: GET
+      return_content: yes
+      status_code: 200
+    register: release_info
+
+  - name: Extract MSI download URL from release info
+    set_fact:
+      msi_url: "{{ release_info.json.assets | selectattr('name', 'match', '.*win-x64.msi$') | map(attribute='browser_download_url') | list | first }}"
+
+  - name: Download latest PowerShell 7 MSI
+    win_get_url:
+      url: "{{ msi_url }}"
+      dest: C:\Temp\PowerShell-7-latest.msi
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+  - name: Install PowerShell 7
+    win_package:
+      path: C:\Temp\PowerShell-7-latest.msi
+      arguments: /quiet /norestart
+      state: present
+    register: pwsh_install
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+  - name: Remove MSI installer file
+    win_file:
+      path: C:\Temp\PowerShell-7-latest.msi
+      state: absent
+    when: pwsh_install is changed
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
