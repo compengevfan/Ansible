@@ -66,3 +66,25 @@
 - name: Reboot after installing Chocolatey
   win_reboot:
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install git
+  win_shell: choco install git.install
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install Notepad++
+  win_shell: choco install notepadplusplus
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install Brave
+  win_shell: choco install brave
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install WinSCP
+  win_shell: choco install winscp.install
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install VS Code
+  win_shell: choco install vscode
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+# - name: Install PowerShell 7
