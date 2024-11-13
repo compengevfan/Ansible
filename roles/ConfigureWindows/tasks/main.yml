@@ -102,7 +102,7 @@
       msi_url: "{{ release_info.json.assets | selectattr('name', 'match', '.*win-x64.msi$') | map(attribute='browser_download_url') | list | first }}"
 
   - name: Make sure destination dir exists
-    file:
+    win_file:
       path: "C:\\Temp"
       state: directory
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
