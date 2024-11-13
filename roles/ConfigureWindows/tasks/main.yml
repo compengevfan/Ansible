@@ -133,7 +133,7 @@
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Download my PowerShell repo
-  shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
+  win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: PowerShell Config
