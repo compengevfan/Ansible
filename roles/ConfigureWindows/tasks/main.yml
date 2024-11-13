@@ -121,3 +121,7 @@
       state: absent
     when: pwsh_install is changed
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Reboot after installing software
+  win_reboot:
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
