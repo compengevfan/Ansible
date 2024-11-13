@@ -68,7 +68,7 @@
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install git
-  win_shell: choco install git.install
+  win_shell: choco install git
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install Notepad++
@@ -80,7 +80,7 @@
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install WinSCP
-  win_shell: choco install winscp.install
+  win_shell: choco install winscp
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install VS Code
