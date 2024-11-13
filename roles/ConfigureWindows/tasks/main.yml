@@ -68,23 +68,23 @@
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install git
-  win_shell: choco install git
+  win_shell: choco install git.install -y
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install Notepad++
-  win_shell: choco install notepadplusplus
+  win_shell: choco install notepadplusplus -y
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install Brave
-  win_shell: choco install brave
+  win_shell: choco install brave -y
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install WinSCP
-  win_shell: choco install winscp
+  win_shell: choco install winscp.install -y
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install VS Code
-  win_shell: choco install vscode
+  win_shell: choco install vscode -y
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 # - name: Install PowerShell 7
