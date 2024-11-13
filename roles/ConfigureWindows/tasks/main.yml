@@ -131,3 +131,25 @@
 - name: Reboot after installing software
   win_reboot:
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Download my PowerShell repo
+  git:
+    repo: https://github.com/compengevfan/PowerShell.git
+    dest: C:\Temp\PowerShell
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: PowerShell Config
+  block:
+  - name: Install modules
+    win_shell: |
+      Install-Module Posh-SSH -Scope AllUsers -Force
+      Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+  - name: Install DupreeFunctions
+    win_shell: |
+      $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
+      New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
+      Copy-Item -Path C:\Temp\PowerShell\DupreeFunctions -Destination "C:\Program Files\WindowsPowerShell\Modules\DupreeFunctions\$DfVersion" -Recurse
+      Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
