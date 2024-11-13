@@ -105,6 +105,7 @@
     file:
       path: "C:\\Temp"
       state: directory
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
   - name: Download latest PowerShell 7 MSI
     win_get_url:
