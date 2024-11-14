@@ -137,20 +137,22 @@
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   ignore_errors: true
 
+- name: Install NuGet
+  win_shell: "Install-PackageProvider -Name NuGet -Force"
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
 - name: PowerShell Config
   block:
   - name: Install modules
-    ansible.windows.win_powershell:
-      script: |
-        Install-Module Posh-SSH -Scope AllUsers -Force
-        Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
+    win_shell: |
+      Install-Module Posh-SSH -Scope AllUsers -Force
+      Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
   - name: Install DupreeFunctions
-    ansible.windows.win_powershell: 
-      script: |
-        $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
-        New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
-        Copy-Item -Path C:\Temp\PowerShell\DupreeFunctions -Destination "C:\Program Files\WindowsPowerShell\Modules\DupreeFunctions\$DfVersion" -Recurse
-        Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
+    win_shell: |
+      $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
+      New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
+      Copy-Item -Path C:\Temp\PowerShell\DupreeFunctions -Destination "C:\Program Files\WindowsPowerShell\Modules\DupreeFunctions\$DfVersion" -Recurse
+      Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
