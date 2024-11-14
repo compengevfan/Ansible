@@ -139,14 +139,14 @@
 - name: PowerShell Config
   block:
   - name: Install modules
-    win_powershell:
+    ansible.windows.win_powershell:
       script: |
         Install-Module Posh-SSH -Scope AllUsers -Force
         Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
   - name: Install DupreeFunctions
-    win_powershell: 
+    ansible.windows.win_powershell: 
       script: |
         $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
         New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
