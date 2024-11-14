@@ -59,7 +59,7 @@
 
 - name: Check for Chocolatey
   win_chocolatey:
-    chocolatey
+    name: chocolatey
   register: chocolatey_check
   failed_when: false
 
