@@ -135,6 +135,7 @@
 - name: Download my PowerShell repo
   win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  ignore_errors: true
 
 - name: PowerShell Config
   block:
