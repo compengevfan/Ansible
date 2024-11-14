@@ -57,15 +57,24 @@
     else { Write-Output "Execution Policy already set to Unrestricted." }
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Install Chocolatey
-  win_shell: |
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-    iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+- name: Check for Chocolatey
+  win_chocolatey:
+    chocolatey
+  register: chocolatey_check
+  failed_when: false
 
-- name: Reboot after installing Chocolatey
-  win_reboot:
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+- name: Chocolatey
+  block:
+    - name: Install Chocolatey
+      win_shell: |
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+    - name: Reboot after installing Chocolatey
+      win_reboot:
+      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  when: chocolatey_check.failed
 
 - name: Install git
   win_chocolatey: 
