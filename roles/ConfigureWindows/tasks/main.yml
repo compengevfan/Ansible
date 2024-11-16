@@ -142,11 +142,6 @@
   win_reboot:
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Download my PowerShell repo
-  win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  ignore_errors: true
-
 - name: Install NuGet
   win_shell: "Install-PackageProvider -Name NuGet -Force"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
