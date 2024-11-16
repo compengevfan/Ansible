@@ -101,6 +101,12 @@
     name: vscode
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
+- name: Check for PowerShell 7
+  win_powershell:
+    script: $PSVersionTable
+  register: ps7_check
+  failed_when: false
+
 - name: Install PowerShell 7
   block:
   - name: Get the latest PowerShell 7 release info from GitHub
@@ -141,6 +147,7 @@
       state: absent
     when: pwsh_install is changed
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  when: ps7_check.failed
 
 - name: Reboot after installing software
   win_reboot:
