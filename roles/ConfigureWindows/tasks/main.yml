@@ -94,6 +94,7 @@
   ansible.windows.win_powershell:
     script: $PSVersionTable
   register: ps7_check
+  failed_when: false
 
 - name: Install PowerShell 7
   block:
