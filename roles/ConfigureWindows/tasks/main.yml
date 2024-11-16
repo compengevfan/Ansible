@@ -76,7 +76,7 @@
       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   when: chocolatey_check.failed
 
-- name: Install git
+- name: Install Software
   win_chocolatey: 
     name: 
       - git.install
@@ -94,7 +94,6 @@
   ansible.windows.win_powershell:
     script: $PSVersionTable
   register: ps7_check
-  failed_when: false
 
 - name: Install PowerShell 7
   block:
@@ -136,7 +135,7 @@
       state: absent
     when: pwsh_install is changed
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: ps7_check.failed
+  when: ps7_check.rc != 0
 
 - name: Reboot after installing software
   win_reboot:
@@ -163,11 +162,18 @@
   register: df_check
   failed_when: false
 
-- name: Install DupreeFunctions
-  win_shell: |
-    $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
-    New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
-    Copy-Item -Path C:\Temp\PowerShell\DupreeFunctions -Destination "C:\Program Files\WindowsPowerShell\Modules\DupreeFunctions\$DfVersion" -Recurse
-    Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: df_check.failed
+- name: Install DupreeFunctions if not found
+  block:
+  - name: Download my PowerShell repo
+    win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    ignore_errors: true
+
+  - name: Install DupreeFunctions
+    win_shell: |
+      $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
+      New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
+      Copy-Item -Path C:\Temp\PowerShell\DupreeFunctions -Destination "C:\Program Files\WindowsPowerShell\Modules\DupreeFunctions\$DfVersion" -Recurse
+      Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  when: df_check.rc != 0
