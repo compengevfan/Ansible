@@ -102,7 +102,7 @@
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for PowerShell 7
-  win_powershell:
+  ansible.windows.win_powershell:
     script: $PSVersionTable
   register: ps7_check
   failed_when: false
