@@ -57,6 +57,17 @@
     else { Write-Output "Execution Policy already set to Unrestricted." }
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
+- name: Install Windows updates
+  ansible.windows.win_updates:
+    category_names: '*'
+    reboot: yes
+  register: update_result
+
+- name: Wait for reboot to complete
+  ansible.builtin.wait_for_connection:
+    timeout: 600
+  when: update_result.reboot_required
+
 - name: Check for Chocolatey
   win_chocolatey:
     name: chocolatey
