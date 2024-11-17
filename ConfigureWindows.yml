@@ -2,7 +2,17 @@
 - name: Run
   hosts: localhost
   gather_facts: no
+  vars:
+    ServerNames: "{{ ServerNames | default('') }}"  # Ensure the variable is defined
   tasks:
-    - name: Run the Role
+    - name: Parse survey variable into a list
+      set_fact:
+        values: "{{ ServerNames.split(',') }}"
+      when: ServerNames | length > 0
+
+    - name: Run the Role for each value
       include_role:
         name: ConfigureWindows
+      loop: "{{ values }}"
+      loop_control:
+        loop_var: ServerName
