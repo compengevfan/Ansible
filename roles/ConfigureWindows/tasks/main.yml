@@ -67,6 +67,7 @@
 
 - name: Install Windows updates
   win_shell: "Get-WindowsUpdate -AcceptAll -Install"
+  become: true
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Reboot after installing updates
