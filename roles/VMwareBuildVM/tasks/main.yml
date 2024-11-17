@@ -23,10 +23,6 @@
     Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
   when: ConfigFileContents_JSON is not defined
 
-# - name: Show me the contents
-#   debug:
-#     msg: "{{ netbox_cred }}"
-
 - name: Make sure ServerName is all upper
   set_fact: ServerNameUpper="{{ ServerName | upper }}"
 
@@ -189,7 +185,7 @@
     name: "{{ ServerNameUpper }}"
   when: platform.json.name is search("Windows")
 
-# - name: Configure Windows VM
-#   include_role:
-#     name: ConfigureLinux
-#   when: platform.json.name is search("Windows")
+- name: Configure Windows VM
+  include_role:
+    name: ConfigureLinux
+  when: platform.json.name is search("Windows")
