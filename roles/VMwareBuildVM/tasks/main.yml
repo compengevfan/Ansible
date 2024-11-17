@@ -187,5 +187,5 @@
 
 - name: Configure Windows VM
   include_role:
-    name: ConfigureLinux
+    name: ConfigureWindows
   when: platform.json.name is search("Windows")
