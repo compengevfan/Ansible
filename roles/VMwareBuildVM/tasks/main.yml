@@ -170,10 +170,16 @@
   pause:
     minutes: 5
 
-- name: Configure Linux VM
-  include_role:
-    name: ConfigureLinux
-  when: not platform.json.name is search("Windows")
+- name: Install Windows updates
+  ansible.windows.win_updates:
+    category_names: '*'
+    reboot: yes
+  register: update_result
+
+- name: Wait for reboot to complete
+  ansible.builtin.wait_for_connection:
+    timeout: 600
+  when: update_result.reboot_required
 
 - name: Upgrade VMware tools (Windows)
   community.vmware.vmware_guest_tools_upgrade:
@@ -189,3 +195,8 @@
   include_role:
     name: ConfigureWindows
   when: platform.json.name is search("Windows")
+
+- name: Configure Linux VM
+  include_role:
+    name: ConfigureLinux
+  when: not platform.json.name is search("Windows")
