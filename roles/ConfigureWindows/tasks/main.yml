@@ -69,6 +69,7 @@
   win_shell: "Get-WindowsUpdate -AcceptAll -Install"
   become: true
   become_method: runas
+  become_user: Administrator
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Reboot after installing updates
