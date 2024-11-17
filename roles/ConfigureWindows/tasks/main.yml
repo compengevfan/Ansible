@@ -57,6 +57,10 @@
     else { Write-Output "Execution Policy already set to Unrestricted." }
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
+- name: Install PSWindowsUpdate
+  win_shell: "Install-Module -Name PSWindowsUpdate -Force -Scope AllUsers"
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
 - name: Install Windows updates
   ansible.windows.win_updates:
     category_names: '*'
