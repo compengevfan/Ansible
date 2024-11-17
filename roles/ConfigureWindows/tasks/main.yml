@@ -57,6 +57,10 @@
     else { Write-Output "Execution Policy already set to Unrestricted." }
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
+- name: Install NuGet
+  win_shell: "Install-PackageProvider -Name NuGet -Force"
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
 - name: Install PSWindowsUpdate
   win_shell: "Install-Module -Name PSWindowsUpdate -Force -Scope AllUsers"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
@@ -155,10 +159,6 @@
 
 - name: Reboot after installing software
   win_reboot:
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Install NuGet
-  win_shell: "Install-PackageProvider -Name NuGet -Force"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install PowerShell modules
