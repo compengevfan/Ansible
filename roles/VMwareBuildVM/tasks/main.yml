@@ -185,7 +185,7 @@
     name: "{{ ServerNameUpper }}"
   when: platform.json.name is search("Windows")
 
-# - name: Configure Windows VM
-#   include_role:
-#     name: ConfigureLinux
-#   when: platform.json.name is search("Windows")
+- name: Configure Windows VM
+  include_role:
+    name: ConfigureLinux
+  when: platform.json.name is search("Windows")
