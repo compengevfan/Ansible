@@ -38,6 +38,12 @@
     ansible_winrm_read_timeout_sec: 300
   no_log: true
 
+- name: Create Temp Directory
+  win_file:
+    path: "C:\\Temp"
+    state: directory
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
 - name: Set timezone
   win_shell: |
     $TimeZone = Get-TimeZone
@@ -76,6 +82,44 @@
 # - name: Reboot after installing updates
 #   win_reboot:
 #   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install .NET 4.8
+  block:
+    - name: Download the installer
+      win_get_url:
+        url: https://go.microsoft.com/fwlink/?linkid=2088631
+        dest: C:\Temp\ndp48-web.exe
+      register: dot-net-download-status
+      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    
+    - name: Check if the file was downloaded successfully
+      win_stat:
+        path: C:\Temp\ndp48-web.exe
+      register: file_status
+      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+    - name: Fail if file download was not successful
+      fail:
+        msg: "The .NET Framework 4.8 installer could not be downloaded."
+      when: not file_status.stat.exists
+      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+    - name: Install .NET Framework 4.8
+      win_package:
+        path: C:\Temp\ndp48-web.exe
+        arguments: "/quiet /norestart"
+        state: present
+      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+    - name: Remove .NET Framework installer
+      win_file:
+        path: C:\Temp\ndp48-web.exe
+        state: absent
+      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+    - name: Reboot after installing .NET 4.8
+      win_reboot:
+      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for Chocolatey
   win_chocolatey:
@@ -129,12 +173,6 @@
   - name: Extract MSI download URL from release info
     set_fact:
       msi_url: "{{ release_info.json.assets | selectattr('name', 'match', '.*win-x64.msi$') | map(attribute='browser_download_url') | list | first }}"
-
-  - name: Make sure destination dir exists
-    win_file:
-      path: "C:\\Temp"
-      state: directory
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
   - name: Download latest PowerShell 7 MSI
     win_get_url:
