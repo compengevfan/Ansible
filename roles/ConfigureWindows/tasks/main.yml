@@ -62,20 +62,20 @@
   win_shell: "Install-PackageProvider -Name NuGet -Force"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Install PSWindowsUpdate
-  win_shell: "Install-Module -Name PSWindowsUpdate -Force -Scope AllUsers"
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+# - name: Install PSWindowsUpdate
+#   win_shell: "Install-Module -Name PSWindowsUpdate -Force -Scope AllUsers"
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Install Windows updates
-  win_shell: "Install-WindowsUpdate -AcceptAll -IgnoreReboot"
-  become: true
-  become_method: runas
-  become_user: Administrator
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+# - name: Install Windows updates
+#   win_shell: "Install-WindowsUpdate -AcceptAll -IgnoreReboot"
+#   become: true
+#   become_method: runas
+#   become_user: Administrator
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Reboot after installing updates
-  win_reboot:
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+# - name: Reboot after installing updates
+#   win_reboot:
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for Chocolatey
   win_chocolatey:
