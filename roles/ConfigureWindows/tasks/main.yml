@@ -66,9 +66,7 @@
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install Windows updates
-  ansible.windows.win_updates: 
-    category_names: '*'
-    reboot: true
+  win_shell: "Install-WindowsUpdate -AcceptAll -IgnoreReboot"
   become: true
   become_method: runas
   become_user: Administrator
