@@ -94,7 +94,7 @@
     - name: Reboot after installing Chocolatey
       win_reboot:
       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: chocolatey_check.failed
+  when: (chocolatey_check.failed) or (chocolatey_check.rc != 0)
 
 - name: Install Software
   win_chocolatey: 
