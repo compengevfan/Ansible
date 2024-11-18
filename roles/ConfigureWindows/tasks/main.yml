@@ -89,7 +89,7 @@
       win_get_url:
         url: https://go.microsoft.com/fwlink/?linkid=2088631
         dest: C:\Temp\ndp48-web.exe
-      register: dot-net-download-status
+      register: download_status
       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
     
     - name: Check if the file was downloaded successfully
