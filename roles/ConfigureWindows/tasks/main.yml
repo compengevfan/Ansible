@@ -68,21 +68,6 @@
   win_shell: "Install-PackageProvider -Name NuGet -Force"
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-# - name: Install PSWindowsUpdate
-#   win_shell: "Install-Module -Name PSWindowsUpdate -Force -Scope AllUsers"
-#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-# - name: Install Windows updates
-#   win_shell: "Install-WindowsUpdate -AcceptAll -IgnoreReboot"
-#   become: true
-#   become_method: runas
-#   become_user: Administrator
-#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-# - name: Reboot after installing updates
-#   win_reboot:
-#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
 - name: Install .NET 4.8
   block:
     - name: Download the installer
@@ -227,3 +212,23 @@
       Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   when: df_check.rc != 0
+
+- name: Join a domain
+  block:
+  - name: Join domain
+    ansible.windows.win_domain_membership:
+      dns_domain_name: "{{ ConfigFileContents_JSON.Domain }}"
+      domain_admin_user:
+      domain_admin_password:
+      domain_ou_path:
+      state: domain
+    register: domain_state
+
+  - name: Wait a bit for AD Sync
+    pause:
+      seconds: 30
+
+  - name: Reboot after joing domain
+    win_reboot:
+    when: domain_state.reboot_required
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
