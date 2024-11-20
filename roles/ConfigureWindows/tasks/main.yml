@@ -38,192 +38,187 @@
     ansible_winrm_read_timeout_sec: 300
   no_log: true
 
-- name: Create Temp Directory
-  win_file:
-    path: "C:\\Temp"
-    state: directory
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Set timezone
-  win_shell: |
-    $TimeZone = Get-TimeZone
-    if ($TimeZone.Id -ne "Eastern Standard Time") {
-      Write-Output "Setting Time Zone to EST."
-      Set-TimeZone -Id "Eastern Standard Time"
-    }
-    else { Write-Output "TimeZone already set to EST." }
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Set execution policy
-  win_shell: |
-    $ExecPolicy = Get-ExecutionPolicy
-    if ($Execpolicy -ne "Unrestricted") {
-      Write-Output "Setting Execution Policy to Unrestricted."
-      Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope LocalMachine -Force
-    }
-    else { Write-Output "Execution Policy already set to Unrestricted." }
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Install NuGet
-  win_shell: "Install-PackageProvider -Name NuGet -Force"
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-# - name: Install PSWindowsUpdate
-#   win_shell: "Install-Module -Name PSWindowsUpdate -Force -Scope AllUsers"
+# - name: Create Temp Directory
+#   win_file:
+#     path: "C:\\Temp"
+#     state: directory
 #   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-# - name: Install Windows updates
-#   win_shell: "Install-WindowsUpdate -AcceptAll -IgnoreReboot"
-#   become: true
-#   become_method: runas
-#   become_user: Administrator
+# - name: Set timezone
+#   win_shell: |
+#     $TimeZone = Get-TimeZone
+#     if ($TimeZone.Id -ne "Eastern Standard Time") {
+#       Write-Output "Setting Time Zone to EST."
+#       Set-TimeZone -Id "Eastern Standard Time"
+#     }
+#     else { Write-Output "TimeZone already set to EST." }
 #   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-# - name: Reboot after installing updates
+# - name: Set execution policy
+#   win_shell: |
+#     $ExecPolicy = Get-ExecutionPolicy
+#     if ($Execpolicy -ne "Unrestricted") {
+#       Write-Output "Setting Execution Policy to Unrestricted."
+#       Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope LocalMachine -Force
+#     }
+#     else { Write-Output "Execution Policy already set to Unrestricted." }
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+# - name: Install NuGet
+#   win_shell: "Install-PackageProvider -Name NuGet -Force"
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+# - name: Install .NET 4.8
+#   block:
+#     - name: Download the installer
+#       win_get_url:
+#         url: https://go.microsoft.com/fwlink/?linkid=2088631
+#         dest: C:\Temp\ndp48-web.exe
+#       register: download_status
+#       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    
+#     - name: Check if the file was downloaded successfully
+#       win_stat:
+#         path: C:\Temp\ndp48-web.exe
+#       register: file_status
+#       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+#     - name: Fail if file download was not successful
+#       fail:
+#         msg: "The .NET Framework 4.8 installer could not be downloaded."
+#       when: not file_status.stat.exists
+#       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+#     - name: Install .NET Framework 4.8
+#       win_package:
+#         path: C:\Temp\ndp48-web.exe
+#         arguments: "/quiet /norestart"
+#         state: present
+#       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+#     - name: Remove .NET Framework installer
+#       win_file:
+#         path: C:\Temp\ndp48-web.exe
+#         state: absent
+#       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+#     - name: Reboot after installing .NET 4.8
+#       win_reboot:
+#       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+# - name: Check for Chocolatey
+#   win_chocolatey:
+#     name: chocolatey
+#   register: chocolatey_check
+#   failed_when: false
+
+# - name: Chocolatey
+#   block:
+#     - name: Install Chocolatey
+#       win_shell: |
+#         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+#         iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+#       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+#     - name: Reboot after installing Chocolatey
+#       win_reboot:
+#       delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+#   when: (chocolatey_check.failed) or (chocolatey_check.rc != 0)
+
+# - name: Install Software
+#   win_chocolatey: 
+#     name: 
+#       - git.install
+#       - notepadplusplus
+#       - brave
+#       - winscp.install
+#       - vscode
+#       - putty
+#       - windirstat
+#       - 7zip.install
+#     state: present
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+# - name: Check for PowerShell 7
+#   ansible.windows.win_powershell:
+#     script: $PSVersionTable
+#   register: ps7_check
+#   failed_when: false
+
+# - name: Install PowerShell 7
+#   block:
+#   - name: Get the latest PowerShell 7 release info from GitHub
+#     uri:
+#       url: "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
+#       method: GET
+#       return_content: yes
+#       status_code: 200
+#     register: release_info
+
+#   - name: Extract MSI download URL from release info
+#     set_fact:
+#       msi_url: "{{ release_info.json.assets | selectattr('name', 'match', '.*win-x64.msi$') | map(attribute='browser_download_url') | list | first }}"
+
+#   - name: Download latest PowerShell 7 MSI
+#     win_get_url:
+#       url: "{{ msi_url }}"
+#       dest: C:\Temp\PowerShell-7-latest.msi
+#     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+#   - name: Install PowerShell 7
+#     win_package:
+#       path: C:\Temp\PowerShell-7-latest.msi
+#       arguments: /quiet /norestart
+#       state: present
+#     register: pwsh_install
+#     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+#   - name: Remove MSI installer file
+#     win_file:
+#       path: C:\Temp\PowerShell-7-latest.msi
+#       state: absent
+#     when: pwsh_install is changed
+#     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+#   when: ps7_check.rc != 0
+
+# - name: Reboot after installing software
 #   win_reboot:
 #   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Install .NET 4.8
-  block:
-    - name: Download the installer
-      win_get_url:
-        url: https://go.microsoft.com/fwlink/?linkid=2088631
-        dest: C:\Temp\ndp48-web.exe
-      register: download_status
-      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-    
-    - name: Check if the file was downloaded successfully
-      win_stat:
-        path: C:\Temp\ndp48-web.exe
-      register: file_status
-      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+# - name: Install PowerShell modules
+#   win_shell: |
+#     Install-Module Posh-SSH -Scope AllUsers -Force
+#     Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-    - name: Fail if file download was not successful
-      fail:
-        msg: "The .NET Framework 4.8 installer could not be downloaded."
-      when: not file_status.stat.exists
-      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+# - name: Check for DupreeFunctions
+#   win_shell: |
+#     Get-Module DupreeFunctions -ListAvailable
+#   register: df_check
+#   failed_when: false
 
-    - name: Install .NET Framework 4.8
-      win_package:
-        path: C:\Temp\ndp48-web.exe
-        arguments: "/quiet /norestart"
-        state: present
-      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+# - name: Install DupreeFunctions if not found
+#   block:
+#   - name: Download my PowerShell repo
+#     win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
+#     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+#     ignore_errors: true
 
-    - name: Remove .NET Framework installer
-      win_file:
-        path: C:\Temp\ndp48-web.exe
-        state: absent
-      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+#   - name: Install DupreeFunctions
+#     win_shell: |
+#       $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
+#       New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
+#       Copy-Item -Path C:\Temp\PowerShell\DupreeFunctions -Destination "C:\Program Files\WindowsPowerShell\Modules\DupreeFunctions\$DfVersion" -Recurse
+#       Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
+#     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+#   when: df_check.rc != 0
 
-    - name: Reboot after installing .NET 4.8
-      win_reboot:
-      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Check for Chocolatey
-  win_chocolatey:
-    name: chocolatey
-  register: chocolatey_check
-  failed_when: false
-
-- name: Chocolatey
-  block:
-    - name: Install Chocolatey
-      win_shell: |
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-    - name: Reboot after installing Chocolatey
-      win_reboot:
-      delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: (chocolatey_check.failed) or (chocolatey_check.rc != 0)
-
-- name: Install Software
-  win_chocolatey: 
-    name: 
-      - git.install
-      - notepadplusplus
-      - brave
-      - winscp.install
-      - vscode
-      - putty
-      - windirstat
-      - 7zip.install
-    state: present
+- name: Join domain
+  microsoft.ad.membership:
+    dns_domain_name: "{{ ConfigFileContents_JSON.Domain }}"
+    domain_admin_user: "{{ evoriginda_cred.username }}"
+    domain_admin_password: "{{ evoriginda_cred.password }}"
+    domain_ou_path: "{{ VmFileContents_JSON.VMInfo.OU }}"
+    state: domain
+    reboot: true
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Check for PowerShell 7
-  ansible.windows.win_powershell:
-    script: $PSVersionTable
-  register: ps7_check
-  failed_when: false
-
-- name: Install PowerShell 7
-  block:
-  - name: Get the latest PowerShell 7 release info from GitHub
-    uri:
-      url: "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
-      method: GET
-      return_content: yes
-      status_code: 200
-    register: release_info
-
-  - name: Extract MSI download URL from release info
-    set_fact:
-      msi_url: "{{ release_info.json.assets | selectattr('name', 'match', '.*win-x64.msi$') | map(attribute='browser_download_url') | list | first }}"
-
-  - name: Download latest PowerShell 7 MSI
-    win_get_url:
-      url: "{{ msi_url }}"
-      dest: C:\Temp\PowerShell-7-latest.msi
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-  - name: Install PowerShell 7
-    win_package:
-      path: C:\Temp\PowerShell-7-latest.msi
-      arguments: /quiet /norestart
-      state: present
-    register: pwsh_install
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-  - name: Remove MSI installer file
-    win_file:
-      path: C:\Temp\PowerShell-7-latest.msi
-      state: absent
-    when: pwsh_install is changed
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: ps7_check.rc != 0
-
-- name: Reboot after installing software
-  win_reboot:
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Install PowerShell modules
-  win_shell: |
-    Install-Module Posh-SSH -Scope AllUsers -Force
-    Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Check for DupreeFunctions
-  win_shell: |
-    Get-Module DupreeFunctions -ListAvailable
-  register: df_check
-  failed_when: false
-
-- name: Install DupreeFunctions if not found
-  block:
-  - name: Download my PowerShell repo
-    win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-    ignore_errors: true
-
-  - name: Install DupreeFunctions
-    win_shell: |
-      $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
-      New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
-      Copy-Item -Path C:\Temp\PowerShell\DupreeFunctions -Destination "C:\Program Files\WindowsPowerShell\Modules\DupreeFunctions\$DfVersion" -Recurse
-      Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: df_check.rc != 0
