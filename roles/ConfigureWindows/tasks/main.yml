@@ -216,19 +216,10 @@
 - name: Join a domain
   block:
   - name: Join domain
-    ansible.windows.win_domain_membership:
+    microsoft.ad.membership:
       dns_domain_name: "{{ ConfigFileContents_JSON.Domain }}"
-      domain_admin_user:
-      domain_admin_password:
-      domain_ou_path:
+      domain_admin_user: "{{ evoriginda_cred.username }}"
+      domain_admin_password: "{{ evoriginda_cred.password }}"
+      domain_ou_path: "{{ ConfigFileContents_JSON.OU }}"
       state: domain
-    register: domain_state
-
-  - name: Wait a bit for AD Sync
-    pause:
-      seconds: 30
-
-  - name: Reboot after joing domain
-    win_reboot:
-    when: domain_state.reboot_required
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+      reboot: true
