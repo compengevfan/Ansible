@@ -213,13 +213,12 @@
     delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   when: df_check.rc != 0
 
-- name: Join a domain
-  block:
-  - name: Join domain
-    microsoft.ad.membership:
-      dns_domain_name: "{{ ConfigFileContents_JSON.Domain }}"
-      domain_admin_user: "{{ evoriginda_cred.username }}"
-      domain_admin_password: "{{ evoriginda_cred.password }}"
-      domain_ou_path: "{{ VmFileContents_JSON.OU }}"
-      state: domain
-      reboot: true
+- name: Join domain
+  microsoft.ad.membership:
+    dns_domain_name: "{{ ConfigFileContents_JSON.Domain }}"
+    domain_admin_user: "{{ evoriginda_cred.username }}"
+    domain_admin_password: "{{ evoriginda_cred.password }}"
+    domain_ou_path: "{{ VmFileContents_JSON.OU }}"
+    state: domain
+    reboot: true
+  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
