@@ -63,7 +63,7 @@
 
 - name: Check for DupreeFunctions
   shell: |
-    Get-Module DupreeFunctions -ListAvailable
+    Import-Module DupreeFunctions
   args:
     executable: /usr/bin/pwsh
   register: df_check
