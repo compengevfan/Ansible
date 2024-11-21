@@ -61,18 +61,30 @@
     executable: /usr/bin/pwsh
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Download my PowerShell repo
-  git:
-    repo: https://github.com/compengevfan/PowerShell.git
-    dest: /tmp/PowerShell
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-
-- name: Install DupreeFunctions
+- name: Check for DupreeFunctions
   shell: |
-    $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName /tmp/PowerShell/DupreeFunctions).Version.ToString()
-    New-Item -Path /usr/local/share/powershell/Modules -Name DupreeFunctions -ItemType Directory -Force
-    Copy-Item -Path /tmp/PowerShell/DupreeFunctions -Destination /usr/local/share/powershell/Modules/DupreeFunctions/$DfVersion -Recurse
-    Remove-Item /tmp/PowerShell -Recurse -Force -Confirm:$false
+    Get-Module DupreeFunctions -ListAvailable
   args:
     executable: /usr/bin/pwsh
+  register: df_check
+  failed_when: false
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Install DupreeFunctions if not found
+  block:
+  - name: Download my PowerShell repo
+    git:
+      repo: https://github.com/compengevfan/PowerShell.git
+      dest: /tmp/PowerShell
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+  - name: Install DupreeFunctions
+    shell: |
+      $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName /tmp/PowerShell/DupreeFunctions).Version.ToString()
+      New-Item -Path /usr/local/share/powershell/Modules -Name DupreeFunctions -ItemType Directory -Force
+      Copy-Item -Path /tmp/PowerShell/DupreeFunctions -Destination /usr/local/share/powershell/Modules/DupreeFunctions/$DfVersion -Recurse
+      Remove-Item /tmp/PowerShell -Recurse -Force -Confirm:$false
+    args:
+      executable: /usr/bin/pwsh
+    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  when: df_check.rc != 0
