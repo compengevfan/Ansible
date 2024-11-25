@@ -146,6 +146,7 @@
     name: "{{ ServerNameUpper }}"
     state: poweredon
     wait_for_customization: true
+    wait_for_ip_address: true
     customization:
       script_text: |
         #!/bin/bash
@@ -163,6 +164,7 @@
     name: "{{ ServerNameUpper }}"
     state: poweredon
     wait_for_customization: true
+    wait_for_ip_address: true
     customization:
       runonce:
       - powershell.exe -ExecutionPolicy Unrestricted -File C:\Windows\Temp\ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP
