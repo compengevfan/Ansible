@@ -145,6 +145,7 @@
     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
     name: "{{ ServerNameUpper }}"
     state: poweredon
+    wait_for_customization: true
     customization:
       script_text: |
         #!/bin/bash
@@ -161,14 +162,15 @@
     cluster: "{{ vmInfo.json.results[0].cluster.name }}"
     name: "{{ ServerNameUpper }}"
     state: poweredon
+    wait_for_customization: true
     customization:
       runonce:
       - powershell.exe -ExecutionPolicy Unrestricted -File C:\Windows\Temp\ConfigureRemotingForAnsible.ps1 -ForceNewSSLCert -EnableCredSSP
   when: platform.json.name is search("Windows")
 
-- name: Wait a bit for customization
-  pause:
-    minutes: 5
+# - name: Wait a bit for customization
+#   pause:
+#     minutes: 5
 
 - name: Upgrade VMware tools (Windows)
   community.vmware.vmware_guest_tools_upgrade:
