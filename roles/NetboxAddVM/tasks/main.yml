@@ -52,7 +52,7 @@
         netbox_url: "{{ netbox_cred.url }}"
         netbox_token: "{{ netbox_cred.token }}"
         data:
-          address: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
+          address: "{{ VmFileContents_JSON.VMInfo.IPAddress }}/{{ ConfigFileContents_JSON.Subnet.split('/')[1] }}"
           dns_name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
           assigned_object: 
             name: eth1
@@ -68,7 +68,7 @@
           name: "{{ ServerNameUpper }}"
           site: Amberly
           cluster: C1
-          primary_ip4: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
+          primary_ip4: "{{ VmFileContents_JSON.VMInfo.IPAddress }}/{{ ConfigFileContents_JSON.Subnet.split('/')[1] }}"
         state: present
         validate_certs: no
 
