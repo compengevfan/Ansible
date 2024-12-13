@@ -46,19 +46,32 @@
     state: present
     validate_certs: no
 
-- name: Assign IP if one is provided
-  netbox.netbox.netbox_ip_address:
-    netbox_url: "{{ netbox_cred.url }}"
-    netbox_token: "{{ netbox_cred.token }}"
-    data:
-      address: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
-      dns_name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-      assigned_object: 
-        name: eth1
-        virtual_machine: "{{ ServerNameUpper }}"
-    state: present
-    validate_certs: no
-  when: VmFileContents_JSON.VMInfo.IPAddress != None
+- name: Assign IP if one is provided and set primary
+  block:
+    - netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ netbox_cred.url }}"
+        netbox_token: "{{ netbox_cred.token }}"
+        data:
+          address: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
+          dns_name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+          assigned_object: 
+            name: eth1
+            virtual_machine: "{{ ServerNameUpper }}"
+        state: present
+        validate_certs: no
+
+    - name: Set IP as primary
+      netbox.netbox.netbox_virtual_machine:
+        netbox_url: "{{ netbox_cred.url }}"
+        netbox_token: "{{ netbox_cred.token }}"
+        data:
+          name: "{{ ServerNameUpper }}"
+          site: Amberly
+          cluster: C1
+          primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
+        state: present
+        validate_certs: no
+  when: VmFileContents_JSON.VMInfo.IPAddress != None and VirtualMachine.virtual_machine.primary_ip == None
 
 - name: Get a free IP and assign it if one is not provided
   block: 
@@ -104,11 +117,11 @@
           primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
         state: present
         validate_certs: no
+  when: VmFileContents_JSON.VMInfo.IPAddress == None and VirtualMachine.virtual_machine.primary_ip == None
 
-    - name: Call the role to add IP to DNS
-      include_role:
-        name: CreateDnsARecord
-      vars:
-        IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
-        Domain: "{{ ConfigFileContents_JSON.Domain }}"
-  when: VirtualMachine.virtual_machine.primary_ip == None
+- name: Call the role to add IP to DNS
+  include_role:
+    name: CreateDnsARecord
+  vars:
+    IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
+    Domain: "{{ ConfigFileContents_JSON.Domain }}"
