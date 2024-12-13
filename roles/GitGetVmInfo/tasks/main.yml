@@ -3,11 +3,11 @@
 - name: Make sure ServerName is all upper
   set_fact: ServerNameUpper="{{ ServerName | upper }}"
 
-- name: Get raw JSON file from github
+- name: Get raw VM JSON file from github
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/V2/{{ ServerNameUpper }}.json"
     dest: "/tmp/{{ ServerName }}.json"
 
-- name: Obtain contents of downloaded file and convert to JSON
+- name: Obtain contents of downloaded VM file and convert to JSON
   set_fact:
     VmFileContents_JSON: "{{ lookup('file', '/tmp/{{ ServerName }}.json') | from_json }}"
