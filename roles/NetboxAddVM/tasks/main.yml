@@ -36,19 +36,33 @@
     validate_certs: no
   register: VirtualMachine
 
-- name: Create the interface and IP if it doesn't exist
-  block: 
-    - name: Create interface
-      netbox.netbox.netbox_vm_interface:
-        netbox_url: "{{ netbox_cred.url }}"
-        netbox_token: "{{ netbox_cred.token }}"
-        data:
-          virtual_machine: "{{ ServerNameUpper }}"
-          name: eth1
-          enabled: true
-        state: present
-        validate_certs: no
+- name: Create the interface
+  netbox.netbox.netbox_vm_interface:
+    netbox_url: "{{ netbox_cred.url }}"
+    netbox_token: "{{ netbox_cred.token }}"
+    data:
+      virtual_machine: "{{ ServerNameUpper }}"
+      name: eth1
+      enabled: true
+    state: present
+    validate_certs: no
 
+- name: Assign IP if one is provided
+  netbox.netbox.netbox_ip_address:
+  netbox_url: "{{ netbox_cred.url }}"
+  netbox_token: "{{ netbox_cred.token }}"
+  data:
+    address: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
+    dns_name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    assigned_object: 
+      name: eth1
+      virtual_machine: "{{ ServerNameUpper }}"
+  state: present
+  validate_certs: no
+  when: VmFileContents_JSON.VMInfo.IPAddress != None
+
+- name: Get a free IP and assign it if one is not provided
+  block: 
     - name: Find the prefix
       ansible.builtin.uri:
         url: "{{ netbox_cred.url }}/api/ipam/prefixes?prefix={{ ConfigFileContents_JSON.Subnet }}"
