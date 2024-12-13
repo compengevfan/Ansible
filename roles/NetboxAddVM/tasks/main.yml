@@ -71,6 +71,13 @@
           primary_ip4: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
         state: present
         validate_certs: no
+
+    - name: Call the role to add IP to DNS
+      include_role:
+        name: CreateDnsARecord
+      vars:
+        IpAddress: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
+        Domain: "{{ ConfigFileContents_JSON.Domain }}"
   when: VmFileContents_JSON.VMInfo.IPAddress != None and VirtualMachine.virtual_machine.primary_ip == None
 
 - name: Get a free IP and assign it if one is not provided
@@ -117,11 +124,11 @@
           primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
         state: present
         validate_certs: no
-  when: VmFileContents_JSON.VMInfo.IPAddress == None and VirtualMachine.virtual_machine.primary_ip == None
 
-- name: Call the role to add IP to DNS
-  include_role:
-    name: CreateDnsARecord
-  vars:
-    IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
-    Domain: "{{ ConfigFileContents_JSON.Domain }}"
+    - name: Call the role to add IP to DNS
+      include_role:
+        name: CreateDnsARecord
+      vars:
+        IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
+        Domain: "{{ ConfigFileContents_JSON.Domain }}"
+  when: VmFileContents_JSON.VMInfo.IPAddress == None and VirtualMachine.virtual_machine.primary_ip == None
