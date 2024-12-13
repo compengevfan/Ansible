@@ -68,7 +68,7 @@
           name: "{{ ServerNameUpper }}"
           site: Amberly
           cluster: C1
-          primary_ip4: "{{ availableIps.json[0].address.split('/')[0] }}"
+          primary_ip4: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
         state: present
         validate_certs: no
   when: VmFileContents_JSON.VMInfo.IPAddress != None and VirtualMachine.virtual_machine.primary_ip == None
