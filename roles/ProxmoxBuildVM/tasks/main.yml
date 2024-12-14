@@ -1,0 +1,65 @@
+---
+# tasks file for ProxmoxBuildVM
+- name: Obtain Credentials
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - netbox
+      - proxmox
+      - windowslocaladmin
+
+- name: Get VM Info
+  include_role:
+    name: GitGetVmInfo
+  vars:
+    ServerName: "{{ ServerName }}"
+  when: VmFileContents_JSON is not defined
+
+- name: Get Config Info
+  include_role:
+    name: GitConfigInfo
+  vars:
+    Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+  when: ConfigFileContents_JSON is not defined
+
+- name: Make sure ServerName is all upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
+
+- name: Get VM Info from Netbox API
+  ansible.builtin.uri:
+    url: "{{ netbox_cred.url }}/api/virtualization/virtual-machines?name={{ ServerNameUpper }}"
+    headers:
+      Content-Type: application/json
+      Authorization: "{{ netbox_cred.api_token }}"
+    validate_certs: no
+  register: vmInfo
+
+- name: Get Template Name API
+  ansible.builtin.uri:
+    url: "{{ netbox_cred.url }}/api/dcim/platforms/{{ vmInfo.json.results[0].platform.id }}/"
+    headers:
+      Content-Type: application/json
+      Authorization: "{{ netbox_cred.api_token }}"
+    validate_certs: no
+  register: platform
+
+- name: Get Prefix API
+  ansible.builtin.uri:
+    url: "{{ netbox_cred.url }}/api/ipam/prefixes?contains={{ vmInfo.json.results[0].primary_ip.address.split('/')[0] }}"
+    headers:
+      Content-Type: application/json
+      Authorization: "{{ netbox_cred.api_token }}"
+    validate_certs: no
+  register: prefix
+
+- name: Get Subnet from API output
+  script: Subnet.py {{ vmInfo.json.results[0].primary_ip.address.split('/')[1] }}
+  args: 
+    executable: /usr/bin/python
+  register: subnetReturn
+  delegate_to: localhost
+
+- name:  Clone a virtual machine from Linux template
+  community.general.proxmox_kvm:
+    
