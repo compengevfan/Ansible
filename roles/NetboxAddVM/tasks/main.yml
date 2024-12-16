@@ -78,7 +78,7 @@
       vars:
         IpAddress: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
         Domain: "{{ ConfigFileContents_JSON.Domain }}"
-  when: VmFileContents_JSON.VMInfo.IPAddress != None and VirtualMachine.virtual_machine.primary_ip == None
+  when: VmFileContents_JSON.VMInfo.IPAddress is defined and VirtualMachine.virtual_machine.primary_ip == None
 
 - name: Get a free IP and assign it if one is not provided
   block: 
@@ -131,4 +131,4 @@
       vars:
         IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
         Domain: "{{ ConfigFileContents_JSON.Domain }}"
-  when: VmFileContents_JSON.VMInfo.IPAddress == None and VirtualMachine.virtual_machine.primary_ip == None
+  when: VmFileContents_JSON.VMInfo.IPAddress is not defined and VirtualMachine.virtual_machine.primary_ip == None
