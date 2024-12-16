@@ -50,6 +50,7 @@
     name:
       - git
       - powershell
+      - qemu-guest-agent
     state: latest
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
