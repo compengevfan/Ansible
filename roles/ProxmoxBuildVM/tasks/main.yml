@@ -70,6 +70,9 @@
     node: pmx1
     storage: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
     format: qcow2
+    cores: "{{ vmInfo.json.results[0].vcpus | int }}"
+    vcpus: 1
+    memory: "{{ vmInfo.json.results[0].memory | int }}"
     timeout: 500
 
 - name: Start VM
