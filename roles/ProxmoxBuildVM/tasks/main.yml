@@ -67,7 +67,7 @@
     api_host: pmx1.evorigin.com
     clone: "{{ platform.json.custom_fields.VM_Template }}"
     name: "{{ ServerNameUpper }}"
-    node: pmx1.evorigin.com
+    node: pmx1
     storage: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
     format: qcow2
     timeout: 500
@@ -78,5 +78,5 @@
     api_password: "{{ proxmoxroot_cred.password }}"
     api_host: pmx1.evorigin.com
     name: "{{ ServerNameUpper }}"
-    node: pmx1.evorigin.com
+    node: pmx1
     state: started
