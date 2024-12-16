@@ -6,7 +6,7 @@
   vars:
     includecred:
       - netbox
-      - proxmox
+      - proxmoxroot
       - windowslocaladmin
 
 - name: Get VM Info
