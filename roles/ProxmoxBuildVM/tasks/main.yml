@@ -61,25 +61,37 @@
   delegate_to: localhost
 
 - name:  Clone a virtual machine from Linux template
-  community.general.proxmox_kvm:
-    api_user: "{{ proxmoxroot_cred.username }}"
-    api_password: "{{ proxmoxroot_cred.password }}"
-    api_host: pmx1.evorigin.com
-    clone: "{{ platform.json.custom_fields.VM_Template }}"
-    name: "{{ ServerNameUpper }}"
-    node: pmx1
-    storage: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
-    format: qcow2
-    cores: "{{ vmInfo.json.results[0].vcpus | int }}"
-    vcpus: 1
-    memory: "{{ vmInfo.json.results[0].memory | int }}"
-    timeout: 500
+  block:
+  - name: Create the VM
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmoxroot_cred.username }}"
+      api_password: "{{ proxmoxroot_cred.password }}"
+      api_host: pmx1.evorigin.com
+      clone: "{{ platform.json.custom_fields.VM_Template }}"
+      name: "{{ ServerNameUpper }}"
+      node: pmx1
+      storage: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
+      format: qcow2
+      timeout: 500
 
-- name: Start VM
-  community.general.proxmox_kvm:
-    api_user: "{{ proxmoxroot_cred.username }}"
-    api_password: "{{ proxmoxroot_cred.password }}"
-    api_host: pmx1.evorigin.com
-    name: "{{ ServerNameUpper }}"
-    node: pmx1
-    state: started
+  - name: Update Linux VM configuration
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmoxroot_cred.username }}"
+      api_password: "{{ proxmoxroot_cred.password }}"
+      api_host: pmx1.evorigin.com
+      name: "{{ ServerNameUpper }}"
+      node: pmx1
+      cores: "{{ vmInfo.json.results[0].vcpus | int }}"
+      memory: "{{ vmInfo.json.results[0].memory | int }}"
+      vcpus: 1
+      update: true
+
+  - name: Start VM
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmoxroot_cred.username }}"
+      api_password: "{{ proxmoxroot_cred.password }}"
+      api_host: pmx1.evorigin.com
+      name: "{{ ServerNameUpper }}"
+      node: pmx1
+      state: started
+  when: not platform.json.name is search("Windows")
