@@ -62,8 +62,8 @@
 
 - name:  Clone a virtual machine from Linux template
   community.general.proxmox_kvm:
-    api_user: "{{ proxmoxroot_cred.username }}"
-    api_password: "{{ proxmoxroot_cred.password }}"
+    api_user: "{{ proxmoxroot_cred.apitokenid }}"
+    api_password: "{{ proxmoxroot_cred.apisecret }}"
     api_host: pmx1.evorigin.com
     clone: "{{ platform.json.custom_fields.VM_Template }}"
     name: "{{ ServerNameUpper }}"
@@ -74,8 +74,8 @@
 
 - name: Start VM
   community.general.proxmox_kvm:
-    api_user: "{{ proxmoxroot_cred.username }}"
-    api_password: "{{ proxmoxroot_cred.password }}"
+    api_user: "{{ proxmoxroot_cred.apitokenid }}"
+    api_password: "{{ proxmoxroot_cred.apisecret }}"
     api_host: pmx1.evorigin.com
     name: "{{ ServerNameUpper }}"
     node: pmx1.evorigin.com
