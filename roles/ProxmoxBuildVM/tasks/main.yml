@@ -84,6 +84,10 @@
       cores: "{{ vmInfo.json.results[0].vcpus | int }}"
       memory: "{{ vmInfo.json.results[0].memory | int }}"
       vcpus: 1
+      searchdomains: '{{ vmInfo.json.results[0].Domain }}'
+      nameservers: 
+        - '{{ vmInfo.json.results[0].DNS1 }}'
+        - '{{ vmInfo.json.results[0].DNS2 }}'
       ipconfig:
         ipconfig0: 'ip={{ vmInfo.json.results[0].primary_ip.address }}'
       update: true
