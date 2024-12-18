@@ -84,7 +84,7 @@
       cores: "{{ vmInfo.json.results[0].vcpus | int }}"
       memory: "{{ vmInfo.json.results[0].memory | int }}"
       vcpus: 1
-      searchdomains: '{{ vmInfo.json.results[0].Domain }}'
+      searchdomains: '{{ ConfigFileContents_JSON.Domain }}'
       nameservers: 
         - '{{ vmInfo.json.results[0].DNS1 }}'
         - '{{ vmInfo.json.results[0].DNS2 }}'
