@@ -86,8 +86,8 @@
       vcpus: 1
       searchdomains: '{{ ConfigFileContents_JSON.Domain }}'
       nameservers: 
-        - '{{ ConfigFileContents_JSON..DNS1 }}'
-        - '{{ ConfigFileContents_JSON..DNS2 }}'
+        - '{{ ConfigFileContents_JSON.DNS1 }}'
+        - '{{ ConfigFileContents_JSON.DNS2 }}'
       ipconfig:
         ipconfig0: 'ip={{ vmInfo.json.results[0].primary_ip.address }}'
       update: true
