@@ -83,7 +83,7 @@
       node: pmx1
       cores: "{{ vmInfo.json.results[0].vcpus | int }}"
       memory: "{{ vmInfo.json.results[0].memory | int }}"
-      vcpus: 1
+      vcpus: "{{ vmInfo.json.results[0].vcpus | int }}"
       searchdomains: '{{ ConfigFileContents_JSON.Domain }}'
       nameservers: 
         - '{{ ConfigFileContents_JSON.DNS1 }}'
