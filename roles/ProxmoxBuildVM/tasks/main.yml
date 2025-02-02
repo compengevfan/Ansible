@@ -100,4 +100,4 @@
       name: "{{ ServerNameUpper }}"
       node: pmx1
       state: started
-  when: not platform.json.name is search("Windows")
+  # when: not platform.json.name is search("Windows")
