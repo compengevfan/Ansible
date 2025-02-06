@@ -30,6 +30,6 @@
       loop: "{{ iDracs }}"
       vars: 
         iDracs:
-          - rac-esx1.evorigin.com
-          - rac-esx2.evorigin.com
-          - rac-esx3.evorigin.com
+          - rac-pmx1.evorigin.com
+          - rac-pmx2.evorigin.com
+          - rac-pmx3.evorigin.com
