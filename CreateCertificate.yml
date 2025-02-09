@@ -20,6 +20,7 @@
         locality_name: "Jax"
         organization_name: "EvOrigin"
         organizational_unit_name: "Lab"
+        email_address: "admin@lab.local"
         common_name: "{{ ServerName }}.evorigin.com"
         key_usage:
           - digitalSignature
