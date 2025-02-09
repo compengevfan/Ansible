@@ -1,0 +1,22 @@
+---
+- name: Generate Private Key and CSR
+  hosts: localhost
+  tasks:
+    - name: Generate Private Key
+      community.crypto.openssl_privatekey:
+        path: /etc/ssl/private/ansible.com.pem
+        size: 2048
+      register: private_key
+      # no_log: true
+
+# - name: "Job Setup"
+#   hosts: localhost
+#   connection: local
+#   gather_facts: no
+#   tasks:
+#     - name: Obtain iDrac Credential
+#       include_role:
+#         name: GetVaultCreds
+#       vars:
+#         includecred:
+#           - idrac
