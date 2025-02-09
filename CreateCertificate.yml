@@ -1,6 +1,7 @@
 ---
 - name: Generate Private Key and CSR
   hosts: localhost
+  gather_facts: no
   tasks:
     - name: Generate Private Key
       community.crypto.openssl_privatekey:
