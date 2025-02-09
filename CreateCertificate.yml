@@ -34,7 +34,6 @@
         subject_alt_name:
           - "DNS:{{ ServerName }}.evorigin.com"
           # Add more SANs as needed, based on the [alt_names] section
-        create_key: false
         return_content: true
       register: csr
 # - name: "Job Setup"
