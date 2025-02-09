@@ -7,6 +7,7 @@
       community.crypto.openssl_privatekey:
         path: /tmp/ansible.com.pem
         size: 2048
+        return_content: true
       register: private_key
       # no_log: true
 
