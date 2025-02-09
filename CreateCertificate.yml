@@ -15,12 +15,26 @@
       community.crypto.openssl_csr:
         path: /tmp/ansible.com.csr
         privatekey_path: /tmp/ansible.com.pem
-        CN: test.evorigin.com
-        OU: Lab
-        O: EvOrigin
-        L: Jax
-        ST: FL
-        C: US
+        country_name: "US"
+        state_or_province_name: "FL"
+        locality_name: "Jax"
+        organization_name: "EvOrigin"
+        organizational_unit_name: "Lab"
+        common_name: "{{ ServerName }}.evorigin.com"
+        key_usage:
+          - digitalSignature
+          - nonRepudiation
+          - keyEncipherment
+          - dataEncipherment
+        extended_key_usage:
+          - serverAuth
+          - clientAuth
+          - codeSigning
+          - emailProtection
+        subject_alt_name:
+          - "DNS:{{ ServerName }}.evorigin.com"
+          # Add more SANs as needed, based on the [alt_names] section
+        create_key: false
         return_content: true
       register: csr
 # - name: "Job Setup"
