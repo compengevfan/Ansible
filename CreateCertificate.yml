@@ -7,10 +7,22 @@
       community.crypto.openssl_privatekey:
         path: /tmp/ansible.com.pem
         size: 2048
-        return_content: true
-      register: private_key
+        # return_content: true
+      # register: private_key
       # no_log: true
 
+    - name: Generate CSR
+      community.crypto.openssl_csr:
+        path: /tmp/ansible.com.csr
+        privatekey_path: /tmp/ansible.com.pem
+        CN: test.evorigin.com
+        OU: Lab
+        O: EvOrigin
+        L: Jax
+        ST: FL
+        C: US
+        return_content: true
+      register: csr
 # - name: "Job Setup"
 #   hosts: localhost
 #   connection: local
