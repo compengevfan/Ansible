@@ -43,14 +43,14 @@
   gather_facts: yes
   tasks:
     - name: Create a folder on Windows Server
-      win_file:
+      ansible.windows.win_file:
         path: C:\CertStuff
         state: "{{ ServerName }}"
   
     - name: Copy CSR to CA Server
-      copy:
+      ansible.windows.win_copy:
         src: "/tmp/{{ ServerName }}.csr"
-        dest: "C:/CertStuff/{{ ServerName }}/{{ ServerName }}.csr"
+        dest: "C:\\CertStuff\\{{ ServerName }}\\{{ ServerName }}.csr"
 # - name: "Job Setup"
 #   hosts: localhost
 #   connection: local
