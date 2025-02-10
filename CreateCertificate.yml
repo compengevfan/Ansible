@@ -44,8 +44,8 @@
   tasks:
     - name: Create a folder on Windows Server
       ansible.windows.win_file:
-        path: C:\CertStuff
-        state: "{{ ServerName }}"
+        path: "C:\\CertStuff\\{{ ServerName }}"
+        state: directory
   
     - name: Copy CSR to CA Server
       ansible.windows.win_copy:
