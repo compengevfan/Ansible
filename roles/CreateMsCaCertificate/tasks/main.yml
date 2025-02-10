@@ -1,0 +1,56 @@
+---
+# tasks file for CreateMsCaCertificate
+- name: Create certificate folder
+  win_file:
+    path: "{{ cert_folder }}"
+    state: directory
+
+- name: Create request.inf for certreq
+  win_template:
+    src: request.inf.j2
+    dest: "{{ cert_folder }}\\{{ ServerName }}.inf"
+
+- name: Generate CSR using certreq
+  win_shell: >
+    certreq -new
+    "{{ cert_folder }}\\{{ ServerName }}.inf"
+    "{{ cert_folder }}\\{{ ServerName }}.csr"
+
+- name: Submit the CSR to the CA and retrieve the signed certificate
+  win_shell: >
+    certreq -submit -config "{{ ca_config }}"
+    "{{ cert_folder }}\\{{ ServerName }}.csr"
+    "{{ cert_folder }}\\{{ ServerName }}.cer"
+
+- name: Get the thumbprint of the newly installed cert
+  # We filter by matching the Subject to the CN. Adjust if your subject is different.
+  win_shell: >
+    $thumb = (Get-ChildItem -Path Cert:\\LocalMachine\\My |
+      Where-Object { $_.Subject -like "*CN={{ ServerName }}*" } |
+      Select-Object -Last 1).Thumbprint;
+    Write-Host $thumb
+  register: cert_thumbprint
+
+- name: Export certificate and private key to PFX
+  # Requires that the private key is marked Exportable=TRUE in the INF.
+  win_shell: >
+    powershell.exe -Command "
+      $pw = ConvertTo-SecureString -String '{{ pfx_password }}' -Force -AsPlainText;
+      Export-PfxCertificate -Cert 'Cert:\\LocalMachine\\My\\{{ cert_thumbprint.stdout }}'
+        -FilePath '{{ cert_folder }}\\{{ ServerName }}.pfx'
+        -Password $pw
+    "
+
+- name: Split the .pfx into .key and .crt using openssl (if OpenSSL is installed on Windows)
+  # Extract the private key
+  win_shell: >
+    openssl pkcs12 -in "{{ cert_folder }}\\{{ ServerName }}.pfx"
+    -nocerts -nodes -password pass:{{ pfx_password }}
+    -out "{{ cert_folder }}\\{{ ServerName }}.key"
+
+- name: Split the .pfx into .key and .crt using openssl (if OpenSSL is installed on Windows)
+  # Extract the public cert
+  win_shell: >
+    openssl pkcs12 -in "{{ cert_folder }}\\{{ ServerName }}.pfx"
+    -clcerts -nokeys -password pass:{{ pfx_password }}
+    -out "{{ cert_folder }}\\{{ ServerName }}.crt"

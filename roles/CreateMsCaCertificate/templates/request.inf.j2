@@ -1,0 +1,22 @@
+[NewRequest]
+Subject = "CN={{ ServerName }}.evorigin.com, O=EvOrigin, OU=Lab, L=Jax, ST=FL, C=US"
+KeyLength = "{{ KeyLength }}"
+KeySpec = 1
+KeyUsage = 0xA0  ; Digital Signature, Key Encipherment
+Exportable = TRUE
+MachineKeySet = TRUE
+RequestType = PKCS10
+ProviderName = "Microsoft RSA SChannel Cryptographic Provider"
+ProviderType = 12
+SMIME = FALSE
+
+[Extensions]
+2.5.29.19 = {text} CA=FALSE  ; Basic Constraints
+2.5.29.37 = {text} 1.3.6.1.5.5.7.3.1,1.3.6.1.5.5.7.3.2,1.3.6.1.5.5.7.3.3,1.3.6.1.5.5.7.3.4  ; Extended Key Usage (Server, Client, Code Signing, Email Protection)
+2.5.29.15 = {text}  digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment  ; Key Usage
+
+[RequestAttributes]
+CertificateTemplate = "{{ cert_template }}"
+
+[AlternativeNames]
+DNS = {{ ServerName }}.evorigin.com
