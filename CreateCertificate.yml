@@ -5,7 +5,7 @@
   tasks:
     - name: Generate Private Key
       community.crypto.openssl_privatekey:
-        path: /tmp/ansible.com.pem
+        path: "/tmp/{{ ServerName }}.pem"
         size: 2048
         # return_content: true
       # register: private_key
@@ -13,8 +13,8 @@
 
     - name: Generate CSR
       community.crypto.openssl_csr:
-        path: /tmp/ansible.com.csr
-        privatekey_path: /tmp/ansible.com.pem
+        path: "/tmp/{{ ServerName }}.csr"
+        privatekey_path: "/tmp/{{ ServerName }}.pem"
         country_name: "US"
         state_or_province_name: "FL"
         locality_name: "Jax"
@@ -35,8 +35,22 @@
         subject_alt_name:
           - "DNS:{{ ServerName }}.evorigin.com"
           # Add more SANs as needed, based on the [alt_names] section
-        return_content: true
+        # return_content: true
       register: csr
+
+- name: Create Certificate Using MS CA
+  hosts: jax-cert001.evorigin.com
+  gather_facts: yes
+  tasks:
+    - name: Create a folder on Windows Server
+      win_file:
+        path: C:\CertStuff
+        state: "{{ ServerName }}"
+  
+    - name: Copy CSR to CA Server
+      copy:
+        src: "/tmp/{{ ServerName }}.csr"
+        dest: "C:/CertStuff/{{ ServerName }}/{{ ServerName }}.csr"
 # - name: "Job Setup"
 #   hosts: localhost
 #   connection: local
