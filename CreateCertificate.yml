@@ -57,3 +57,7 @@
         src: "/tmp/{{ ServerName }}.key"
         dest: "C:\\CertStuff\\{{ ServerName }}\\{{ ServerName }}.key"
         force: true
+
+    - name: Submit certificate request
+      ansible.windows.win_shell: "certreq -submit -attrib 'CertificateTemplate:Web Server 10 Years' C:\\CertStuff\\{{ ServerName }}\\{{ ServerName }}.csr C:\\CertStuff\\{{ ServerName }}\\{{ ServerName }}.cer"
+      register: cert_request_result
