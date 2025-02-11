@@ -18,7 +18,7 @@
 
 - name: Submit the CSR to the CA and retrieve the signed certificate
   win_shell: >
-    certreq -submit q -config "jax-cert001.evorigin.com\evorigin-JAX-CERT001-CA"
+    certreq -submit -q -config "{{ ca_config }}"
     "{{ cert_folder }}\{{ ServerName }}.csr"
     "{{ cert_folder }}\{{ ServerName }}.cer"
 
