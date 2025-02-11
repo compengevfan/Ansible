@@ -12,13 +12,13 @@
 
 - name: Generate CSR using certreq
   win_shell: >
-    certreq -new
+    certreq -new -q
     "{{ cert_folder }}\\{{ ServerName }}.inf"
     "{{ cert_folder }}\\{{ ServerName }}.csr"
 
 - name: Submit the CSR to the CA and retrieve the signed certificate
   win_shell: >
-    certreq -submit -config "{{ ca_config }}"
+    certreq -submit q -config "{{ ca_config }}"
     "{{ cert_folder }}\\{{ ServerName }}.csr"
     "{{ cert_folder }}\\{{ ServerName }}.cer"
 
