@@ -6,7 +6,7 @@
     pfx_password: "DeleteMe" #This is not really used but it is required by the CA
     ca_config: "jax-cert001.evorigin.com\\evorigin-JAX-CERT001-CA"
     cert_template: "WebServer10years"
-    cert_folder: "C:\\CertStuff\\{{ ServerName }}"
+    cert_folder: "C:/CertStuff/{{ ServerName }}"
   tasks:
     - name: Run the Role
       include_role:

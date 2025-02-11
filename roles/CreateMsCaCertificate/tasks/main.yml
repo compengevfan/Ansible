@@ -13,14 +13,14 @@
 - name: Generate CSR using certreq
   win_shell: >
     certreq -new -q
-    "{{ cert_folder }}\{{ ServerName }}.inf"
-    "{{ cert_folder }}\{{ ServerName }}.csr"
+    "{{ cert_folder }}/{{ ServerName }}.inf"
+    "{{ cert_folder }}/{{ ServerName }}.csr"
 
 - name: Submit the CSR to the CA and retrieve the signed certificate
   win_shell: >
     certreq -submit q -config "{{ ca_config }}"
-    "{{ cert_folder }}\{{ ServerName }}.csr"
-    "{{ cert_folder }}\{{ ServerName }}.cer"
+    "{{ cert_folder }}/{{ ServerName }}.csr"
+    "{{ cert_folder }}/{{ ServerName }}.cer"
 
 - name: Get the thumbprint of the newly installed cert
   # We filter by matching the Subject to the CN. Adjust if your subject is different.
