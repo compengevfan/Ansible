@@ -11,7 +11,7 @@
     dest: "{{ cert_folder }}\\{{ ServerName }}.inf"
 
 - name: Generate CSR using certreq
-  win_shell: >
+  win_powershell: >
     certreq -new -q
     "{{ cert_folder }}/{{ ServerName }}.inf"
     "{{ cert_folder }}/{{ ServerName }}.csr"
