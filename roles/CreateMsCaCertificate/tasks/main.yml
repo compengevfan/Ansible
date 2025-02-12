@@ -22,6 +22,11 @@
     "{{ cert_folder }}\{{ ServerName }}.csr"
     "{{ cert_folder }}\{{ ServerName }}.cer"
 
+- name: Accept the certificate into the local machine certificate store
+  win_command: >
+    certreq -accept
+    "{{ cert_folder }}\\{{ ServerName }}.cer"
+
 - name: Get the thumbprint of the newly installed cert
   # We filter by matching the Subject to the CN. Adjust if your subject is different.
   win_shell: >
