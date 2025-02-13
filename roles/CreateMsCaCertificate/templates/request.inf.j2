@@ -10,12 +10,16 @@ ProviderName = "Microsoft RSA SChannel Cryptographic Provider"
 ProviderType = 12
 SMIME = FALSE
 
+[Extensions]
+; Basic Constraints
+;2.5.29.19 = {text} ; or 
+2.5.29.19 = "critical,CA=FALSE"
+; Key Usage (digitalSignature + keyEncipherment)
+2.5.29.15 = 0xa0
+; Extended Key Usage (Server Auth, Client Auth, Code Signing, Email Protection)
+2.5.29.37 = 1.3.6.1.5.5.7.3.1,1.3.6.1.5.5.7.3.2,1.3.6.1.5.5.7.3.3,1.3.6.1.5.5.7.3.4
+; Subject Alternative Name
+2.5.29.17 = "DNS={{ ServerName }}.evorigin.com"
+
 [RequestAttributes]
 CertificateTemplate = "{{ cert_template }}"
-
-[Extensions]
-2.5.29.17 = "{text}"
-_continue_ = "DNS={{ ServerName }}.evorigin.com"
-2.5.29.19 = CA=FALSE  ; Basic Constraints
-2.5.29.37 = 1.3.6.1.5.5.7.3.1,1.3.6.1.5.5.7.3.2,1.3.6.1.5.5.7.3.3,1.3.6.1.5.5.7.3.4  ; Extended Key Usage (Server, Client, Code Signing, Email Protection)
-2.5.29.15 = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment  ; Key Usage
