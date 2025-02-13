@@ -44,7 +44,7 @@
   # Requires that the private key is marked Exportable=TRUE in the INF.
   win_shell: >
     $pw = ConvertTo-SecureString -String "{{ pfx_password }}" -Force -AsPlainText;
-    Export-PfxCertificate -Cert 'Cert:\\LocalMachine\\My\\{{ cert_thumbprint.stdout }}' -FilePath '{{ cert_folder }}\{{ ServerName }}.pfx' -Password $pw -ChainOption WholeChain
+    Export-PfxCertificate -Cert 'Cert:\\LocalMachine\\My\\{{ cert_thumbprint.stdout }}' -FilePath '{{ cert_folder }}\{{ ServerName }}.pfx' -Password $pw -ChainOption BuildChain
 
 - name: Split the .pfx into .key and .crt using openssl (if OpenSSL is installed on Windows)
   # Extract the private key
