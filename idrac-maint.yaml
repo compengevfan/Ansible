@@ -11,8 +11,6 @@
   gather_facts: no
   tasks:
     - raw: 'racadm clrsel'
-      register: result
-      failed_when: result.rc != 0
 
 - name: Clear Job Queue
   hosts: all
