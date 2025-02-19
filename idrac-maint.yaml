@@ -30,7 +30,7 @@
   gather_facts: no
   tasks:
     - dellemc.openmanage.idrac_lifecycle_controller_jobs:
-        idrac_ip: "{{ item }}"
+        idrac_ip: "{{ inventory_hostname }}"
         idrac_user: "{{ idrac_cred.username }}"
         idrac_password: "{{ idrac_cred.password }}"
         validate_certs: false
@@ -47,7 +47,7 @@
   gather_facts: no
   tasks:
     - dellemc.openmanage.idrac_reset:
-        idrac_ip: "{{ item }}"
+        idrac_ip: "{{ inventory_hostname }}"
         idrac_user: "{{ idrac_cred.username }}"
         idrac_password: "{{ idrac_cred.password }}"
         validate_certs: false
