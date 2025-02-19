@@ -1,28 +1,18 @@
 ---
-# - name: iDrac Maintenance
-#   hosts: all
-#   gather_facts: no
-#   tasks:
-#     - name: Reset
-#       raw: 'racadm racreset'
-
 - name: install omsdk
   hosts: localhost
   tasks:
     - ansible.builtin.pip:
         name: omsdk
 
-# - name: "Job Setup"
-#   hosts: localhost
-#   connection: local
-#   gather_facts: no
-#   tasks:
-#     - name: Obtain iDrac Credential
-#       include_role:
-#         name: GetVaultCreds
-#       vars:
-#         includecred:
-#           - idrac
+- name: Clear SEL
+  hosts: all
+  connection: local
+  gather_facts: no
+  tasks:
+    - raw: 'racadm clrsel'
+      register: result
+      failed_when: result.rc != 0
 
 - name: Clear Job Queue
   hosts: all
@@ -34,12 +24,6 @@
         idrac_user: "{{ ansible_user }}"
         idrac_password: "{{ ansible_password }}"
         validate_certs: false
-      # loop: "{{ iDRACs }}"
-      # vars: 
-      #   iDracs:
-      #     - rac-pmx1.evorigin.com
-      #     # - rac-pmx2.evorigin.com
-      #     # - rac-pmx3.evorigin.com
 
 - name: iDrac Reset
   hosts: all
@@ -51,9 +35,3 @@
         idrac_user: "{{ ansible_user }}"
         idrac_password: "{{ ansible_password }}"
         validate_certs: false
-      # loop: "{{ iDRACs }}"
-      # vars: 
-      #   iDracs:
-      #     - rac-pmx1.evorigin.com
-      #     # - rac-pmx2.evorigin.com
-      #     # - rac-pmx3.evorigin.com
