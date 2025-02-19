@@ -25,7 +25,7 @@
           - idrac
 
 - name: Clear Job Queue
-  hosts: localhost
+  hosts: all
   connection: local
   gather_facts: no
   tasks:
@@ -42,7 +42,7 @@
       #     # - rac-pmx3.evorigin.com
 
 - name: iDrac Reset
-  hosts: localhost
+  hosts: all
   connection: local
   gather_facts: no
   tasks:
