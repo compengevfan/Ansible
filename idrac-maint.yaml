@@ -12,17 +12,17 @@
     - ansible.builtin.pip:
         name: omsdk
 
-- name: "Job Setup"
-  hosts: localhost
-  connection: local
-  gather_facts: no
-  tasks:
-    - name: Obtain iDrac Credential
-      include_role:
-        name: GetVaultCreds
-      vars:
-        includecred:
-          - idrac
+# - name: "Job Setup"
+#   hosts: localhost
+#   connection: local
+#   gather_facts: no
+#   tasks:
+#     - name: Obtain iDrac Credential
+#       include_role:
+#         name: GetVaultCreds
+#       vars:
+#         includecred:
+#           - idrac
 
 - name: Clear Job Queue
   hosts: all
@@ -31,8 +31,8 @@
   tasks:
     - dellemc.openmanage.idrac_lifecycle_controller_jobs:
         idrac_ip: "{{ inventory_hostname }}"
-        idrac_user: "{{ idrac_cred.username }}"
-        idrac_password: "{{ idrac_cred.password }}"
+        idrac_user: "{{ ansible_user }}"
+        idrac_password: "{{ ansible_password }}"
         validate_certs: false
       # loop: "{{ iDRACs }}"
       # vars: 
@@ -48,8 +48,8 @@
   tasks:
     - dellemc.openmanage.idrac_reset:
         idrac_ip: "{{ inventory_hostname }}"
-        idrac_user: "{{ idrac_cred.username }}"
-        idrac_password: "{{ idrac_cred.password }}"
+        idrac_user: "{{ ansible_user }}"
+        idrac_password: "{{ ansible_password }}"
         validate_certs: false
       # loop: "{{ iDRACs }}"
       # vars: 
