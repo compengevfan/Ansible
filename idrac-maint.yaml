@@ -34,7 +34,7 @@
         idrac_user: "{{ idrac_cred.username }}"
         idrac_password: "{{ idrac_cred.password }}"
         validate_certs: false
-      loop: "{{ iDRACs }}"
+      # loop: "{{ iDRACs }}"
       # vars: 
       #   iDracs:
       #     - rac-pmx1.evorigin.com
@@ -51,7 +51,7 @@
         idrac_user: "{{ idrac_cred.username }}"
         idrac_password: "{{ idrac_cred.password }}"
         validate_certs: false
-      loop: "{{ iDRACs }}"
+      # loop: "{{ iDRACs }}"
       # vars: 
       #   iDracs:
       #     - rac-pmx1.evorigin.com
