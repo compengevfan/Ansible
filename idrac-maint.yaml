@@ -25,7 +25,7 @@
           - idrac
 
 - name: Clear Job Queue
-  hosts: localhost
+  hosts: iDRACs
   connection: local
   gather_facts: no
   tasks:
