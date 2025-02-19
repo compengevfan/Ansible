@@ -1,42 +1,59 @@
 ---
-- name: iDrac Maintenance
-  hosts: all
+# - name: iDrac Maintenance
+#   hosts: all
+#   gather_facts: no
+#   tasks:
+#     - name: Reset
+#       raw: 'racadm racreset'
+
+- name: install omsdk
+  hosts: localhost
+  tasks:
+    - ansible.builtin.pip:
+        name: omsdk
+
+- name: "Job Setup"
+  hosts: localhost
+  connection: local
   gather_facts: no
   tasks:
-    - name: Reset
-      raw: 'racadm racreset'
-      
-# - name: install omsdk
-#   hosts: localhost
-#   tasks:
-#     - ansible.builtin.pip:
-#         name: omsdk
+    - name: Obtain iDrac Credential
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - idrac
 
-# - name: "Job Setup"
-#   hosts: localhost
-#   connection: local
-#   gather_facts: no
-#   tasks:
-#     - name: Obtain iDrac Credential
-#       include_role:
-#         name: GetVaultCreds
-#       vars:
-#         includecred:
-#           - idrac
+- name: Clear Job Queue
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - dellemc.openmanage.idrac_lifecycle_controller_jobs:
+        idrac_ip: "{{ item }}"
+        idrac_user: "{{ idrac_cred.username }}"
+        idrac_password: "{{ idrac_cred.password }}"
+        validate_certs: false
+      loop: "{{ iDracs }}"
+      vars: 
+        iDracs:
+          - rac-pmx1.evorigin.com
+          # - rac-pmx2.evorigin.com
+          # - rac-pmx3.evorigin.com
 
-# - name: iDrac Reset
-#   hosts: localhost
-#   connection: local
-#   gather_facts: no
-#   tasks:
-#     - dellemc.openmanage.idrac_reset:
-#         idrac_ip: "{{ item }}"
-#         idrac_user: "{{ idrac_cred.username }}"
-#         idrac_password: "{{ idrac_cred.password }}"
-#         validate_certs: false
-#       loop: "{{ iDracs }}"
-#       vars: 
-#         iDracs:
-#           - rac-pmx1.evorigin.com
-#           # - rac-pmx2.evorigin.com
-#           # - rac-pmx3.evorigin.com
+- name: iDrac Reset
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - dellemc.openmanage.idrac_reset:
+        idrac_ip: "{{ item }}"
+        idrac_user: "{{ idrac_cred.username }}"
+        idrac_password: "{{ idrac_cred.password }}"
+        validate_certs: false
+      loop: "{{ iDracs }}"
+      vars: 
+        iDracs:
+          - rac-pmx1.evorigin.com
+          # - rac-pmx2.evorigin.com
+          # - rac-pmx3.evorigin.com
