@@ -16,8 +16,8 @@
   gather_facts: no
   vars:
     pfx_password: "DeleteMe" #This is not really used but it is required by the CA
-    ca_config: "{{ certificateauthority_info.ca_config }}"
-    cert_template: "{{certificateauthority_info.cert_template }}"
+    ca_config: "{{ hostvars['localhost']['certificateauthority_info'].ca_config }}"
+    cert_template: "{{ hostvars['localhost']['certificateauthority_info'].cert_template }}"
     cert_folder: "C:\\CertStuff\\{{ ServerName }}"
   tasks:
     - name: Run the Role
