@@ -57,7 +57,7 @@
 - name: Get Certificate Authority info from Vault
   set_fact:
     certificateauthority_info: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/certificateauthority validate_certs=False') }}"
-  # no_log: true
+  no_log: true
   when: "'certificateauthority' in includecred"
 
 - name: Test Credential
