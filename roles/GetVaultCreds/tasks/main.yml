@@ -54,6 +54,12 @@
   no_log: true
   when: "'proxmoxroot' in includecred"
 
+- name: Get Certificate Authority info from Vault
+  set_fact:
+    certificateauthority_info: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/certificateauthority validate_certs=False') }}"
+  no_log: true
+  when: "'proxmoxroot' in includecred"
+
 - name: Test Credential
   set_fact:
     test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test validate_certs=False') }}"
