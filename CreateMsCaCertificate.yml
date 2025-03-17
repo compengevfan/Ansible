@@ -4,7 +4,7 @@
   connection: local
   gather_facts: no
   tasks:
-    - name: Obtain netbox api token
+    - name: Obtain Certificate Authority Info
       include_role:
         name: GetVaultCreds
       vars:
