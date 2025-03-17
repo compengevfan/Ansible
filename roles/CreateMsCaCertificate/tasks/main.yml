@@ -1,5 +1,10 @@
 ---
 # tasks file for CreateMsCaCertificate
+- name: Remove Certificate folder
+  win_file:
+    path: "{{ cert_folder }}"
+    state: absent
+
 - name: Create certificate folder
   win_file:
     path: "{{ cert_folder }}"
