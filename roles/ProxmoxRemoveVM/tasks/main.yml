@@ -19,6 +19,7 @@
     name: "{{ ServerNameUpper }}"
     state: stopped
     force: true
+  ignore_errors: true
 
 - name: Delete VM
   community.general.proxmox_kvm:
@@ -28,6 +29,7 @@
     name: "{{ ServerNameUpper }}"
     state: absent
     force: true
+  ignore_errors: true
 
 - name: Remove VM from Netbox
   include_role:
