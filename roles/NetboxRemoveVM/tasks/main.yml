@@ -10,7 +10,7 @@
 - name: Make sure ServerName is all upper
   set_fact: ServerNameUpper="{{ ServerName | upper }}"
 
-- name: Create VM
+- name: Delete VM
   netbox.netbox.netbox_virtual_machine:
     netbox_url: "{{ netbox_cred.url }}"
     netbox_token: "{{ netbox_cred.token }}"

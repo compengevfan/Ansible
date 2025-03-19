@@ -35,3 +35,5 @@
   include_role:
     name: NetboxRemoveVM
   when: mode == "Decom"
+
+- name: Remove VM IP from DNS
