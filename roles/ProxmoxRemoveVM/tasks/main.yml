@@ -25,3 +25,8 @@
     name: "{{ ServerNameUpper }}"
     state: absent
     force: true
+
+- name: Remove VM from Netbox
+  include_role:
+    name: NetboxRemoveVM
+  when: mode == "Decom"
