@@ -1,2 +1,27 @@
 ---
 # tasks file for ProxmoxRemoveVM
+- name: Obtain Credentials
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - proxmoxroot
+      - windowslocaladmin
+
+- name: Shutdown VM
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmoxroot_cred.username }}"
+    api_password: "{{ proxmoxroot_cred.password }}"
+    api_host: pmx1.evorigin.com
+    name: "{{ ServerNameUpper }}"
+    state: stopped
+    force: true
+
+- name: Delete VM
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmoxroot_cred.username }}"
+    api_password: "{{ proxmoxroot_cred.password }}"
+    api_host: pmx1.evorigin.com
+    name: "{{ ServerNameUpper }}"
+    state: absent
+    force: true

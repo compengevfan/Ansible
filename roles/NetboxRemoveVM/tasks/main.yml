@@ -1,2 +1,4 @@
 ---
 # tasks file for NetboxRemoveVM
+- name: Make sure ServerName is all upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
