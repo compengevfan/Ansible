@@ -36,4 +36,4 @@
     name: NetboxRemoveVM
   when: mode == "Decom"
 
-- name: Remove VM IP from DNS
+# - name: Remove VM IP from DNS
