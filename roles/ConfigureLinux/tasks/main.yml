@@ -49,7 +49,7 @@
     curl -sSL -O https://packages.microsoft.com/config/rhel/9/packages-microsoft-prod.rpm
     rpm -i packages-microsoft-prod.rpm
     rm packages-microsoft-prod.rpm
-    dnf update
+    dnf update -y
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install packages
