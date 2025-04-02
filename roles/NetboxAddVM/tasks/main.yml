@@ -74,7 +74,7 @@
 
     - name: Call the role to add IP to DNS
       include_role:
-        name: CreateDnsARecord
+        name: DnsCreateARecord
       vars:
         IpAddress: "{{ VmFileContents_JSON.VMInfo.IPAddress }}"
         Domain: "{{ ConfigFileContents_JSON.Domain }}"
@@ -127,7 +127,7 @@
 
     - name: Call the role to add IP to DNS
       include_role:
-        name: CreateDnsARecord
+        name: DnsCreateARecord
       vars:
         IpAddress: "{{ availableIps.json[0].address.split('/')[0] }}"
         Domain: "{{ ConfigFileContents_JSON.Domain }}"

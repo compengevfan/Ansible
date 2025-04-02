@@ -1,5 +1,5 @@
 ---
-# tasks file for CreateDnsARecord
+# tasks file for DnsCreateARecord
 - name: Obtain evorigin.com svcDNS service account cred
   include_role:
     name: GetVaultCreds
