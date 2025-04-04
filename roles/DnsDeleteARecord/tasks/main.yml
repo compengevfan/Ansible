@@ -16,7 +16,7 @@
     ansible_connection: winrm
     ansible_port: 5985
     ansible_winrm_transport: ntlm
-  when: Domain == "evorigin.com"
+  # when: Domain == "evorigin.com"
   # no_log: true
 
 - name: Add the A Record
