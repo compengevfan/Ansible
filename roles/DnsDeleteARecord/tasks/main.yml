@@ -7,6 +7,20 @@
     includecred:
       - evorigindns
 
+- name: Get VM Info
+  include_role:
+    name: GitGetVmInfo
+  vars:
+    ServerName: "{{ ServerName }}"
+  when: VmFileContents_JSON is not defined
+
+- name: Get Config Info
+  include_role:
+    name: GitConfigInfo
+  vars:
+    Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+  when: ConfigFileContents_JSON is not defined
+
 - name: Setup the DNS server for evorigin domain
   add_host:
     name: "{{ evorigindns_cred.dnsservername }}"
@@ -16,7 +30,7 @@
     ansible_connection: winrm
     ansible_port: 5985
     ansible_winrm_transport: ntlm
-  # when: Domain == "evorigin.com"
+  when: ConfigFileContents_JSON.Domain == "evorigin.com"
   # no_log: true
 
 - name: Add the A Record
@@ -24,5 +38,5 @@
     name: "{{ ServerNameUpper }}"
     type: "A"
     state: absent
-    zone: "{{ Domain }}"
+    zone: "{{ ConfigFileContents_JSON.Domain }}"
   delegate_to: "{{ evorigindns_cred.dnsservername }}"
