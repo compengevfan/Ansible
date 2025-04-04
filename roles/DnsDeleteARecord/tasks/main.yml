@@ -17,7 +17,7 @@
     ansible_port: 5985
     ansible_winrm_transport: ntlm
   when: Domain == "evorigin.com"
-  no_log: true
+  # no_log: true
 
 - name: Add the A Record
   community.windows.win_dns_record:
