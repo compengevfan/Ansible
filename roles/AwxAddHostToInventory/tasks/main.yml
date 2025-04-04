@@ -1,0 +1,28 @@
+---
+# tasks file for AwxAddHostToInventory
+- name: Obtain evorigin.com svcDNS service account cred
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - evorigindns
+
+- name: Setup the DNS server for evorigin domain
+  add_host:
+    name: "{{ evorigindns_cred.dnsservername }}"
+    groups: dns_host
+    ansible_user: "{{ evorigindns_cred.username }}"
+    ansible_password: "{{ evorigindns_cred.password }}"
+    ansible_connection: winrm
+    ansible_port: 5985
+    ansible_winrm_transport: ntlm
+  when: Domain == "evorigin.com"
+  no_log: true
+
+- name: Add the A Record
+  community.windows.win_dns_record:
+    name: "{{ ServerNameUpper }}"
+    type: "A"
+    state: absent
+    zone: "{{ Domain }}"
+  delegate_to: "{{ evorigindns_cred.dnsservername }}"
