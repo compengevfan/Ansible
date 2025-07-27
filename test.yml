@@ -5,7 +5,7 @@
   tasks:
     - name: Get Cred
       set_fact:
-        test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=homelabsecrets/data/linuxroot validate_certs=False') }}"
+        test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/linuxroot validate_certs=False') }}"
       # no_log: true
       delegate_to: localhost
       connection: local
