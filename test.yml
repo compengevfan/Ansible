@@ -10,7 +10,7 @@
       # no_log: true
 
 - name: Run a test play
-  hosts: all
+  hosts: AlmaLinux
   gather_facts: yes
   vars:
     ansible_user:     "{{ hostvars['localhost']['test_cred'].username }}"
