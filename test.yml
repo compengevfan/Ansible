@@ -13,8 +13,6 @@
 
     - name: Run a Command
       command: uptime
-      user: "{{ test_cred.username }}"
-      password: "{{ test_cred.password }}"
       # no_log: true
       register: command_output
 
