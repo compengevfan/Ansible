@@ -7,6 +7,7 @@
       set_fact:
         test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=homelabsecrets/data/dell/iDRAC validate_certs=False') }}"
       no_log: true
+      delegate_to: localhost
 
     - name: Run a Command
       command: uptime
