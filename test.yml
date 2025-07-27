@@ -1,6 +1,7 @@
 ---
 - name: Get Vault Credentials
   hosts: localhost
+  connection: local
   gather_facts: no
   tasks:
     - name: Get Cred
@@ -12,8 +13,8 @@
   hosts: all
   gather_facts: yes
   vars:
-    ansible_user:     "{{ test_cred.username }}"
-    ansible_password: "{{ test_cred.password }}"
+    ansible_user:     "{{ hostvars['localhost']['test_cred'].username }}"
+    ansible_password: "{{ hostvars['localhost']['test_cred'].password }}"
   tasks:
     - name: Run a Command
       command: uptime
