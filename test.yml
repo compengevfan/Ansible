@@ -1,16 +1,20 @@
 ---
-- name: This is a test
-  hosts: all
+- name: Get Vault Credentials
+  hosts: localhost
   gather_facts: no
   tasks:
     - name: Get Cred
       set_fact:
         test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/linuxroot validate_certs=False') }}"
       # no_log: true
-      delegate_to: localhost
-      connection: local
-      run_once: true
 
+- name: Run a test play
+  hosts: all
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ test_cred.username }}"
+    ansible_password: "{{ test_cred.password }}"
+  tasks:
     - name: Run a Command
       command: uptime
       # no_log: true
