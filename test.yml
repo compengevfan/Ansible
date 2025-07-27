@@ -1,8 +1,16 @@
 ---
 - name: This is a test
-  hosts: localhost
+  hosts: all
   gather_facts: no
   tasks:
     - name: Get Cred
       set_fact:
         test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=homelabsecrets/data/dell/iDRAC validate_certs=False') }}"
+      no_log: true
+
+    - name: Run a Command
+      command: uptime
+      register: command_output
+
+    - debug:
+        var: command_output
