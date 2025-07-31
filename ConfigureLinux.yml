@@ -1,6 +1,7 @@
 ---
 - name: GetCredentials
   hosts: localhost
+  connection: local
   gather_facts: no
   tasks:
     - name: Obtain Credentials
