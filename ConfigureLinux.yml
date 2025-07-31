@@ -1,22 +1,19 @@
 ---
-- name: GetCredentials
-  hosts: AlmaLinux
-  gather_facts: no
-  tasks:
-    - name: Obtain Credentials
-      include_role:
-        name: GetVaultCreds
-      vars:
-        includecred:
-          - linuxroot
-      run_once: true
+# - name: GetCredentials
+#   hosts: AlmaLinux
+#   gather_facts: no
+#   tasks:
+#     - name: Obtain Credentials
+#       include_role:
+#         name: GetVaultCreds
+#       vars:
+#         includecred:
+#           - linuxroot
+#       run_once: true
         
 - name: Run the ConfigureLinux Role
   hosts: AlmaLinux
   gather_facts: yes
-  vars:
-    ansible_user:     "{{ hostvars['localhost']['linuxroot_cred'].username }}"
-    ansible_password: "{{ hostvars['localhost']['linuxroot_cred'].password }}"
   tasks:
     - name: Run the ConfigureLinux Role
       include_role:
