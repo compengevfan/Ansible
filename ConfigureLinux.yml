@@ -1,6 +1,6 @@
 ---
 - name: GetCredentials
-  hosts: localhost
+  hosts: AlmaLinux
   connection: local
   gather_facts: no
   tasks:
@@ -10,6 +10,7 @@
       vars:
         includecred:
           - linuxroot
+      delegate_to: localhost
         
 - name: Run the ConfigureLinux Role
   hosts: AlmaLinux

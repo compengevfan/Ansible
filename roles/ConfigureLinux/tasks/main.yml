@@ -67,7 +67,7 @@
     # Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
   args:
     executable: /usr/bin/pwsh
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for DupreeFunctions
   shell: |
