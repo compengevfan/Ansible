@@ -14,8 +14,8 @@
   hosts: AlmaLinux
   gather_facts: yes
   vars:
-    ansible_user:     "{{ hostvars['localhost']['test_cred'].username }}"
-    ansible_password: "{{ hostvars['localhost']['test_cred'].password }}"
+    ansible_user:     "{{ hostvars['localhost']['linuxroot_cred'].username }}"
+    ansible_password: "{{ hostvars['localhost']['linuxroot_cred'].password }}"
   tasks:
     - name: Run the ConfigureLinux Role
       include_role:
