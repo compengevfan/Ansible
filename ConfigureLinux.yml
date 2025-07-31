@@ -1,8 +1,22 @@
 ---
-- name: Run
+- name: GetCredentials
   hosts: localhost
   gather_facts: no
   tasks:
-    - name: Run the Role
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - linuxroot
+        
+- name: Run the ConfigureLinux Role
+  hosts: AlmaLinux
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ hostvars['localhost']['test_cred'].username }}"
+    ansible_password: "{{ hostvars['localhost']['test_cred'].password }}"
+  tasks:
+    - name: Run the ConfigureLinux Role
       include_role:
         name: ConfigureLinux
