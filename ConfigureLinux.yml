@@ -9,7 +9,6 @@
       vars:
         includecred:
           - linuxroot
-      run_once: true
         
 - name: Run the ConfigureLinux Role
   hosts: AlmaLinux
