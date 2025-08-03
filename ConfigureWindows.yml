@@ -1,8 +1,22 @@
 ---
-- name: Run
-  hosts: localhost
+- name: GetCredentials
+  hosts: Windows
   gather_facts: no
   tasks:
-    - name: Run the Role
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - windowslocaladmin
+
+- name: Run
+  hosts: Windows
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ windowslocaladmin_cred.username }}"
+    ansible_password: "{{ windowslocaladmin_cred.password }}"
+  tasks:
+    - name: Run the ConfigureWindows Role
       include_role:
         name: ConfigureWindows
