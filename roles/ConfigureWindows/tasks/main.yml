@@ -141,7 +141,7 @@
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for PowerShell 7
-  ansible.windows.win_powershell:
+  shell:
     script: $PSVersionTable
   register: ps7_check
   failed_when: false
@@ -180,7 +180,7 @@
       state: absent
     when: pwsh_install is changed
     # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: ps7_check.rc != 0
+  when: ps7_check is not defined
 
 - name: Reboot after installing software
   win_reboot:
