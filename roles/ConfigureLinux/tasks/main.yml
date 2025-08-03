@@ -64,8 +64,8 @@
 - name: Install Node Exporter
   shell: |
     dnf install -y epel-release
-    dnf install -y prometheus-node_exporter
-    systemctl enable --now node_exporter
+    dnf install -y golang-github-prometheus-node-exporter
+    systemctl enable --now prometheus-node-exporter
 
 # - name: Install PowerShell Modules
 #   shell: |
