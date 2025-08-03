@@ -144,6 +144,8 @@
   shell:
     script: $PSVersionTable
   register: ps7_check
+  args:
+    executable: pwsh
   failed_when: false
 
 - name: Install PowerShell 7
