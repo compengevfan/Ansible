@@ -141,11 +141,9 @@
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for PowerShell 7
-  shell:
-    script: $PSVersionTable
+  win_stat:
+    path: C:\Program Files\PowerShell\7\pwsh.exe
   register: ps7_check
-  args:
-    executable: pwsh
   failed_when: false
 
 - name: Install PowerShell 7
