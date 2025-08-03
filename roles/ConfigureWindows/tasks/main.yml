@@ -136,6 +136,7 @@
       - putty
       - windirstat
       - 7zip.install
+      - prometheus-windows-exporter.install
     state: present
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 

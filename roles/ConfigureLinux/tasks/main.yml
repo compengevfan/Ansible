@@ -61,13 +61,16 @@
     state: latest
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Install PowerShell Modules
-  shell: |
-    Install-Module Posh-SSH -Scope AllUsers -Force
-    # Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
-  args:
-    executable: /usr/bin/pwsh
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+- name: Install Prometheus
+  prometheus.prometheus.node_exporter:
+
+# - name: Install PowerShell Modules
+#   shell: |
+#     Install-Module Posh-SSH -Scope AllUsers -Force
+#     Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
+#   args:
+#     executable: /usr/bin/pwsh
+#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for DupreeFunctions
   shell: |
