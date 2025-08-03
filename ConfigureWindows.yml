@@ -1,6 +1,6 @@
 ---
 - name: GetCredentials
-  hosts: Windows
+  hosts: all
   gather_facts: no
   tasks:
     - name: Obtain Credentials
