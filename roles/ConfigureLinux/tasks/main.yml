@@ -68,8 +68,7 @@
   ansible.builtin.import_role:
     name: prometheus.prometheus.node_exporter
   vars:
-    ansible_user:     "{{ linuxroot_cred.username }}"
-    ansible_password: "{{ linuxroot_cred.password }}"
+    {{ linuxroot_cred }}
 
 # - name: Install PowerShell Modules
 #   shell: |
