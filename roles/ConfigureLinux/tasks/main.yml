@@ -61,6 +61,9 @@
     state: latest
   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
+- name: Install Prometheus
+  prometheus.prometheus.node_exporter:
+
 # - name: Install PowerShell Modules
 #   shell: |
 #     Install-Module Posh-SSH -Scope AllUsers -Force
