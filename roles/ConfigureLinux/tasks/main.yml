@@ -65,10 +65,8 @@
 #   prometheus.prometheus.node_exporter:
 
 - name: Install Node Exporter
-  collections:
-    - prometheus.prometheus
-  roles:
-    - role: prometheus.prometheus.node_exporter
+  ansible.builtin.import_role:
+    name: prometheus.prometheus.node_exporter
 
 # - name: Install PowerShell Modules
 #   shell: |
