@@ -61,14 +61,11 @@
     state: latest
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-# - name: Install Prometheus
-#   prometheus.prometheus.node_exporter:
-
 - name: Install Node Exporter
-  ansible.builtin.import_role:
-    name: prometheus.prometheus.node_exporter
-  var:
-    "{{ linuxroot_cred }}"
+  shell: |
+    dnf install -y epel-release
+    dnf install -y prometheus-node_exporter
+    systemctl enable --now node_exporter
 
 # - name: Install PowerShell Modules
 #   shell: |
