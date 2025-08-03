@@ -67,8 +67,8 @@
 - name: Install Node Exporter
   ansible.builtin.import_role:
     name: prometheus.prometheus.node_exporter
-  vars:
-    {{ linuxroot_cred }}
+  var:
+    "{{ linuxroot_cred }}"
 
 # - name: Install PowerShell Modules
 #   shell: |
