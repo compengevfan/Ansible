@@ -149,7 +149,7 @@
 - name: Install PowerShell 7
   block:
   - name: Get the latest PowerShell 7 release info from GitHub
-    uri:
+    win_uri:
       url: "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
       method: GET
       return_content: yes
