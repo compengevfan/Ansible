@@ -11,7 +11,7 @@
           - windowslocaladmin
 
 - name: Run
-  hosts: Windows
+  hosts: all
   gather_facts: yes
   vars:
     ansible_user:     "{{ windowslocaladmin_cred.username }}"
