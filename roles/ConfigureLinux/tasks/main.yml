@@ -61,8 +61,14 @@
     state: latest
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Install Prometheus
-  prometheus.prometheus.node_exporter:
+# - name: Install Prometheus
+#   prometheus.prometheus.node_exporter:
+
+- name: Install Node Exporter
+  collections:
+    - prometheus.prometheus
+  roles:
+    - role: prometheus.prometheus.node_exporter
 
 # - name: Install PowerShell Modules
 #   shell: |
