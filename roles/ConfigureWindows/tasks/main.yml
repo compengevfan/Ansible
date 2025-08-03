@@ -180,7 +180,7 @@
       state: absent
     when: pwsh_install is changed
     # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: ps7_check is not defined
+  when: ps7_check.stat.exists == false
 
 - name: Reboot after installing software
   win_reboot:
