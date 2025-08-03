@@ -1,48 +1,48 @@
 ---
 # tasks file for ConfigureLinux
-- name: Make sure ServerName is all upper
-  set_fact: ServerNameUpper="{{ ServerName | upper }}"
-  when: ServerNameUpper is not defined
+# - name: Make sure ServerName is all upper
+#   set_fact: ServerNameUpper="{{ ServerName | upper }}"
+#   when: ServerNameUpper is not defined
 
-- name: Get VM Info
-  include_role:
-    name: GitGetVmInfo
-  vars:
-    ServerName: "{{ ServerName }}"
-  when: VmFileContents_JSON is not defined
+# - name: Get VM Info
+#   include_role:
+#     name: GitGetVmInfo
+#   vars:
+#     ServerName: "{{ ServerName }}"
+#   when: VmFileContents_JSON is not defined
 
-- name: Get Config Info
-  include_role:
-    name: GitConfigInfo
-  vars:
-    Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
-  when: ConfigFileContents_JSON is not defined
+# - name: Get Config Info
+#   include_role:
+#     name: GitConfigInfo
+#   vars:
+#     Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+#   when: ConfigFileContents_JSON is not defined
 
-- name: Obtain Credentials
-  include_role:
-    name: GetVaultCreds
-  vars:
-    includecred:
-      - linuxroot
+# - name: Obtain Credentials
+#   include_role:
+#     name: GetVaultCreds
+#   vars:
+#     includecred:
+#       - linuxroot
 
-- name: Add server to configure to temp inventory
-  add_host:
-    name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-    groups: linuxconfigure
-    ansible_user: "{{ linuxroot_cred.username }}"
-    ansible_password: "{{ linuxroot_cred.password }}"
-  no_log: true
+# - name: Add server to configure to temp inventory
+#   add_host:
+#     name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+#     groups: linuxconfigure
+#     ansible_user: "{{ linuxroot_cred.username }}"
+#     ansible_password: "{{ linuxroot_cred.password }}"
+#   no_log: true
 
 - name: Disable firewalld on AlmaLinux 9
   systemd:
     name: firewalld
     state: stopped
     enabled: false
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Update all currently installed packages
   shell: dnf update -y
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Add Microsoft RH repo
   shell: |
@@ -50,7 +50,7 @@
     rpm -i packages-microsoft-prod.rpm
     rm packages-microsoft-prod.rpm
     dnf update -y
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install packages
   dnf: 
@@ -59,7 +59,7 @@
       - powershell
       - qemu-guest-agent
     state: latest
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install Prometheus
   prometheus.prometheus.node_exporter:
@@ -79,7 +79,7 @@
     executable: /usr/bin/pwsh
   register: df_check
   failed_when: false
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install DupreeFunctions if not found
   block:
@@ -87,7 +87,7 @@
     git:
       repo: https://github.com/compengevfan/PowerShell.git
       dest: /tmp/PowerShell
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
   - name: Install DupreeFunctions
     shell: |
@@ -97,7 +97,7 @@
       Remove-Item /tmp/PowerShell -Recurse -Force -Confirm:$false
     args:
       executable: /usr/bin/pwsh
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   when: df_check.rc != 0
 
 - name: Reboot Server
@@ -106,4 +106,4 @@
     pre_reboot_delay: 0
     post_reboot_delay: 30
     test_command: uptime
-  delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
