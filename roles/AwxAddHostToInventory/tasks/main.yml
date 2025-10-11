@@ -1,2 +1,11 @@
 ---
 # tasks file for AwxAddHostToInventory
+- name: ServerName to Upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
+
+- name: Add AlmaLinux to AWX Inventory
+  include_role:
+    name: GitGetVmInfo
+  vars:
+    ServerName: "{{ ServerNameUpper }}"
+  when: VmFileContents_JSON is not defined
