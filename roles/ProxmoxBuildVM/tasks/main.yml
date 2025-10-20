@@ -63,7 +63,7 @@
 - name:  Clone a virtual machine from Linux template
   block:
   - name: Create the VM
-    community.general.proxmox_kvm:
+    community.proxmox.proxmox_kvm:
       api_user: "{{ proxmoxroot_cred.username }}"
       api_password: "{{ proxmoxroot_cred.password }}"
       api_host: pmx1.evorigin.com
@@ -75,7 +75,7 @@
       timeout: 500
 
   - name: Update Linux VM configuration
-    community.general.proxmox_kvm:
+    community.proxmox.proxmox_kvm:
       api_user: "{{ proxmoxroot_cred.username }}"
       api_password: "{{ proxmoxroot_cred.password }}"
       api_host: pmx1.evorigin.com
@@ -93,7 +93,7 @@
       update: true
 
   - name: Start VM
-    community.general.proxmox_kvm:
+    community.proxmox.proxmox_kvm:
       api_user: "{{ proxmoxroot_cred.username }}"
       api_password: "{{ proxmoxroot_cred.password }}"
       api_host: pmx1.evorigin.com
