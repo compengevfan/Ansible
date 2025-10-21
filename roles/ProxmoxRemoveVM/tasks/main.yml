@@ -12,7 +12,7 @@
       - windowslocaladmin
 
 - name: Shutdown VM
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_user: "{{ proxmoxroot_cred.username }}"
     api_password: "{{ proxmoxroot_cred.password }}"
     api_host: pmx1.evorigin.com
@@ -22,7 +22,7 @@
   ignore_errors: true
 
 - name: Delete VM
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_user: "{{ proxmoxroot_cred.username }}"
     api_password: "{{ proxmoxroot_cred.password }}"
     api_host: pmx1.evorigin.com
