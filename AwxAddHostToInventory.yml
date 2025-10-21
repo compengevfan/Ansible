@@ -1,5 +1,5 @@
 ---
-- hosts: "{{ Hosts }}"
+- hosts: localhost
   gather_facts: yes
   roles:
     - AwxAddHostToInventory
