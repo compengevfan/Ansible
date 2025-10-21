@@ -14,6 +14,7 @@
   awx.awx.host:
     name: "{{ ServerNameUpper }}"
     inventory: "Linux"
+    controller_host: "jax-k3s001.evorigin.com"
     state: present
   when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
 
