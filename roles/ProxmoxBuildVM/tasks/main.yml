@@ -100,4 +100,8 @@
       name: "{{ ServerNameUpper }}"
       node: pmx1
       state: started
+
+  - name: Add VM to Inventory
+    include_role:
+      name: AwxAddHostToInventory
   # when: not platform.json.name is search("Windows")
