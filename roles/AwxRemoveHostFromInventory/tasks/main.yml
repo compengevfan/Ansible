@@ -1,0 +1,57 @@
+---
+# tasks file for AwxAddHostToInventory
+- name: Obtain Credentials
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - awx
+
+- name: Get VM Info
+  include_role:
+    name: GitGetVmInfo
+  vars:
+    ServerName: "{{ ServerName }}"
+  when: VmFileContents_JSON is not defined
+  
+- name: ServerName to Upper
+  set_fact: ServerNameUpper="{{ ServerName | upper }}"
+
+- name: Add AlmaLinux Server to AWX Inventory
+  awx.awx.host:
+    name: "{{ ServerNameUpper }}"
+    inventory: "Linux"
+    controller_host: "jax-k3s001.evorigin.com"
+    controller_username: "{{ awx_cred.username }}"
+    controller_password: "{{ awx_cred.password }}"
+    validate_certs: no
+    state: absent
+  when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
+
+# - name: Add AlmaLinux Server to AlmaLinux Group
+#   awx.awx.group:
+#     name: "AlmaLinux"
+#     inventory: "Linux"
+#     controller_host: "jax-k3s001.evorigin.com"
+#     controller_username: "{{ awx_cred.username }}"
+#     controller_password: "{{ awx_cred.password }}"
+#     validate_certs: no
+#     hosts:
+#       - "{{ ServerNameUpper }}"
+#     preserve_existing_hosts: true
+#     state: present
+#   when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
+
+# - name: Add AlmaLinux Server to AlmaLinux Group
+#   awx.awx.group:
+#     name: "Virtual"
+#     inventory: "Linux"
+#     controller_host: "jax-k3s001.evorigin.com"
+#     controller_username: "{{ awx_cred.username }}"
+#     controller_password: "{{ awx_cred.password }}"
+#     validate_certs: no
+#     hosts:
+#       - "{{ ServerNameUpper }}"
+#     preserve_existing_hosts: true
+#     state: present
+#   when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
