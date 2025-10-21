@@ -1,5 +1,12 @@
 ---
 # tasks file for AwxAddHostToInventory
+- name: Obtain Credentials
+  include_role:
+    name: GetVaultCreds
+  vars:
+    includecred:
+      - awx
+
 - name: Get VM Info
   include_role:
     name: GitGetVmInfo
@@ -15,6 +22,8 @@
     name: "{{ ServerNameUpper }}"
     inventory: "Linux"
     controller_host: "jax-k3s001.evorigin.com"
+    controller_username: "{{ awx_cred.username }}"
+    controller_password: "{{ awx_cred.password }}"
     validate_certs: no
     state: present
   when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
@@ -24,6 +33,8 @@
     name: "AlmaLinux"
     inventory: "Linux"
     controller_host: "jax-k3s001.evorigin.com"
+    controller_username: "{{ awx_cred.username }}"
+    controller_password: "{{ awx_cred.password }}"
     validate_certs: no
     hosts:
       - "{{ ServerNameUpper }}"
