@@ -40,3 +40,16 @@
       - "{{ ServerNameUpper }}"
     state: present
   when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
+
+- name: Add AlmaLinux Server to AlmaLinux Group
+  awx.awx.group:
+    name: "Virtual"
+    inventory: "Linux"
+    controller_host: "jax-k3s001.evorigin.com"
+    controller_username: "{{ awx_cred.username }}"
+    controller_password: "{{ awx_cred.password }}"
+    validate_certs: no
+    hosts:
+      - "{{ ServerNameUpper }}"
+    state: present
+  when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
