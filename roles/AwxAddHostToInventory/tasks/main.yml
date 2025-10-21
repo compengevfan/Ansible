@@ -38,6 +38,7 @@
     validate_certs: no
     hosts:
       - "{{ ServerNameUpper }}"
+    preserve_existing_hosts: true
     state: present
   when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
 
@@ -51,5 +52,6 @@
     validate_certs: no
     hosts:
       - "{{ ServerNameUpper }}"
+    preserve_existing_hosts: true
     state: present
   when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
