@@ -15,6 +15,7 @@
     name: "{{ ServerNameUpper }}"
     inventory: "Linux"
     controller_host: "jax-k3s001.evorigin.com"
+    validate_certs: no
     state: present
   when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
 
@@ -22,6 +23,8 @@
   awx.awx.group:
     name: "AlmaLinux"
     inventory: "Linux"
+    controller_host: "jax-k3s001.evorigin.com"
+    validate_certs: no
     hosts:
       - "{{ ServerNameUpper }}"
     state: present
