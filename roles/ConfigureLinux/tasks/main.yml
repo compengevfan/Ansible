@@ -21,6 +21,7 @@
       - git
       - powershell
       - qemu-guest-agent
+      - cifs-utils
     state: latest
 
 - name: Ensure EPEL 9 repo is present
