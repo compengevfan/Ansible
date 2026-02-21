@@ -1,48 +1,12 @@
 ---
-# tasks file for ConfigureLinux
-# - name: Make sure ServerName is all upper
-#   set_fact: ServerNameUpper="{{ ServerName | upper }}"
-#   when: ServerNameUpper is not defined
-
-# - name: Get VM Info
-#   include_role:
-#     name: GitGetVmInfo
-#   vars:
-#     ServerName: "{{ ServerName }}"
-#   when: VmFileContents_JSON is not defined
-
-# - name: Get Config Info
-#   include_role:
-#     name: GitConfigInfo
-#   vars:
-#     Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
-#   when: ConfigFileContents_JSON is not defined
-
-# - name: Obtain Credentials
-#   include_role:
-#     name: GetVaultCreds
-#   vars:
-#     includecred:
-#       - linuxroot
-
-# - name: Add server to configure to temp inventory
-#   add_host:
-#     name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-#     groups: linuxconfigure
-#     ansible_user: "{{ linuxroot_cred.username }}"
-#     ansible_password: "{{ linuxroot_cred.password }}"
-#   no_log: true
-
 - name: Disable firewalld on AlmaLinux 9
   systemd:
     name: firewalld
     state: stopped
     enabled: false
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Update all currently installed packages
   shell: dnf update -y
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Add Microsoft RH repo
   shell: |
@@ -50,7 +14,6 @@
     rpm -i packages-microsoft-prod.rpm
     rm packages-microsoft-prod.rpm
     dnf update -y
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install packages
   dnf: 
@@ -58,22 +21,46 @@
       - git
       - powershell
       - qemu-guest-agent
+      - cifs-utils
     state: latest
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Install Node Exporter
+- name: Ensure EPEL 9 repo is present
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+
+#If golang-github-prometheus-node-exporter is present, remove service and uninstall.
+- name: Stop and disable old prometheus-node-exporter service
+  ansible.builtin.systemd:
+    name: prometheus-node-exporter
+    state: stopped
+    enabled: false
+  register: old_node_exporter_service
+  failed_when: false
+
+- name: Remove golang-github-prometheus-node-exporter package
+  ansible.builtin.dnf:
+    name: golang-github-prometheus-node-exporter
+    state: absent
+  register: old_node_exporter_pkg
+  failed_when: false
+
+- name: Install node exporter
+  ansible.builtin.dnf:
+    name: node_exporter
+    state: present
+
+- name: Enable and start node_exporter
+  ansible.builtin.systemd:
+    name: node_exporter
+    enabled: true
+    state: started
+
+- name: Install PowerShell Modules
   shell: |
-    dnf install -y epel-release
-    dnf install -y golang-github-prometheus-node-exporter
-    systemctl enable --now prometheus-node-exporter
-
-# - name: Install PowerShell Modules
-#   shell: |
-#     Install-Module Posh-SSH -Scope AllUsers -Force
-#     Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
-#   args:
-#     executable: /usr/bin/pwsh
-#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    Install-Module Posh-SSH -Scope AllUsers -Force
+  args:
+    executable: /usr/bin/pwsh
 
 - name: Check for DupreeFunctions
   shell: |
@@ -82,7 +69,6 @@
     executable: /usr/bin/pwsh
   register: df_check
   failed_when: false
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install DupreeFunctions if not found
   block:
@@ -90,7 +76,6 @@
     git:
       repo: https://github.com/compengevfan/PowerShell.git
       dest: /tmp/PowerShell
-    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
   - name: Install DupreeFunctions
     shell: |
@@ -100,7 +85,6 @@
       Remove-Item /tmp/PowerShell -Recurse -Force -Confirm:$false
     args:
       executable: /usr/bin/pwsh
-    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   when: df_check.rc != 0
 
 - name: Reboot Server
@@ -109,4 +93,3 @@
     pre_reboot_delay: 0
     post_reboot_delay: 30
     test_command: uptime
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
