@@ -36,7 +36,7 @@
   # We filter by matching the Subject to the CN. Adjust if your subject is different.
   win_shell: >
     $thumb = (Get-ChildItem -Path Cert:\\LocalMachine\\My |
-      Where-Object { $_.Subject -like "*CN={{ ServerName }}*" } |
+      Where-Object { $_.Subject -like "*CN={{ '*.' + ServerName if Wildcard | bool else ServerName + '.evorigin.com' }}*" } |
       Select-Object -Last 1).Thumbprint;
     Write-Host $thumb
   register: cert_thumbprint

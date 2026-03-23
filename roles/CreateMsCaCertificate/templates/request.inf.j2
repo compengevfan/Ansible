@@ -1,5 +1,5 @@
 [NewRequest]
-Subject = "CN={{ ServerName }}.evorigin.com, O=EvOrigin, OU=Lab, L=Jax, ST=FL, C=US"
+Subject = "CN={{ '*.' + ServerName if Wildcard | bool else ServerName + '.evorigin.com' }}, O=EvOrigin, OU=Lab, L=Jax, ST=FL, C=US"
 KeyLength = "{{ KeyLength }}"
 KeySpec = 1
 KeyUsage = 0xA0  ; Digital Signature, Key Encipherment
@@ -17,7 +17,7 @@ _continue_ = "CA=FALSE"
 
 ; Subject Alternative Name
 2.5.29.17 = "{text}"
-_continue_ = "DNS={{ ServerName }}.evorigin.com"
+_continue_ = "DNS={{ '*.' + ServerName if Wildcard | bool else ServerName + '.evorigin.com' }}"
 
 [RequestAttributes]
 CertificateTemplate = "{{ cert_template }}"
