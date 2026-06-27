@@ -1,43 +1,4 @@
 ---
-# tasks file for ConfigureWindows
-# - name: Make sure ServerName is all upper
-#   set_fact: ServerNameUpper="{{ ServerName | upper }}"
-#   when: ServerNameUpper is not defined
-
-# - name: Get VM Info
-#   include_role:
-#     name: GitGetVmInfo
-#   vars:
-#     ServerName: "{{ ServerName }}"
-#   when: VmFileContents_JSON is not defined
-
-# - name: Get Config Info
-#   include_role:
-#     name: GitConfigInfo
-#   vars:
-#     Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
-#   when: ConfigFileContents_JSON is not defined
-
-# - name: Obtain Credentials
-#   include_role:
-#     name: GetVaultCreds
-#   vars:
-#     includecred:
-#       - windowslocaladmin
-#       - evoriginda
-
-# - name: Add server to configure to temp inventory
-#   add_host:
-#     name: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-#     groups: windowsconfigure
-#     ansible_user: "{{ windowslocaladmin_cred.username }}"
-#     ansible_password: "{{ windowslocaladmin_cred.password }}"
-#     ansible_connection: winrm
-#     ansible_port: 5985
-#     ansible_winrm_transport: ntlm
-#     ansible_winrm_read_timeout_sec: 300
-#   no_log: true
-
 - name: Create Temp Directory
   win_file:
     path: "C:\\Temp"
@@ -202,7 +163,7 @@
   block:
   - name: Download my PowerShell repo
     win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
     ignore_errors: true
 
   - name: Install DupreeFunctions
@@ -214,12 +175,3 @@
     # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   when: df_check.rc != 0
 
-# - name: Join domain
-#   microsoft.ad.membership:
-#     dns_domain_name: "{{ ConfigFileContents_JSON.Domain }}"
-#     domain_admin_user: "{{ evoriginda_cred.username }}"
-#     domain_admin_password: "{{ evoriginda_cred.password }}"
-#     domain_ou_path: "{{ VmFileContents_JSON.VMInfo.OU }}"
-#     state: domain
-#     reboot: true
-#   delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"

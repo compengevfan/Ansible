@@ -1,0 +1,44 @@
+---
+- name: Get Linux Credentials
+  hosts: AlmaLinux
+  gather_facts: no
+  tasks:
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - linuxroot
+
+- name: Run the ConfigureLinux Role
+  hosts: AlmaLinux
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Run the ConfigureLinux Role
+      include_role:
+        name: ConfigureLinux
+
+- name: Get Windows Credentials
+  hosts: Windows
+  gather_facts: no
+  tasks:
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - windowslocaladmin
+
+- name: Run the ConfigureWindows Role
+  hosts: Windows
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ windowslocaladmin_cred.username }}"
+    ansible_password: "{{ windowslocaladmin_cred.password }}"
+  tasks:
+    - name: Run the ConfigureWindows Role
+      include_role:
+        name: ConfigureWindows
