@@ -57,7 +57,7 @@
 - name: Set execution policy
   win_shell: |
     $ExecPolicy = Get-ExecutionPolicy
-    if ($Execpolicy -ne "Unrestricted") {
+    if ($ExecPolicy -ne "Unrestricted") {
       Write-Output "Setting Execution Policy to Unrestricted."
       Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine -Force
     }
@@ -190,7 +190,6 @@
 - name: Install PowerShell modules
   win_shell: |
     Install-Module Posh-SSH -Scope AllUsers -Force
-    Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for DupreeFunctions
@@ -203,7 +202,7 @@
   block:
   - name: Download my PowerShell repo
     win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
-    delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
     ignore_errors: true
 
   - name: Install DupreeFunctions
