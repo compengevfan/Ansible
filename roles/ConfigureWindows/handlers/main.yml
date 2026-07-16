@@ -1,2 +1,6 @@
 ---
 # handlers file for ConfigureWindows
+- name: Restart Zabbix Agent
+  win_service:
+    name: Zabbix Agent
+    state: restarted

@@ -107,10 +107,9 @@
       # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for Chocolatey
-  win_chocolatey:
-    name: chocolatey
+  win_stat:
+    path: C:\ProgramData\chocolatey\bin\choco.exe
   register: chocolatey_check
-  failed_when: false
 
 - name: Chocolatey
   block:
@@ -123,7 +122,7 @@
     - name: Reboot after installing Chocolatey
       win_reboot:
       # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-  when: (chocolatey_check.failed) or (chocolatey_check.rc != 0)
+  when: not chocolatey_check.stat.exists
 
 - name: Install Software
   win_chocolatey: 
@@ -140,6 +139,45 @@
       - zabbix-agent
     state: present
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+- name: Configure Zabbix Agent
+  block:
+    - name: Set Zabbix Server (passive)
+      win_lineinfile:
+        path: "{{ zabbix_agent_conf_path }}"
+        regexp: '^Server='
+        line: "Server={{ zabbix_server_ip }}"
+      notify: Restart Zabbix Agent
+
+    - name: Set Zabbix ServerActive
+      win_lineinfile:
+        path: "{{ zabbix_agent_conf_path }}"
+        regexp: '^ServerActive='
+        line: "ServerActive={{ zabbix_server_ip }}"
+      notify: Restart Zabbix Agent
+
+    - name: Set Zabbix Hostname
+      win_lineinfile:
+        path: "{{ zabbix_agent_conf_path }}"
+        regexp: '^Hostname='
+        line: "Hostname={{ ansible_hostname }}"
+      notify: Restart Zabbix Agent
+
+    - name: Allow Zabbix agent inbound (TCP 10050)
+      community.windows.win_firewall_rule:
+        name: Zabbix Agent
+        localport: 10050
+        action: allow
+        direction: in
+        protocol: tcp
+        state: present
+        enabled: yes
+
+    - name: Ensure Zabbix Agent service is running and set to auto-start
+      win_service:
+        name: Zabbix Agent
+        start_mode: auto
+        state: started
 
 - name: Check for PowerShell 7
   win_stat:
