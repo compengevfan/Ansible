@@ -59,7 +59,7 @@
     $ExecPolicy = Get-ExecutionPolicy
     if ($Execpolicy -ne "Unrestricted") {
       Write-Output "Setting Execution Policy to Unrestricted."
-      Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope LocalMachine -Force
+      Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine -Force
     }
     else { Write-Output "Execution Policy already set to Unrestricted." }
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
@@ -137,6 +137,7 @@
       - windirstat
       - 7zip.install
       - prometheus-windows-exporter.install
+      - zabbix-agent
     state: present
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
