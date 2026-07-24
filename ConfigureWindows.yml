@@ -8,14 +8,14 @@
         name: GetVaultCreds
       vars:
         includecred:
-          - windowslocaladmin
+          - evoriginda
 
 - name: Run
   hosts: all
   gather_facts: yes
   vars:
-    ansible_user:     "{{ windowslocaladmin_cred.username }}"
-    ansible_password: "{{ windowslocaladmin_cred.password }}"
+    ansible_user:     "{{ evoriginda_cred.username }}"
+    ansible_password: "{{ evoriginda_cred.password }}"
   tasks:
     - name: Run the ConfigureWindows Role
       include_role:
