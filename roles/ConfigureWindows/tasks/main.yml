@@ -115,7 +115,7 @@
   block:
     - name: Download Chocolatey MSI
       win_get_url:
-        url: https://github.com/chocolatey/choco/releases/latest/download/chocolatey.msi
+        url: https://github.com/chocolatey/choco/releases/download/2.7.3/chocolatey-2.7.3.0.msi
         dest: C:\Temp\chocolatey.msi
 
     - name: Install Chocolatey via MSI
