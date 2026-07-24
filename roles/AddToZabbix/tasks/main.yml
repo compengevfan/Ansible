@@ -1,0 +1,134 @@
+---
+# tasks file for AddToZabbix
+# Registers the target host in Zabbix if it isn't already present.
+# All Zabbix API calls run on the control node via delegate_to: localhost.
+
+- name: Fail if target OS is not supported by AddToZabbix
+  fail:
+    msg: "Unsupported ansible_system '{{ ansible_system }}'. Supported: {{ zabbix_os_map.keys() | list | join(', ') }}"
+  when: ansible_system not in zabbix_os_map
+
+- name: Set target template and host group from OS
+  set_fact:
+    zabbix_target_template: "{{ zabbix_os_map[ansible_system].template }}"
+    zabbix_target_group: "{{ zabbix_os_map[ansible_system].group }}"
+
+- name: Check if host already exists in Zabbix
+  ansible.builtin.uri:
+    url: "{{ zabbix_api_url }}/api_jsonrpc.php"
+    method: POST
+    headers:
+      Content-Type: application/json-rpc
+      Authorization: "Bearer {{ zabbixapi_cred.token }}"
+    body_format: json
+    body:
+      jsonrpc: "2.0"
+      method: host.get
+      params:
+        filter:
+          host: ["{{ ansible_hostname }}"]
+      id: 1
+    validate_certs: "{{ zabbix_api_validate_certs }}"
+    return_content: yes
+  register: zbx_host_check
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Add host to Zabbix
+  when: (zbx_host_check.json.result | length) == 0
+  block:
+    - name: Look up host group ID
+      ansible.builtin.uri:
+        url: "{{ zabbix_api_url }}/api_jsonrpc.php"
+        method: POST
+        headers:
+          Content-Type: application/json-rpc
+          Authorization: "Bearer {{ zabbixapi_cred.token }}"
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: hostgroup.get
+          params:
+            filter:
+              name: ["{{ zabbix_target_group }}"]
+          id: 2
+        validate_certs: "{{ zabbix_api_validate_certs }}"
+        return_content: yes
+      register: zbx_group_lookup
+      delegate_to: localhost
+      become: false
+      no_log: true
+
+    - name: Fail if host group not found
+      fail:
+        msg: "Zabbix host group '{{ zabbix_target_group }}' not found."
+      when: (zbx_group_lookup.json.result | length) == 0
+
+    - name: Look up template ID
+      ansible.builtin.uri:
+        url: "{{ zabbix_api_url }}/api_jsonrpc.php"
+        method: POST
+        headers:
+          Content-Type: application/json-rpc
+          Authorization: "Bearer {{ zabbixapi_cred.token }}"
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: template.get
+          params:
+            filter:
+              host: ["{{ zabbix_target_template }}"]
+          id: 3
+        validate_certs: "{{ zabbix_api_validate_certs }}"
+        return_content: yes
+      register: zbx_template_lookup
+      delegate_to: localhost
+      become: false
+      no_log: true
+
+    - name: Fail if template not found
+      fail:
+        msg: "Zabbix template '{{ zabbix_target_template }}' not found."
+      when: (zbx_template_lookup.json.result | length) == 0
+
+    - name: Create host in Zabbix
+      ansible.builtin.uri:
+        url: "{{ zabbix_api_url }}/api_jsonrpc.php"
+        method: POST
+        headers:
+          Content-Type: application/json-rpc
+          Authorization: "Bearer {{ zabbixapi_cred.token }}"
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: host.create
+          params:
+            host: "{{ ansible_hostname }}"
+            interfaces:
+              - type: 1
+                main: 1
+                useip: 1
+                ip: "{{ ansible_default_ipv4.address }}"
+                dns: "{{ ansible_fqdn }}"
+                port: "10050"
+            groups:
+              - groupid: "{{ zbx_group_lookup.json.result[0].groupid }}"
+            templates:
+              - templateid: "{{ zbx_template_lookup.json.result[0].templateid }}"
+          id: 4
+        validate_certs: "{{ zabbix_api_validate_certs }}"
+        return_content: yes
+      register: zbx_host_create
+      delegate_to: localhost
+      become: false
+      no_log: true
+
+    - name: Fail if host creation returned an API error
+      fail:
+        msg: "Zabbix host.create failed for '{{ ansible_hostname }}'. Re-run with no_log removed on the Create task to see details."
+      when: zbx_host_create.json.error is defined
+
+    - name: Report new host in Zabbix
+      debug:
+        msg: "Added '{{ ansible_hostname }}' to Zabbix (hostid={{ zbx_host_create.json.result.hostids[0] | default('?') }})."

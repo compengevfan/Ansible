@@ -9,6 +9,7 @@
       vars:
         includecred:
           - evoriginda
+          - zabbixapi
 
 - name: Run
   hosts: all
@@ -20,3 +21,7 @@
     - name: Run the ConfigureWindows Role
       include_role:
         name: ConfigureWindows
+
+    - name: Add host to Zabbix
+      include_role:
+        name: AddToZabbix
