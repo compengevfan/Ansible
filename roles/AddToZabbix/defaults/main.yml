@@ -1,0 +1,14 @@
+---
+# defaults file for AddToZabbix
+zabbix_api_url: http://zabbix.evorigin.com/zabbix
+zabbix_api_validate_certs: false
+
+# Mapping of ansible_system -> Zabbix template and host group.
+# Extend to support more OS families if needed.
+zabbix_os_map:
+  Win32NT:
+    template: 'Windows by Zabbix Agent'
+    group: 'Windows'
+  Linux:
+    template: 'Linux by Zabbix agent'
+    group: 'Linux Server'

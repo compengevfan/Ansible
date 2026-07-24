@@ -9,7 +9,8 @@
       vars:
         includecred:
           - linuxroot
-        
+          - zabbixapi
+
 - name: Run the ConfigureLinux Role
   hosts: AlmaLinux
   gather_facts: yes
@@ -20,3 +21,7 @@
     - name: Run the ConfigureLinux Role
       include_role:
         name: ConfigureLinux
+
+    - name: Add host to Zabbix
+      include_role:
+        name: AddToZabbix
