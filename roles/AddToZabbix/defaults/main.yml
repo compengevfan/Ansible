@@ -7,7 +7,7 @@ zabbix_api_validate_certs: false
 # Extend to support more OS families if needed.
 zabbix_os_map:
   Win32NT:
-    template: 'Windows by Zabbix Agent'
+    template: 'Windows by Zabbix agent'
     group: 'Windows'
   Linux:
     template: 'Linux by Zabbix agent'
