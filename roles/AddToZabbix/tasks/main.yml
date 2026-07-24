@@ -8,10 +8,11 @@
     msg: "Unsupported ansible_system '{{ ansible_system }}'. Supported: {{ zabbix_os_map.keys() | list | join(', ') }}"
   when: ansible_system not in zabbix_os_map
 
-- name: Set target template and host group from OS
+- name: Set target template, host group, and interface IP
   set_fact:
     zabbix_target_template: "{{ zabbix_os_map[ansible_system].template }}"
     zabbix_target_group: "{{ zabbix_os_map[ansible_system].group }}"
+    zabbix_target_ip: "{{ (ansible_default_ipv4 | default({})).address | default(ansible_ip_addresses | select('match', '^\\d+\\.\\d+\\.\\d+\\.\\d+$') | list | first) }}"
 
 - name: Check if host already exists in Zabbix
   ansible.builtin.uri:
@@ -26,7 +27,7 @@
       method: host.get
       params:
         filter:
-          host: ["{{ ansible_hostname }}"]
+          host: ["{{ ansible_fqdn }}"]
       id: 1
     validate_certs: "{{ zabbix_api_validate_certs }}"
     return_content: yes
@@ -104,12 +105,12 @@
           jsonrpc: "2.0"
           method: host.create
           params:
-            host: "{{ ansible_hostname }}"
+            host: "{{ ansible_fqdn }}"
             interfaces:
               - type: 1
                 main: 1
                 useip: 1
-                ip: "{{ ansible_default_ipv4.address }}"
+                ip: "{{ zabbix_target_ip }}"
                 dns: "{{ ansible_fqdn }}"
                 port: "10050"
             groups:
@@ -126,9 +127,9 @@
 
     - name: Fail if host creation returned an API error
       fail:
-        msg: "Zabbix host.create failed for '{{ ansible_hostname }}'. Re-run with no_log removed on the Create task to see details."
+        msg: "Zabbix host.create failed for '{{ ansible_fqdn }}'. Re-run with no_log removed on the Create task to see details."
       when: zbx_host_create.json.error is defined
 
     - name: Report new host in Zabbix
       debug:
-        msg: "Added '{{ ansible_hostname }}' to Zabbix (hostid={{ zbx_host_create.json.result.hostids[0] | default('?') }})."
+        msg: "Added '{{ ansible_fqdn }}' to Zabbix (hostid={{ zbx_host_create.json.result.hostids[0] | default('?') }})."
