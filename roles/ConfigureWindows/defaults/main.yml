@@ -1,4 +1,4 @@
 ---
 # defaults file for ConfigureWindows
 zabbix_server_ip: 192.168.0.115
-zabbix_agent_conf_path: 'C:\Program Files\Zabbix Agent\zabbix_agentd.conf'
+zabbix_agent_conf_path: 'C:\ProgramData\zabbix\zabbix_agentd.conf'
