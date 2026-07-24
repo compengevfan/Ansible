@@ -1,2 +1,6 @@
 ---
 # handlers file for ConfigureLinux
+- name: Restart zabbix-agent
+  ansible.builtin.systemd:
+    name: zabbix-agent
+    state: restarted

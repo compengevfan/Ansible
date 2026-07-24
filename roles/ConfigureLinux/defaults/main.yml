@@ -1,2 +1,5 @@
 ---
 # defaults file for ConfigureLinux
+zabbix_server_ip: 192.168.0.115
+zabbix_agent_conf_path: /etc/zabbix/zabbix_agentd.conf
+zabbix_release_rpm_url: https://repo.zabbix.com/zabbix/7.0/rhel/9/x86_64/zabbix-release-latest.el9.noarch.rpm
