@@ -109,7 +109,7 @@
             interfaces:
               - type: 1
                 main: 1
-                useip: 1
+                useip: 0
                 ip: "{{ zabbix_target_ip }}"
                 dns: "{{ ansible_fqdn }}"
                 port: "10050"
