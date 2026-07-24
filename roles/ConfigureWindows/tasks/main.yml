@@ -111,17 +111,28 @@
     path: C:\ProgramData\chocolatey\bin\choco.exe
   register: chocolatey_check
 
-- name: Chocolatey
+- name: Install Chocolatey
   block:
-    - name: Install Chocolatey
-      win_shell: |
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-      # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+    - name: Download Chocolatey MSI
+      win_get_url:
+        url: https://github.com/chocolatey/choco/releases/latest/download/chocolatey.msi
+        dest: C:\Temp\chocolatey.msi
+
+    - name: Install Chocolatey via MSI
+      win_package:
+        path: C:\Temp\chocolatey.msi
+        arguments: /quiet /norestart
+        state: present
+      register: choco_install
+
+    - name: Remove Chocolatey MSI installer
+      win_file:
+        path: C:\Temp\chocolatey.msi
+        state: absent
+      when: choco_install is changed
 
     - name: Reboot after installing Chocolatey
       win_reboot:
-      # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   when: not chocolatey_check.stat.exists
 
 - name: Install Software
