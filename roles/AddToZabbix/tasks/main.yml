@@ -8,11 +8,37 @@
     msg: "Unsupported ansible_system '{{ ansible_system }}'. Supported: {{ zabbix_os_map.keys() | list | join(', ') }}"
   when: ansible_system not in zabbix_os_map
 
-- name: Set target template, host group, and interface IP
+- name: Set target template and host group from OS
   set_fact:
     zabbix_target_template: "{{ zabbix_os_map[ansible_system].template }}"
     zabbix_target_group: "{{ zabbix_os_map[ansible_system].group }}"
-    zabbix_target_ip: "{{ (ansible_default_ipv4 | default({})).address | default(ansible_ip_addresses | select('match', '^\\d+\\.\\d+\\.\\d+\\.\\d+$') | list | first) }}"
+
+- name: Determine interface IP from default route
+  set_fact:
+    zabbix_target_ip: "{{ ansible_default_ipv4.address }}"
+  when:
+    - ansible_default_ipv4 is defined
+    - ansible_default_ipv4.address is defined
+
+- name: Determine interface IP from Linux address list
+  set_fact:
+    zabbix_target_ip: "{{ ansible_all_ipv4_addresses | first }}"
+  when:
+    - zabbix_target_ip is not defined
+    - ansible_all_ipv4_addresses is defined
+    - ansible_all_ipv4_addresses | length > 0
+
+- name: Determine interface IP from Windows address list
+  set_fact:
+    zabbix_target_ip: "{{ ansible_ip_addresses | select('match', '^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$') | list | first }}"
+  when:
+    - zabbix_target_ip is not defined
+    - ansible_ip_addresses is defined
+
+- name: Fail if no usable IPv4 address was found
+  fail:
+    msg: "Could not determine an IPv4 address for '{{ ansible_fqdn }}'."
+  when: zabbix_target_ip is not defined
 
 - name: Check if host already exists in Zabbix
   ansible.builtin.uri:
