@@ -56,16 +56,53 @@
     enabled: true
     state: started
 
+- name: Exclude Zabbix packages from EPEL
+  community.general.ini_file:
+    path: /etc/yum.repos.d/epel.repo
+    section: epel
+    option: excludepkgs
+    value: 'zabbix*'
+    no_extra_spaces: yes
+    mode: '0644'
+
 - name: Add Zabbix release repo
   ansible.builtin.dnf:
     name: "{{ zabbix_release_rpm_url }}"
     state: present
     disable_gpg_check: yes
 
+- name: Check if a zabbix-agent package is already installed
+  ansible.builtin.command: rpm -q zabbix-agent
+  register: zabbix_agent_rpm
+  changed_when: false
+  failed_when: false
+
+- name: Check for the official Zabbix config layout
+  ansible.builtin.stat:
+    path: "{{ zabbix_agent_conf_path }}"
+  register: zabbix_conf_stat
+
+- name: Remove non-official zabbix-agent package
+  ansible.builtin.dnf:
+    name: zabbix-agent
+    state: absent
+  when:
+    - zabbix_agent_rpm.rc == 0
+    - not zabbix_conf_stat.stat.exists
+
+- name: Remove orphaned config from non-official zabbix-agent
+  ansible.builtin.file:
+    path: /etc/zabbix_agentd.conf
+    state: absent
+  when:
+    - zabbix_agent_rpm.rc == 0
+    - not zabbix_conf_stat.stat.exists
+
 - name: Install Zabbix agent
   ansible.builtin.dnf:
     name: zabbix-agent
     state: present
+    disablerepo: epel
 
 - name: Set Zabbix Server (passive)
   ansible.builtin.lineinfile:
