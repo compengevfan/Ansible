@@ -71,7 +71,7 @@
       register: zbx_host_check
       delegate_to: localhost
       become: false
-      # no_log: true
+      no_log: true
 
     - name: Add host to Zabbix
       when: (zbx_host_check.json.result | length) == 0
