@@ -11,4 +11,4 @@ zabbix_os_map:
     group: 'Windows'
   Linux:
     template: 'Linux by Zabbix agent'
-    group: 'Linux Server'
+    group: 'Linux servers'
