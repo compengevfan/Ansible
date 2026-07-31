@@ -68,6 +68,15 @@
   win_shell: "Install-PackageProvider -Name NuGet -Force"
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
+# Chocolatey CLI 2.x requires .NET Framework 4.8. Server 2022 and newer ship
+# with 4.8/4.8.1 already, so only install it where it is actually missing.
+- name: Check installed .NET Framework 4.x release
+  win_reg_stat:
+    path: HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full
+    name: Release
+  register: netfx_release
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
 - name: Install .NET 4.8
   block:
     - name: Download the installer
@@ -76,7 +85,7 @@
         dest: C:\Temp\ndp48-web.exe
       register: download_status
       # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
-    
+
     - name: Check if the file was downloaded successfully
       win_stat:
         path: C:\Temp\ndp48-web.exe
@@ -94,6 +103,7 @@
         path: C:\Temp\ndp48-web.exe
         arguments: "/quiet /norestart"
         state: present
+      register: netfx_install
       # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
     - name: Remove .NET Framework installer
@@ -104,7 +114,9 @@
 
     - name: Reboot after installing .NET 4.8
       win_reboot:
+      when: netfx_install is changed
       # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+  when: not netfx_release.exists or (netfx_release.value | default(0) | int) < netfx_48_release
 
 - name: Check for Chocolatey
   win_stat:
@@ -146,49 +158,69 @@
       - putty
       - windirstat
       - 7zip.install
-      - prometheus-windows-exporter.install
-      - zabbix-agent
     state: present
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
-- name: Configure Zabbix Agent
+# Modern .NET (Core) is side-by-side with .NET Framework, not a replacement.
+# Only needed on hosts that actually run .NET apps -- set dotnet_runtime_packages
+# in inventory/group_vars to opt in. See defaults/main.yml for the options.
+- name: Install modern .NET runtime
+  win_chocolatey:
+    name: "{{ dotnet_runtime_packages }}"
+    state: present
+  when: dotnet_runtime_packages | length > 0
+  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+
+# This role used to install zabbix-agent and prometheus-windows-exporter.install
+# from Chocolatey. Both collide with the vendor MSIs the monitoring role uses:
+# choco's zabbix-agent fails with "Cannot create a file when that file already
+# exists" once C:\ProgramData\zabbix is present, and the exporter package wraps
+# the very same MSI, so it exits 1603 when an equal or newer version is already
+# installed. Hand both back to the MSIs on any host still carrying them.
+#
+# Gated on the Chocolatey check from before the install above: if Chocolatey was
+# not already present on this host, it cannot be carrying the old packages.
+- name: Remove the Chocolatey-installed monitoring agents
   block:
-    - name: Set Zabbix Server (passive)
-      win_lineinfile:
-        path: "{{ zabbix_agent_conf_path }}"
-        regexp: '^Server='
-        line: "Server={{ zabbix_server_ip }}"
-      notify: Restart Zabbix Agent
+    - name: Uninstall the Chocolatey Zabbix agent package
+      win_chocolatey:
+        name: zabbix-agent
+        state: absent
+      register: choco_zabbix_removed
+      ignore_errors: true
 
-    - name: Set Zabbix ServerActive
-      win_lineinfile:
-        path: "{{ zabbix_agent_conf_path }}"
-        regexp: '^ServerActive='
-        line: "ServerActive={{ zabbix_server_ip }}"
-      notify: Restart Zabbix Agent
+    - name: Uninstall the Chocolatey windows_exporter package
+      win_chocolatey:
+        name: prometheus-windows-exporter.install
+        state: absent
+      register: choco_exporter_removed
+      ignore_errors: true
 
-    - name: Set Zabbix Hostname
-      win_lineinfile:
-        path: "{{ zabbix_agent_conf_path }}"
-        regexp: '^Hostname='
-        line: "Hostname={{ ansible_hostname }}"
-      notify: Restart Zabbix Agent
+    # Chocolatey's config layout, not the MSI's. Left behind, it becomes a
+    # second candidate in the config discovery the monitoring role does.
+    - name: Remove the Chocolatey Zabbix agent directory
+      win_file:
+        path: C:\ProgramData\zabbix
+        state: absent
+      when: choco_zabbix_removed is changed
 
-    - name: Allow Zabbix agent inbound (TCP 10050)
-      community.windows.win_firewall_rule:
-        name: Zabbix Agent
-        localport: 10050
-        action: allow
-        direction: in
-        protocol: tcp
-        state: present
-        enabled: yes
+    - name: Warn if a Chocolatey package could not be removed
+      debug:
+        msg: >-
+          Chocolatey could not cleanly uninstall the monitoring packages on
+          {{ ansible_fqdn }}, which is what a partially installed package does.
+          The MSI installs below still run, but if an agent ends up in a bad
+          state, run 'choco uninstall zabbix-agent
+          prometheus-windows-exporter.install' by hand and re-run.
+      when: choco_zabbix_removed is failed or choco_exporter_removed is failed
+  when: chocolatey_check.stat.exists
 
-    - name: Ensure Zabbix Agent service is running and set to auto-start
-      win_service:
-        name: Zabbix Agent
-        start_mode: auto
-        state: started
+# Monitoring agents come from the vendor MSIs, not Chocolatey, so a host gets the
+# same result whichever playbook touches it - and so the same role can be used on
+# domain controllers, where Chocolatey is not an option.
+- name: Install and configure the monitoring agents
+  include_role:
+    name: ConfigureMonitoringWindows
 
 - name: Check for PowerShell 7
   win_stat:

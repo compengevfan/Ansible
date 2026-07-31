@@ -1,0 +1,160 @@
+---
+# tasks file for ConfigureMonitoringWindows
+#
+# Deliberately absent, unlike ConfigureWindows: no reboot, no Chocolatey, no
+# execution policy change, no .NET install, no desktop software. These hosts are
+# already in service and several of them are Tier 0.
+
+# --- Zabbix agent ---------------------------------------------------------
+
+- name: Check for the Zabbix agent service
+  ansible.windows.win_service_info:
+    name: "{{ zabbix_agent_service_name }}"
+  register: zabbix_service_check
+  failed_when: false
+
+- name: Install the Zabbix agent
+  block:
+    - name: Download the Zabbix agent MSI
+      win_get_url:
+        url: "{{ zabbix_agent_msi_url }}"
+        dest: '{{ monitoring_download_dir }}\zabbix_agent.msi'
+
+    - name: Install the Zabbix agent MSI
+      win_package:
+        path: '{{ monitoring_download_dir }}\zabbix_agent.msi'
+        arguments: >-
+          /quiet /norestart
+          SERVER={{ zabbix_server_ip }}
+          SERVERACTIVE={{ zabbix_server_ip }}
+          HOSTNAME={{ ansible_fqdn }}
+          LISTENPORT={{ zabbix_agent_listen_port }}
+        state: present
+      register: zabbix_agent_install
+
+    - name: Remove the Zabbix agent MSI
+      win_file:
+        path: '{{ monitoring_download_dir }}\zabbix_agent.msi'
+        state: absent
+      when: zabbix_agent_install is changed
+  when: not (zabbix_service_check.exists | default(false))
+
+# The MSI is given the right settings above, but a host whose agent was
+# installed some other way (the Chocolatey package ConfigureWindows used to
+# install, or by hand) still needs converging, so enforce the settings
+# explicitly every run.
+
+- name: Locate the Zabbix agent configuration file
+  win_stat:
+    path: "{{ item }}"
+  loop: "{{ zabbix_agent_conf_candidates }}"
+  register: zabbix_conf_check
+
+- name: Set the Zabbix agent configuration path
+  set_fact:
+    zabbix_agent_conf_path: "{{ zabbix_conf_check.results | selectattr('stat.exists') | map(attribute='item') | list | first | default('') }}"
+
+- name: Fail if no Zabbix agent configuration file was found
+  fail:
+    msg: >-
+      No Zabbix agent config found on '{{ ansible_fqdn }}' in any of
+      {{ zabbix_agent_conf_candidates | join(', ') }}. The agent may have
+      installed to a non-standard location; add it to
+      zabbix_agent_conf_candidates.
+  when: zabbix_agent_conf_path == ''
+
+- name: Set Zabbix Server (passive)
+  win_lineinfile:
+    path: "{{ zabbix_agent_conf_path }}"
+    regexp: '^Server='
+    line: "Server={{ zabbix_server_ip }}"
+  notify: Restart Zabbix Agent
+
+- name: Set Zabbix ServerActive
+  win_lineinfile:
+    path: "{{ zabbix_agent_conf_path }}"
+    regexp: '^ServerActive='
+    line: "ServerActive={{ zabbix_server_ip }}"
+  notify: Restart Zabbix Agent
+
+# FQDN, not ansible_hostname: AddToZabbix registers the host as ansible_fqdn and
+# Zabbix matches active checks on this value, so the short name used by
+# ConfigureWindows/ConfigureLinux leaves active checks unresolved.
+- name: Set Zabbix Hostname
+  win_lineinfile:
+    path: "{{ zabbix_agent_conf_path }}"
+    regexp: '^Hostname='
+    line: "Hostname={{ ansible_fqdn }}"
+  notify: Restart Zabbix Agent
+
+# --- windows_exporter -----------------------------------------------------
+
+- name: Check for the windows_exporter service
+  ansible.windows.win_service_info:
+    name: "{{ windows_exporter_service_name }}"
+  register: windows_exporter_service_check
+  failed_when: false
+
+- name: Install windows_exporter
+  block:
+    - name: Download the windows_exporter MSI
+      win_get_url:
+        url: "{{ windows_exporter_msi_url }}"
+        dest: '{{ monitoring_download_dir }}\windows_exporter.msi'
+
+    - name: Install the windows_exporter MSI
+      win_package:
+        path: '{{ monitoring_download_dir }}\windows_exporter.msi'
+        arguments: /quiet /norestart
+        state: present
+      register: windows_exporter_install
+
+    - name: Remove the windows_exporter MSI
+      win_file:
+        path: '{{ monitoring_download_dir }}\windows_exporter.msi'
+        state: absent
+      when: windows_exporter_install is changed
+  when: not (windows_exporter_service_check.exists | default(false))
+
+# --- Firewall -------------------------------------------------------------
+
+- name: Allow Zabbix agent inbound
+  community.windows.win_firewall_rule:
+    name: Zabbix Agent
+    localport: "{{ zabbix_agent_listen_port }}"
+    remoteip: "{{ zabbix_agent_allowed_source }}"
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: yes
+
+- name: Allow windows_exporter inbound
+  community.windows.win_firewall_rule:
+    name: Prometheus windows_exporter
+    localport: "{{ windows_exporter_listen_port }}"
+    remoteip: "{{ prometheus_allowed_source }}"
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: yes
+
+# --- Services -------------------------------------------------------------
+
+- name: Ensure the Zabbix agent service is running and set to auto-start
+  win_service:
+    name: "{{ zabbix_agent_service_name }}"
+    start_mode: auto
+    state: started
+
+- name: Ensure the windows_exporter service is running and set to auto-start
+  win_service:
+    name: "{{ windows_exporter_service_name }}"
+    start_mode: auto
+    state: started
+
+# Restart the agent now rather than at the end of the play, so it is already
+# reporting under its FQDN by the time AddToZabbix registers the host.
+- name: Apply any pending agent restarts
+  meta: flush_handlers

@@ -25,3 +25,7 @@
     - name: Add host to Zabbix
       include_role:
         name: AddToZabbix
+
+    - name: Add host to Prometheus
+      include_role:
+        name: AddToPrometheus

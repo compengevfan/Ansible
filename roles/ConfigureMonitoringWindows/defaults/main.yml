@@ -1,0 +1,46 @@
+---
+# defaults file for ConfigureMonitoringWindows
+
+# Where installers are staged, and removed again afterwards. C:\Windows\Temp
+# rather than the connecting account's profile TEMP because msiexec runs as
+# SYSTEM and cannot reliably read another user's profile, and rather than
+# C:\Temp because that inherits an ACL from C:\ letting any authenticated user
+# drop files in it.
+monitoring_download_dir: 'C:\Windows\Temp'
+
+# --- Zabbix agent ---------------------------------------------------------
+zabbix_server_ip: 192.168.0.115
+
+# Versions are pinned deliberately: these hosts are Tier 0, so a run should
+# install the same thing today and next month. Bump these by hand.
+# The agent version must not be newer than the Zabbix server (7.0.27 as of
+# 2026-07-30 - confirm with the apiinfo.version call in the README).
+zabbix_agent_version: "7.0.27"
+zabbix_agent_branch: "7.0"
+zabbix_agent_msi_url: "https://cdn.zabbix.com/zabbix/binaries/stable/{{ zabbix_agent_branch }}/{{ zabbix_agent_version }}/zabbix_agent-{{ zabbix_agent_version }}-windows-amd64-openssl.msi"
+zabbix_agent_service_name: "Zabbix Agent"
+zabbix_agent_listen_port: 10050
+
+# Candidate config locations, checked in order. The vendor MSI installs to
+# Program Files; the Chocolatey zabbix-agent package that ConfigureWindows used
+# to install put it in ProgramData. Listing both lets this role converge a host
+# however its agent was originally installed.
+zabbix_agent_conf_candidates:
+  - 'C:\Program Files\Zabbix Agent\zabbix_agentd.conf'
+  - 'C:\ProgramData\zabbix\zabbix_agentd.conf'
+
+# --- windows_exporter -----------------------------------------------------
+windows_exporter_version: "0.31.8"
+windows_exporter_msi_url: "https://github.com/prometheus-community/windows_exporter/releases/download/v{{ windows_exporter_version }}/windows_exporter-{{ windows_exporter_version }}-amd64.msi"
+windows_exporter_service_name: "windows_exporter"
+windows_exporter_listen_port: 9182
+
+# --- Firewall scoping -----------------------------------------------------
+# Restrict who may reach the agent ports. Set prometheus_allowed_source to your
+# scraper's IP to tighten it.
+#
+# NOTE: the windows_exporter MSI adds its own unscoped firewall exception for
+# 9182 at install time. Windows allows traffic if ANY rule matches, so
+# prometheus_allowed_source only takes effect once that vendor rule is disabled.
+zabbix_agent_allowed_source: "{{ zabbix_server_ip }}"
+prometheus_allowed_source: any

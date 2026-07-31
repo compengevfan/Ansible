@@ -1,0 +1,6 @@
+---
+# handlers file for ConfigureMonitoringWindows
+- name: Restart Zabbix Agent
+  win_service:
+    name: "{{ zabbix_agent_service_name }}"
+    state: restarted
