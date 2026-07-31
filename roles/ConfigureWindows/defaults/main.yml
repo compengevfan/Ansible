@@ -1,5 +1,15 @@
 ---
 # defaults file for ConfigureWindows
+
+# Hosts that must never receive the full member-server baseline. Domain
+# controllers are detected from facts rather than inventory, so a newly promoted
+# DC is protected even if nobody remembers to add it to the group.
+configure_windows_baseline_allowed: true
+configure_windows_monitoring_only_group: MonitoringOnly
+configure_windows_blocked_domain_roles:
+  - Primary domain controller
+  - Backup domain controller
+
 # Zabbix and windows_exporter settings live in ConfigureMonitoringWindows, which
 # this role includes. zabbix_agent_conf_path in particular was the Chocolatey
 # package's layout and no longer applies now that the vendor MSI is used.
