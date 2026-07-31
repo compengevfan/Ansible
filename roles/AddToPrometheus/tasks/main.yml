@@ -1,0 +1,126 @@
+---
+# tasks file for AddToPrometheus
+# Adds the target host to the Prometheus scrape list by writing a per-host
+# file_sd_configs target file on prometheus_host. Prometheus picks the file up
+# on its own, so nothing is reloaded or restarted here.
+#
+# One file per host is deliberate: hosts run in parallel, and concurrent
+# read-modify-write of a single shared prometheus.yml silently loses targets.
+
+- name: Fail if target OS is not supported by AddToPrometheus
+  fail:
+    msg: "Unsupported ansible_system '{{ ansible_system }}'. Supported: {{ prometheus_os_map.keys() | list | join(', ') }}"
+  when: ansible_system not in prometheus_os_map
+
+- name: Set target job, port and directory from OS
+  set_fact:
+    prometheus_target_job: "{{ prometheus_os_map[ansible_system].job }}"
+    prometheus_target_port: "{{ prometheus_os_map[ansible_system].port }}"
+    prometheus_target_subdir: "{{ prometheus_os_map[ansible_system].subdir }}"
+
+# The calling play sets ansible_user/ansible_password from a Vault credential
+# that GetVaultCreds stores as a fact on the *target* host. Ansible re-templates
+# those connection vars for the delegated host on every delegate_to task, which
+# fails because neither localhost nor prometheus_host ever had that fact. Every
+# delegated task below therefore overrides them explicitly. Same problem, and
+# same fix, as roles/AddToZabbix/tasks/main.yml.
+
+- name: Read the running Prometheus configuration
+  vars:
+    ansible_connection: local
+    ansible_user: root
+    ansible_password: ''
+  ansible.builtin.uri:
+    url: "{{ prometheus_api_url }}/api/v1/status/config"
+    method: GET
+    return_content: yes
+  register: prometheus_running_config
+  delegate_to: localhost
+  become: false
+
+- name: Determine which jobs use file-based discovery
+  set_fact:
+    prometheus_file_sd_jobs: "{{ (prometheus_running_config.json.data.yaml | from_yaml).scrape_configs | selectattr('file_sd_configs', 'defined') | map(attribute='job_name') | list }}"
+
+- name: Fail if file-based discovery has not been bootstrapped
+  fail:
+    msg: >-
+      Prometheus on {{ prometheus_host }} has no '{{ prometheus_target_job }}'
+      job using file_sd_configs (jobs found with file_sd: {{ prometheus_file_sd_jobs | join(', ') | default('none', true) }}).
+      Run the one-time bootstrap documented in the AddToPrometheus README before
+      using this role.
+  when: prometheus_target_job not in prometheus_file_sd_jobs
+
+- name: Ensure the Prometheus target directory exists
+  vars:
+    ansible_connection: ssh
+    ansible_port: 22
+    ansible_user: "{{ hostvars[inventory_hostname].linuxroot_cred.username }}"
+    ansible_password: "{{ hostvars[inventory_hostname].linuxroot_cred.password }}"
+  ansible.builtin.file:
+    path: "{{ prometheus_targets_dir }}/{{ prometheus_target_subdir }}"
+    state: directory
+    mode: '0755'
+  delegate_to: "{{ prometheus_host }}"
+  become: false
+
+- name: Write the Prometheus target file
+  vars:
+    ansible_connection: ssh
+    ansible_port: 22
+    ansible_user: "{{ hostvars[inventory_hostname].linuxroot_cred.username }}"
+    ansible_password: "{{ hostvars[inventory_hostname].linuxroot_cred.password }}"
+  ansible.builtin.copy:
+    dest: "{{ prometheus_targets_dir }}/{{ prometheus_target_subdir }}/{{ ansible_fqdn }}.yml"
+    mode: '0644'
+    content: |
+      # Managed by the Ansible role AddToPrometheus. Do not edit by hand.
+      # Delete this file to stop scraping {{ ansible_fqdn }}.
+      - targets: ['{{ ansible_fqdn }}:{{ prometheus_target_port }}']
+        labels:
+          instance: {{ ansible_fqdn }}
+  delegate_to: "{{ prometheus_host }}"
+  become: false
+
+- name: Wait for Prometheus to discover the target
+  vars:
+    ansible_connection: local
+    ansible_user: root
+    ansible_password: ''
+  ansible.builtin.uri:
+    url: "{{ prometheus_api_url }}/api/v1/targets?state=active"
+    method: GET
+    return_content: yes
+  register: prometheus_targets_check
+  delegate_to: localhost
+  become: false
+  retries: "{{ prometheus_verify_retries }}"
+  delay: "{{ prometheus_verify_delay }}"
+  until: >-
+    (prometheus_targets_check.json.data.activeTargets | default([])
+     | selectattr('labels.instance', 'defined')
+     | selectattr('labels.instance', 'equalto', ansible_fqdn)
+     | list | length) > 0
+  ignore_errors: true
+  when: prometheus_verify_target
+
+- name: Fail if Prometheus never discovered the target
+  fail:
+    msg: >-
+      Wrote {{ prometheus_targets_dir }}/{{ prometheus_target_subdir }}/{{ ansible_fqdn }}.yml
+      on {{ prometheus_host }}, but Prometheus still does not list
+      {{ ansible_fqdn }} as an active target after
+      {{ prometheus_verify_retries | int * prometheus_verify_delay | int }}s.
+      Either the API at {{ prometheus_api_url }} became unreachable (check the
+      task result above), or - more likely - {{ prometheus_targets_dir }} is not
+      mounted into the Prometheus container, since historically only
+      prometheus.yml was mounted. Check the Mounts section of 'docker inspect'
+      on {{ prometheus_host }}.
+  when:
+    - prometheus_verify_target
+    - prometheus_targets_check is failed
+
+- name: Report the target added to Prometheus
+  debug:
+    msg: "'{{ ansible_fqdn }}' is being scraped by Prometheus job '{{ prometheus_target_job }}' on port {{ prometheus_target_port }}."
+  when: prometheus_verify_target

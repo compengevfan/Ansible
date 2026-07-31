@@ -2,3 +2,16 @@
 # defaults file for ConfigureWindows
 zabbix_server_ip: 192.168.0.115
 zabbix_agent_conf_path: 'C:\ProgramData\zabbix\zabbix_agentd.conf'
+
+# Registry "Release" value that means .NET Framework 4.8 or newer is installed.
+# 528040 = 4.8, 533320 = 4.8.1 (the final .NET Framework release).
+netfx_48_release: 528040
+
+# Modern .NET (Core) runtimes to install via Chocolatey. Empty = skip.
+# .NET 10 is the current LTS (supported through 2028-11-14); .NET 8 and 9 both
+# go end-of-support 2026-11-10, so don't pin new builds to either.
+#   dotnet-10.0-runtime         - console/service apps
+#   dotnet-10.0-aspnetruntime   - ASP.NET Core web apps
+#   dotnet-10.0-desktopruntime  - WPF/WinForms apps
+#   dotnet-10.0-sdk             - build machines only
+dotnet_runtime_packages: []

@@ -1,0 +1,29 @@
+---
+# defaults file for AddToPrometheus
+prometheus_host: jax-dash001l
+prometheus_api_url: http://jax-dash001l:9090
+
+# Host path on prometheus_host. The Prometheus container sees this as
+# /etc/prometheus/targets, which is the path the file_sd_configs globs in
+# prometheus.yml must use. See the README for the one-time bootstrap.
+prometheus_targets_dir: /opt/prometheus/config/targets
+
+# Mapping of ansible_system -> exporter port, target subdirectory, and the job
+# whose file_sd_configs glob picks that subdirectory up. Same shape as
+# zabbix_os_map in roles/AddToZabbix/defaults/main.yml.
+prometheus_os_map:
+  Win32NT:
+    job: windows_exporter
+    port: 9182
+    subdir: windows
+  Linux:
+    job: node_exporter
+    port: 9100
+    subdir: linux
+
+# After writing the target file, poll the Prometheus API until the target shows
+# up. Worth leaving on: without it, a missing bind mount means the host silently
+# never gets scraped.
+prometheus_verify_target: true
+prometheus_verify_retries: 10
+prometheus_verify_delay: 6

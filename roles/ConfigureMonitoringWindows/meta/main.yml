@@ -1,0 +1,9 @@
+galaxy_info:
+  author: compengevfan
+  description: Installs and configures the Zabbix agent and windows_exporter on an existing Windows server. No reboots, no Chocolatey.
+  license: MIT
+  min_ansible_version: "2.12"
+
+  galaxy_tags: []
+
+dependencies: []

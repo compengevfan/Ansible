@@ -1,4 +1,8 @@
 ---
+# Monitoring-only baseline for Windows servers that are already built and in
+# service (domain controllers, the certificate authority, etc.). Installs and
+# configures the Zabbix agent and windows_exporter, then registers the host in
+# Zabbix. Never reboots. For new member server builds use ConfigureWindows.yml.
 - name: GetCredentials
   hosts: all
   gather_facts: no
@@ -19,9 +23,9 @@
     ansible_user:     "{{ evoriginda_cred.username }}"
     ansible_password: "{{ evoriginda_cred.password }}"
   tasks:
-    - name: Run the ConfigureWindows Role
+    - name: Run the ConfigureMonitoringWindows Role
       include_role:
-        name: ConfigureWindows
+        name: ConfigureMonitoringWindows
 
     - name: Add host to Zabbix
       include_role:
