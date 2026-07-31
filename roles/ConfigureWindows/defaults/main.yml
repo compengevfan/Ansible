@@ -1,7 +1,8 @@
 ---
 # defaults file for ConfigureWindows
-zabbix_server_ip: 192.168.0.115
-zabbix_agent_conf_path: 'C:\ProgramData\zabbix\zabbix_agentd.conf'
+# Zabbix and windows_exporter settings live in ConfigureMonitoringWindows, which
+# this role includes. zabbix_agent_conf_path in particular was the Chocolatey
+# package's layout and no longer applies now that the vendor MSI is used.
 
 # Registry "Release" value that means .NET Framework 4.8 or newer is installed.
 # 528040 = 4.8, 533320 = 4.8.1 (the final .NET Framework release).

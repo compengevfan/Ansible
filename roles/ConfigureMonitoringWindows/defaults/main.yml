@@ -22,9 +22,9 @@ zabbix_agent_service_name: "Zabbix Agent"
 zabbix_agent_listen_port: 10050
 
 # Candidate config locations, checked in order. The vendor MSI installs to
-# Program Files; the Chocolatey zabbix-agent package (used by ConfigureWindows)
-# installs to ProgramData. Listing both lets this role converge a host however
-# its agent was originally installed.
+# Program Files; the Chocolatey zabbix-agent package that ConfigureWindows used
+# to install put it in ProgramData. Listing both lets this role converge a host
+# however its agent was originally installed.
 zabbix_agent_conf_candidates:
   - 'C:\Program Files\Zabbix Agent\zabbix_agentd.conf'
   - 'C:\ProgramData\zabbix\zabbix_agentd.conf'

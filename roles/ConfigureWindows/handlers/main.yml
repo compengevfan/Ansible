@@ -1,6 +1,5 @@
 ---
 # handlers file for ConfigureWindows
-- name: Restart Zabbix Agent
-  win_service:
-    name: Zabbix Agent
-    state: restarted
+# The Zabbix agent restart handler now lives in ConfigureMonitoringWindows,
+# which this role includes. Defining a second handler of the same name here
+# would make a single notify fire both of them.

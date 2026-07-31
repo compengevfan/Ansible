@@ -5,6 +5,10 @@ Installs and configures monitoring agents on a Windows server that is **already
 built and in service** — domain controllers, the certificate authority, and any
 other host where the full `ConfigureWindows` baseline would be inappropriate.
 
+It is also included by the `ConfigureWindows` role, so a new member server build
+and a monitoring-only run produce the same result. Monitoring is defined once,
+here.
+
 Specifically it:
 
 - Installs the Zabbix agent from the official Zabbix MSI (if not already present)
@@ -60,6 +64,24 @@ repeatable and auditable. To confirm the Zabbix server version before bumping
     curl -s -X POST http://zabbix.evorigin.com/zabbix/api_jsonrpc.php \
       -H 'Content-Type: application/json-rpc' \
       -d '{"jsonrpc":"2.0","method":"apiinfo.version","params":{},"id":1}'
+
+Relationship to Chocolatey
+--------------------------
+
+This role never touches Chocolatey — that is the point of it, since Chocolatey
+is not an option on domain controllers.
+
+`ConfigureWindows` used to install `zabbix-agent` and
+`prometheus-windows-exporter.install` from Chocolatey, which collides with the
+MSIs used here: choco's `zabbix-agent` aborts with *"Cannot create a file when
+that file already exists"* once `C:\ProgramData\zabbix` exists, and the exporter
+package wraps this very same MSI, so it exits **1603** when an equal or newer
+version is installed. Both packages have been dropped from the `ConfigureWindows`
+software list, and **`ConfigureWindows` removes any leftovers itself** before
+including this role, since that is where they were installed from.
+
+A host that only ever runs `ConfigureMonitoringWindows` is unaffected — it never
+had Chocolatey in the first place.
 
 Two notes on behaviour
 ----------------------

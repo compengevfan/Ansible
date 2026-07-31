@@ -40,8 +40,9 @@
   when: not (zabbix_service_check.exists | default(false))
 
 # The MSI is given the right settings above, but a host whose agent was
-# installed some other way (the Chocolatey package ConfigureWindows uses, or by
-# hand) still needs converging, so enforce the settings explicitly every run.
+# installed some other way (the Chocolatey package ConfigureWindows used to
+# install, or by hand) still needs converging, so enforce the settings
+# explicitly every run.
 
 - name: Locate the Zabbix agent configuration file
   win_stat:
