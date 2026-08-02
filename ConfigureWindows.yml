@@ -1,6 +1,10 @@
 ---
 - name: GetCredentials
-  hosts: all
+  # Domain controllers and the CA belong to MonitoringOnly and must never get
+  # this baseline - it installs Chocolatey and desktop software and reboots
+  # unconditionally. They get ConfigureMonitoringWindows.yml instead. An AWX
+  # limit intersects with this pattern, so it cannot widen it.
+  hosts: 'all:!MonitoringOnly'
   gather_facts: no
   tasks:
     - name: Obtain Credentials
@@ -13,7 +17,11 @@
           - linuxroot
 
 - name: Run
-  hosts: all
+  # Domain controllers and the CA belong to MonitoringOnly and must never get
+  # this baseline - it installs Chocolatey and desktop software and reboots
+  # unconditionally. They get ConfigureMonitoringWindows.yml instead. An AWX
+  # limit intersects with this pattern, so it cannot widen it.
+  hosts: 'all:!MonitoringOnly'
   gather_facts: yes
   vars:
     ansible_user:     "{{ evoriginda_cred.username }}"

@@ -38,6 +38,22 @@
 #     ansible_winrm_read_timeout_sec: 300
 #   no_log: true
 
+# Backstop for the 'all:!MonitoringOnly' pattern in ConfigureWindows.yml. That
+# pattern only protects that one playbook; this guard travels with the role, and
+# the domain-role check needs no inventory maintenance at all.
+- name: Refuse to run the full baseline on a monitoring-only host
+  fail:
+    msg: >-
+      ConfigureWindows installs Chocolatey and desktop software and reboots
+      unconditionally, which is not safe on {{ ansible_fqdn }}
+      (domain role: {{ ansible_windows_domain_role | default('unknown') }};
+      groups: {{ group_names | join(', ') }}).
+      Use ConfigureMonitoringWindows.yml for this host instead.
+  when: >-
+    not (configure_windows_baseline_allowed | bool)
+    or configure_windows_monitoring_only_group in group_names
+    or (ansible_windows_domain_role | default('')) in configure_windows_blocked_domain_roles
+
 - name: Create Temp Directory
   win_file:
     path: "C:\\Temp"
