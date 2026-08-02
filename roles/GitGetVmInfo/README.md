@@ -1,38 +1,75 @@
-Role Name
-=========
+GitGetVmInfo
+============
 
-A brief description of the role goes here.
+Downloads a VM's build definition from the `compengevfan/vmbuildfiles` GitHub
+repository and parses it into the `VmFileContents_JSON` fact. This is where the
+per-server build spec (CPU, RAM, datastore, OU, OS, network name) comes from for
+every build and decom role in this repository.
+
+The file is fetched from:
+
+    https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/V2/<SERVERNAME>.json
+
+`ServerName` is upper-cased first (also exposed as the `ServerNameUpper` fact),
+so the JSON files in that repository are expected to be named in upper case. The
+download lands in `/tmp/<ServerName>.json` on the host running the role, using
+the name as passed in rather than the upper-cased form.
+
+Callers guard the include with `when: VmFileContents_JSON is not defined` so the
+file is only fetched once per play.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Network access to `raw.githubusercontent.com` from the host running the role
+  (usually the AWX execution node via `hosts: localhost`).
+- A writable `/tmp`, which means this role does not work when targeted at a
+  Windows host.
+- The repository is public — no credential is used.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable | Required | Notes |
+|---|---|---|
+| `ServerName` | yes | Short server name; case-insensitive, upper-cased internally |
+
+Facts set:
+
+| Fact | Contents |
+|---|---|
+| `ServerNameUpper` | `ServerName \| upper` |
+| `VmFileContents_JSON` | The parsed build file |
+
+Keys read from `VmFileContents_JSON` elsewhere in this repository, all under
+`.VMInfo`: `OperatingSystem`, `Network`, `vCPUs`, `RAM`, `Datastore`, `OU`,
+`IPAddress`.
+
+`.VMInfo.Network` is the name of the network config consumed by `GitConfigInfo`,
+which is how the two roles chain together.
+
+Notes on behaviour
+------------------
+
+- `get_url` will not re-download an unchanged file, but it also does not fail
+  loudly in a helpful way if the server name has no build file — expect a 404
+  from `get_url` rather than a message naming the server.
+- Nothing cleans up `/tmp/<ServerName>.json`.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None. Typically included by `NetboxAddVM`, `ProxmoxBuildVM`, `VMwareBuildVM`,
+`DnsDeleteARecord`, `AwxAddHostToInventory` and `AwxRemoveHostFromInventory`.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+See `GitGetVmInfo.yml` in the repository root:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+    ansible-playbook GitGetVmInfo.yml -e ServerName=jax-web001
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+MIT

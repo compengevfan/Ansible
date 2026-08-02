@@ -1,38 +1,76 @@
-Role Name
-=========
+GitConfigInfo
+=============
 
-A brief description of the role goes here.
+The network-config counterpart to `GitGetVmInfo`. Downloads a named network
+configuration from the `compengevfan/vmbuildfiles` GitHub repository and parses
+it into the `ConfigFileContents_JSON` fact.
+
+The file is fetched from:
+
+    https://raw.githubusercontent.com/compengevfan/vmbuildfiles/main/V2/ConfigInfo/<CONFIG>.json
+
+`Config` is upper-cased for the URL (also exposed as the `ConfigUpper` fact) and
+saved to `/tmp/<Config>.json` under the name as passed in.
+
+In practice the value passed for `Config` is `VmFileContents_JSON.VMInfo.Network`
+from `GitGetVmInfo`, so a server's build file names its network and this role
+resolves that name into addressing:
+
+    - name: Get Config Info
+      include_role:
+        name: GitConfigInfo
+      vars:
+        Config: "{{ VmFileContents_JSON.VMInfo.Network }}"
+      when: ConfigFileContents_JSON is not defined
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Network access to `raw.githubusercontent.com` from the host running the role.
+- A writable `/tmp`, so this role does not work when targeted at a Windows host.
+- The repository is public — no credential is used.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable | Required | Notes |
+|---|---|---|
+| `Config` | yes | Network config name; case-insensitive, upper-cased internally |
+
+Facts set:
+
+| Fact | Contents |
+|---|---|
+| `ConfigUpper` | `Config \| upper` |
+| `ConfigFileContents_JSON` | The parsed config file |
+
+Keys read from `ConfigFileContents_JSON` elsewhere in this repository: `Domain`,
+`Subnet`, `Gateway`, `DNS1`, `DNS2`, `Cluster`, `PortGroup`.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None, but it is only useful after `GitGetVmInfo` unless the caller supplies
+`Config` directly. Included by `NetboxAddVM`, `ProxmoxBuildVM`, `VMwareBuildVM`
+and `DnsDeleteARecord`.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+No dedicated playbook exists; the role is always included by another. To exercise
+it directly:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+    - hosts: localhost
+      connection: local
+      tasks:
+        - include_role:
+            name: GitConfigInfo
+          vars:
+            Config: vlan10
+        - debug:
+            var: ConfigFileContents_JSON
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+MIT

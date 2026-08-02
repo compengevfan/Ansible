@@ -1,38 +1,79 @@
-Role Name
-=========
+ProxmoxRemoveVM
+===============
 
-A brief description of the role goes here.
+Stops and deletes a VM on Proxmox, and — when run in `Decom` mode — also removes
+it from NetBox and DNS.
+
+Two modes
+---------
+
+`mode` decides how much is torn down:
+
+| `mode` | Effect |
+|---|---|
+| `Decom` | Stop, delete, remove from NetBox, remove the DNS A record |
+| anything else | Stop and delete only; NetBox and DNS are left alone |
+
+The second form exists for rebuilds, where the NetBox record and its IP
+allocation should survive so the VM can be built again onto the same address.
+
+`mode` has no default. It is referenced by two `when` conditions, so an
+undefined `mode` fails the play at the NetBox step, after the VM is already gone.
+
+What it does
+------------
+
+1. Upper-cases `ServerName` into `ServerNameUpper`.
+2. Fetches `proxmoxroot` and `windowslocaladmin` from Vault.
+3. `proxmox_kvm` `state: stopped` with `force: true`.
+4. `proxmox_kvm` `state: absent` with `force: true`.
+5. `NetboxRemoveVM` and `DnsDeleteARecord`, if `mode == "Decom"`.
+
+Both Proxmox tasks set `ignore_errors: true`, so a VM that is already gone, or
+already stopped, does not stop the run — but neither does a genuine API failure.
+A run against an unreachable Proxmox host still reports success and still deletes
+the NetBox and DNS records.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- The `community.proxmox` collection.
+- The `proxmoxroot` credential in Vault. `api_host` is hard-coded to
+  `pmx1.evorigin.com`.
+- For `Decom`, everything `NetboxRemoveVM` and `DnsDeleteARecord` need — in
+  particular, the server's build file must still exist in
+  `compengevfan/vmbuildfiles`, since `DnsDeleteARecord` reads the domain from it.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable | Required | Notes |
+|---|---|---|
+| `ServerName` | yes | Upper-cased into `ServerNameUpper` |
+| `mode` | yes | `Decom` for a full teardown; see above |
+
+`defaults/main.yml` and `vars/main.yml` are empty.
+
+Unused values
+-------------
+
+`windowslocaladmin_cred` is fetched but never used, carried over from
+`ProxmoxBuildVM`.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+Includes `GetVaultCreds`, and in `Decom` mode `NetboxRemoveVM` and
+`DnsDeleteARecord`.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+`ProxmoxRemoveVM.yml` in the repository root:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+    ansible-playbook ProxmoxRemoveVM.yml -e ServerName=jax-web001 -e mode=Decom
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+MIT

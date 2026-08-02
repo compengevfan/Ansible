@@ -1,38 +1,71 @@
-Role Name
-=========
+AwxRemoveHostFromInventory
+==========================
 
-A brief description of the role goes here.
+The decommission counterpart to `AwxAddHostToInventory`. Removes a host from the
+`Linux` inventory on the AWX controller `jax-k3s001.evorigin.com`.
+
+Removing the host removes it from its groups as well, so the group tasks that
+`AwxAddHostToInventory` performs have no counterpart here — they are present in
+`tasks/main.yml` but commented out.
+
+Only AlmaLinux is handled
+-------------------------
+
+As with the add role, the work is gated on:
+
+    when: '"Alma" in VmFileContents_JSON.VMInfo.OperatingSystem'
+
+This means the role still needs the server's build file in
+`compengevfan/vmbuildfiles` to be present at decom time. If the build file has
+already been deleted, `GitGetVmInfo` fails before this role gets a chance to run.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- The `awx.awx` collection in the execution environment.
+- Reachability of `jax-k3s001.evorigin.com`.
+- The `awx` credential in Vault, fetched by the role itself.
+- `validate_certs: no` is set, so the controller's certificate is not verified.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable | Required | Notes |
+|---|---|---|
+| `ServerName` | yes | Short server name; upper-cased into `ServerNameUpper` |
+| `VmFileContents_JSON` | no | Fetched via `GitGetVmInfo` if not already defined |
+
+`defaults/main.yml` and `vars/main.yml` are empty; the controller host and
+inventory name are hard-coded in `tasks/main.yml`.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+Includes `GetVaultCreds` (for `awx`) and `GitGetVmInfo` (only when
+`VmFileContents_JSON` is not already set).
+
+Cosmetic note
+-------------
+
+The role was copied from `AwxAddHostToInventory` and the comments and task names
+were not updated — `tasks/main.yml`, `defaults/main.yml` and `vars/main.yml` all
+still say `AwxAddHostToInventory`, and the removal task is still named "Add
+AlmaLinux Server to AWX Inventory". Only `state: absent` distinguishes it.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+There is no dedicated playbook for this role in the repository root. To run it:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+    - hosts: localhost
+      gather_facts: yes
+      tasks:
+        - include_role:
+            name: AwxRemoveHostFromInventory
+          vars:
+            ServerName: jax-web001
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+MIT
