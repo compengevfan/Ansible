@@ -1,38 +1,77 @@
-Role Name
-=========
+DnsDeleteARecord
+================
 
-A brief description of the role goes here.
+Removes a server's A record from Microsoft DNS at decom time. The inverse of
+`DnsCreateARecord`, and called by `ProxmoxRemoveVM` when it runs in `Decom` mode.
+
+Unlike the create role, this one does not take the domain as a parameter — it
+resolves it from the server's build files, via `GitGetVmInfo` and then
+`GitConfigInfo`, and uses `ConfigFileContents_JSON.Domain`.
+
+How it connects
+---------------
+
+Same approach as `DnsCreateARecord`: the `evorigindns` credential from Vault
+carries the DNS server name, an inventory entry is built with `add_host`, and
+`community.windows.win_dns_record` runs against it with `state: absent`.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- The `community.windows` collection, and `pywinrm` in the execution
+  environment.
+- WinRM over **HTTP on 5985 with NTLM** to the DNS server, and a service account
+  allowed to write to the zone.
+- The build file for the server must still exist in `compengevfan/vmbuildfiles`,
+  since the domain is read from it. If it has already been deleted, this role
+  fails at the `GitGetVmInfo` step.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable | Required | Notes |
+|---|---|---|
+| `ServerName` | yes | Used to fetch the build file |
+| `ServerNameUpper` | yes | Record name. This role does **not** set it — the caller must. `ProxmoxRemoveVM` sets it before including this role |
+| `VmFileContents_JSON` | no | Fetched if not already defined |
+| `ConfigFileContents_JSON` | no | Fetched if not already defined |
+
+`defaults/main.yml` and `vars/main.yml` are empty.
+
+Only evorigin.com is wired up
+-----------------------------
+
+The `add_host` task is gated on
+`when: ConfigFileContents_JSON.Domain == "evorigin.com"`. For any other domain
+the host is never added and the `delegate_to` on the delete task fails.
+
+Cosmetic note
+-------------
+
+The delete task is still named "Add the A Record", copied from
+`DnsCreateARecord`; only `state: absent` distinguishes it. The `no_log: true` on
+the `add_host` task is commented out here but active in the create role.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+Includes `GetVaultCreds` (`evorigindns`), `GitGetVmInfo` and `GitConfigInfo`.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+There is no dedicated playbook for this role. It is included by
+`ProxmoxRemoveVM`:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+    - hosts: localhost
+      connection: local
+      tasks:
+        - set_fact:
+            ServerNameUpper: "{{ ServerName | upper }}"
+        - include_role:
+            name: DnsDeleteARecord
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+MIT

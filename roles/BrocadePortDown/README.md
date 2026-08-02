@@ -1,38 +1,67 @@
-Role Name
-=========
+BrocadePortDown
+===============
 
-A brief description of the role goes here.
+Persistently disables the switch port a server is connected to, and renames the
+port to a plain `port<n>` (or `slot<s> port<p>`) form so it no longer looks
+allocated. The inverse of `BrocadePortUp`.
+
+What it does
+------------
+
+1. `portname | grep <ServerName>` to find the port by its name.
+2. Fails if the server is not found on the switch.
+3. Fails if the `portname` line splits into more than 3 fields, which is how a
+   second connection shows up — the automation only supports one connection per
+   switch.
+4. Runs `files/PortID.py` on `localhost`, which strips the `port` prefix off the
+   existing name and produces both the port identifier and the new name. A `/` in
+   the identifier becomes `slot<s> port<p>`.
+5. `portcfgpersistentdisable <port>`.
+6. `portname <port> -n <newname>`.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- SSH access to the switch with a FOS account allowed to run
+  `portcfgpersistentdisable` and `portname`.
+- `/usr/bin/python` on the control node — `PortID.py` is dispatched with
+  `delegate_to: localhost`.
+- The port must already follow the `port<n>_<name>_<hba>` naming convention that
+  `BrocadePortUp` applies; `PortID.py` splits on `_` and takes field 0.
+- The target is the switch itself, so the play runs with `gather_facts: False`.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable | Required | Notes |
+|---|---|---|
+| `ServerName` | yes | Matched against `portname` output |
+
+`defaults/main.yml` is empty; `vars/main.yml` defines only the parsed
+`ServerInfo` / `Split1`.
+
+Note on the not-found check
+---------------------------
+
+The first task is guarded with `when: ServerName is defined` while the check
+immediately after reads `SWInfo.rc`. If `ServerName` is somehow undefined the
+first task is skipped and the check fails on an undefined register instead of
+producing the intended message. The `fail` messages are prefixed with `Order 66`,
+the marker the calling automation uses for operator-actionable failures.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+`BrocadePortDown.yml` in the repository root:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+    ansible-playbook BrocadePortDown.yml -e target_hostname=switch01 -e ServerName=jaxsql01
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+MIT
