@@ -286,20 +286,14 @@
 
 - name: Check for DupreeFunctions
   win_shell: |
-    Get-Module DupreeFunctions -ListAvailable
+    Import-Module DupreeFunctions
   register: df_check
   failed_when: false
 
-- name: Install DupreeFunctions if not found
-  block:
-  # - name: Download my PowerShell repo
-  #   win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
-  #   ignore_errors: true
-
-  - name: Clone PowerShell Repo and run Bootstrap-DfDeployTarget.ps1
-    win_shell: |
-      git clone https://github.com/compengevfan/PowerShell.git C:\ProgramData\DupreeFunctions\repo
-      C:\ProgramData\DupreeFunctions\repo\GitHubActions\Bootstrap-DfDeployTarget.ps1 -PublicKey "{{ dfdeploy_publickey.public_key }}"
+- name: Clone PowerShell Repo and run Bootstrap-DfDeployTarget.ps1
+  win_shell: |
+    git clone https://github.com/compengevfan/PowerShell.git C:\ProgramData\DupreeFunctions\repo
+    C:\ProgramData\DupreeFunctions\repo\GitHubActions\Bootstrap-DfDeployTarget.ps1 -PublicKey "{{ dfdeploy_publickey.public_key }}"
   when: df_check.rc != 0
 
 # - name: Join domain
