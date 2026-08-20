@@ -290,10 +290,20 @@
   register: df_check
   failed_when: false
 
+# The clone is kept, not deleted. It is the staging clone every future deployment
+# reuses, so this runs only when the repo is not already there.
+# runas is required here: over WinRM the session gets a network logon token, and DISM
+# rejects that with Access denied even though Administrators is enabled on it. That is
+# what Add-WindowsCapability trips over when it installs OpenSSH Server.
 - name: Clone PowerShell Repo and run Bootstrap-DfDeployTarget.ps1
   win_shell: |
-    git clone https://github.com/compengevfan/PowerShell.git C:\ProgramData\DupreeFunctions\repo
+    if (!(Test-Path C:\ProgramData\DupreeFunctions\repo\.git)) {
+      git clone --quiet https://github.com/compengevfan/PowerShell.git C:\ProgramData\DupreeFunctions\repo
+    }
     C:\ProgramData\DupreeFunctions\repo\GitHubActions\Bootstrap-DfDeployTarget.ps1 -PublicKey "{{ dfdeploy_publickey.public_key }}"
+  become: true
+  become_method: runas
+  become_user: SYSTEM
   when: df_check.rc != 0
 
 # - name: Join domain
