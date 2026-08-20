@@ -147,10 +147,10 @@
 
 - name: Install DupreeFunctions if not found
   block:
-  - name: Download my PowerShell repo
-    git:
-      repo: https://github.com/compengevfan/PowerShell.git
-      dest: /tmp/PowerShell
+  # - name: Download my PowerShell repo
+  #   git:
+  #     repo: https://github.com/compengevfan/PowerShell.git
+  #     dest: /tmp/PowerShell
 
   - name: Clone PowerShell Repo and run Bootstrap-DfDeployTarget.ps1
     shell: |
