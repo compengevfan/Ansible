@@ -262,7 +262,6 @@
     win_get_url:
       url: "{{ msi_url }}"
       dest: C:\Temp\PowerShell-7-latest.msi
-    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
   - name: Install PowerShell 7
     win_package:
@@ -270,24 +269,20 @@
       arguments: /quiet /norestart
       state: present
     register: pwsh_install
-    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
   - name: Remove MSI installer file
     win_file:
       path: C:\Temp\PowerShell-7-latest.msi
       state: absent
     when: pwsh_install is changed
-    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
   when: ps7_check.stat.exists == false
 
 - name: Reboot after installing software
   win_reboot:
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Install PowerShell modules
   win_shell: |
     Install-Module Posh-SSH -Scope AllUsers -Force
-  # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for DupreeFunctions
   win_shell: |
@@ -299,16 +294,12 @@
   block:
   - name: Download my PowerShell repo
     win_shell: "git clone https://github.com/compengevfan/PowerShell.git C:\\Temp\\PowerShell"
-    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
     ignore_errors: true
 
-  - name: Install DupreeFunctions
+  - name: Clone PowerShell Repo and run Bootstrap-DfDeployTarget.ps1
     win_shell: |
-      $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName C:\Temp\PowerShell\DupreeFunctions).Version.ToString()
-      New-Item -Path "C:\Program Files\WindowsPowerShell\Modules" -Name DupreeFunctions -ItemType Directory -Force
-      Copy-Item -Path C:\Temp\PowerShell\DupreeFunctions -Destination "C:\Program Files\WindowsPowerShell\Modules\DupreeFunctions\$DfVersion" -Recurse
-      Remove-Item C:\Temp\PowerShell -Recurse -Force -Confirm:$false
-    # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
+      git clone https://github.com/compengevfan/PowerShell.git C:\ProgramData\DupreeFunctions\repo
+      C:\ProgramData\DupreeFunctions\repo\GitHubActions\Bootstrap-DfDeployTarget.ps1 -PublicKey "{{ dfdeploy_publickey.public_key }}"
   when: df_check.rc != 0
 
 # - name: Join domain

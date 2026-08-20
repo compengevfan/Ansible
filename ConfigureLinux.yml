@@ -10,6 +10,7 @@
         includecred:
           - linuxroot
           - zabbixapi
+          - dfdeploy
 
 - name: Run the ConfigureLinux Role
   hosts: AlmaLinux

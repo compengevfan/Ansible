@@ -14,7 +14,7 @@
         includecred:
           - evoriginda
           - zabbixapi
-          - linuxroot
+          - dfdeploy
 
 - name: Run
   # Domain controllers and the CA belong to MonitoringOnly and must never get

@@ -75,3 +75,9 @@
     zabbixapi_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/zabbix validate_certs=False') }}"
   no_log: true
   when: "'zabbixapi' in includecred"
+
+- name: Get dfdeploy public key from Vault
+  set_fact:
+    dfdeploy_publickey: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/dfdeploy validate_certs=False') }}"
+  no_log: true
+  when: "'dfdeploy' in includecred"
