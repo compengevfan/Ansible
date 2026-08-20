@@ -147,14 +147,13 @@
 
 - name: Install DupreeFunctions if not found
   block:
-  # - name: Download my PowerShell repo
-  #   git:
-  #     repo: https://github.com/compengevfan/PowerShell.git
-  #     dest: /tmp/PowerShell
-
+  # The clone is kept, not deleted. It is the staging clone every future deployment
+  # reuses, so this runs only when the repo is not already there.
   - name: Clone PowerShell Repo and run Bootstrap-DfDeployTarget.ps1
     shell: |
-      git clone https://github.com/compengevfan/PowerShell.git /opt/dupreefunctions/repo
+      if (!(Test-Path /opt/dupreefunctions/repo/.git)) {
+        git clone https://github.com/compengevfan/PowerShell.git /opt/dupreefunctions/repo
+      }
       pwsh /opt/dupreefunctions/repo/GitHubActions/Bootstrap-DfDeployTarget.ps1 -PublicKey "{{ dfdeploy_publickey.public_key }}"
     args:
       executable: /usr/bin/pwsh
