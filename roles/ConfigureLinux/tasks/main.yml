@@ -152,12 +152,10 @@
       repo: https://github.com/compengevfan/PowerShell.git
       dest: /tmp/PowerShell
 
-  - name: Install DupreeFunctions
+  - name: Clone PowerShell Repo and run Bootstrap-DfDeployTarget.ps1
     shell: |
-      $DfVersion = (Get-Module -ListAvailable -FullyQualifiedName /tmp/PowerShell/DupreeFunctions).Version.ToString()
-      New-Item -Path /usr/local/share/powershell/Modules -Name DupreeFunctions -ItemType Directory -Force
-      Copy-Item -Path /tmp/PowerShell/DupreeFunctions -Destination /usr/local/share/powershell/Modules/DupreeFunctions/$DfVersion -Recurse
-      Remove-Item /tmp/PowerShell -Recurse -Force -Confirm:$false
+      git clone https://github.com/compengevfan/PowerShell.git /opt/dupreefunctions/repo
+      pwsh /opt/dupreefunctions/repo/GitHubActions/Bootstrap-DfDeployTarget.ps1 -PublicKey "{{ dfdeploy_publickey.public_key }}"
     args:
       executable: /usr/bin/pwsh
   when: df_check.rc != 0
