@@ -15,27 +15,42 @@
     src: request.inf.j2
     dest: "{{ cert_folder }}\\{{ ServerName }}.inf"
 
+# runas is required for every certreq step: over WinRM the session gets a network logon
+# token with no credentials to spend on a second hop, so the LDAP read of the enrolment
+# policy fails with 0x800704dc ERROR_NOT_AUTHENTICATED. Running as SYSTEM puts the
+# machine account on the wire instead, which needs no delegation. The CA template must
+# therefore grant Enroll to the computer account.
 - name: Generate CSR using certreq
   win_shell: >
     certreq -new -q
     "{{ cert_folder }}\{{ ServerName }}.inf"
     "{{ cert_folder }}\{{ ServerName }}.csr"
+  become: true
+  become_method: runas
+  become_user: SYSTEM
 
 - name: Submit the CSR to the CA and retrieve the signed certificate
   win_shell: >
     certreq -submit -q -config "{{ ca_config }}"
     "{{ cert_folder }}\{{ ServerName }}.csr"
     "{{ cert_folder }}\{{ ServerName }}.cer"
+  become: true
+  become_method: runas
+  become_user: SYSTEM
 
+# Also SYSTEM, so -accept matches the pending request raised by -new above.
 - name: Accept the certificate into the local machine certificate store
   win_command: >
     certreq -accept
-    "{{ cert_folder }}\\{{ ServerName }}.cer"
+    "{{ cert_folder }}\{{ ServerName }}.cer"
+  become: true
+  become_method: runas
+  become_user: SYSTEM
 
 - name: Get the thumbprint of the newly installed cert
   # We filter by matching the Subject to the CN. Adjust if your subject is different.
   win_shell: >
-    $thumb = (Get-ChildItem -Path Cert:\\LocalMachine\\My |
+    $thumb = (Get-ChildItem -Path Cert:\LocalMachine\My |
       Where-Object { $_.Subject -like "*CN={{ '*.' + ServerName if Wildcard | bool else ServerName + '.evorigin.com' }}*" } |
       Select-Object -Last 1).Thumbprint;
     Write-Host $thumb
@@ -46,21 +61,25 @@
     msg: "Certificate Thumbprint: {{ cert_thumbprint.stdout }}"
 
 - name: Export certificate and private key to PFX
-  # Requires that the private key is marked Exportable=TRUE in the INF.
+  # Requires that the private key is marked Exportable=TRUE in the INF. SYSTEM again,
+  # because SYSTEM created the machine key above and the export has to read it back.
   win_shell: >
     $pw = ConvertTo-SecureString -String "{{ pfx_password }}" -Force -AsPlainText;
-    Export-PfxCertificate -Cert 'Cert:\\LocalMachine\\My\\{{ cert_thumbprint.stdout }}' -FilePath '{{ cert_folder }}\{{ ServerName }}.pfx' -Password $pw
+    Export-PfxCertificate -Cert 'Cert:\LocalMachine\My\{{ cert_thumbprint.stdout }}' -FilePath '{{ cert_folder }}\{{ ServerName }}.pfx' -Password $pw
+  become: true
+  become_method: runas
+  become_user: SYSTEM
 
 - name: Split the .pfx into .key and .crt using openssl (if OpenSSL is installed on Windows)
   # Extract the private key
   win_shell: >
-    openssl pkcs12 -in "{{ cert_folder }}\\{{ ServerName }}.pfx"
+    openssl pkcs12 -in "{{ cert_folder }}\{{ ServerName }}.pfx"
     -nocerts -nodes -password pass:{{ pfx_password }}
-    -out "{{ cert_folder }}\\{{ ServerName }}.key"
+    -out "{{ cert_folder }}\{{ ServerName }}.key"
 
 - name: Split the .pfx into .key and .crt using openssl (if OpenSSL is installed on Windows)
   # Extract the public cert
   win_shell: >
-    openssl pkcs12 -in "{{ cert_folder }}\\{{ ServerName }}.pfx"
+    openssl pkcs12 -in "{{ cert_folder }}\{{ ServerName }}.pfx"
     -clcerts -nokeys -password pass:{{ pfx_password }}
-    -out "{{ cert_folder }}\\{{ ServerName }}.crt"
+    -out "{{ cert_folder }}\{{ ServerName }}.crt"

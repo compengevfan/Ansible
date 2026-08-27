@@ -36,10 +36,15 @@ The playbook mirrors this in `cert_folder`, which becomes
 Requirements
 ------------
 
-- WinRM to a domain-joined Windows host that can reach the CA, with an account
-  allowed to enrol against `cert_template`.
-- `openssl.exe` on `PATH` on that host — the last two tasks shell out to it. It
-  is not installed by this role.
+- WinRM to a domain-joined Windows host that can reach the CA, connecting as an
+  account that is a local administrator there — the `certreq` and PFX export
+  tasks use `become_method: runas` to `SYSTEM`, which needs that.
+- Enrolment happens as the **computer account** (`<host>$`), not as the WinRM
+  user, because SYSTEM is what goes out on the wire. `cert_template` must grant
+  it Enroll, and must allow the subject to be supplied in the request — the
+  subject comes from `request.inf.j2`, not from the machine's AD object.
+- `openssl.exe` on the **machine** `PATH` on that host — the last two tasks
+  shell out to it. It is not installed by this role.
 - The template must permit an exportable private key; `request.inf.j2` sets
   `Exportable = TRUE`, but the CA template has the final say.
 - `certificateauthority_info` from Vault, which supplies `ca_config` and

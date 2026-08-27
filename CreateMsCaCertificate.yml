@@ -12,7 +12,7 @@
           - certificateauthority
 
 - name: Run
-  hosts: JAX-CERT001
+  hosts: jax-cert001.evorigin.com
   gather_facts: no
   vars:
     pfx_password: "DeleteMe" #This is not really used but it is required by the CA
