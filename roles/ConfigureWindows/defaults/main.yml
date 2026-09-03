@@ -26,3 +26,10 @@ netfx_48_release: 528040
 #   dotnet-10.0-desktopruntime  - WPF/WinForms apps
 #   dotnet-10.0-sdk             - build machines only
 dotnet_runtime_packages: []
+
+# Make git validate TLS against the Windows certificate store (schannel) instead
+# of the OpenSSL CA bundle that ships with Git for Windows. Required for cloning
+# from the internal gitea over the internal CA; assumes the host is domain
+# joined, so the CA is already in the machine store. Set false to leave git's
+# TLS configuration alone.
+configure_windows_git_schannel: true

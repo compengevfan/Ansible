@@ -280,6 +280,47 @@
 - name: Reboot after installing software
   win_reboot:
 
+# Git for Windows ships its own OpenSSL CA bundle, which does not contain the
+# internal CA, so cloning from gitea fails certificate validation. Pointing git
+# at schannel makes it validate against the Windows certificate store, where the
+# CA is already trusted because the host is domain joined. http.sslCAInfo has to
+# go with it: the Git installer points it at the bundled ca-bundle.crt, and git
+# will not combine a CA file with the schannel backend.
+#
+# --system, not --global: --global would only configure the account Ansible
+# connects as. The system config lives in the Git install directory, so every
+# account that logs into the host inherits it.
+- name: Configure git to validate TLS against the Windows certificate store
+  win_shell: |
+    $git = (Get-Command git.exe -ErrorAction SilentlyContinue).Source
+    if (-not $git) { $git = 'C:\Program Files\Git\cmd\git.exe' }
+    if (-not (Test-Path $git)) {
+      throw "git.exe was not found; expected Chocolatey's git.install to have provided it."
+    }
+
+    $changed = $false
+
+    # --get exits 1 when the key is absent, which is the state on a fresh install.
+    $backend = & $git config --system --get http.sslBackend
+    if ($backend -ne 'schannel') {
+      & $git config --system http.sslBackend schannel
+      if ($LASTEXITCODE -ne 0) { throw "git config --system http.sslBackend failed with $LASTEXITCODE" }
+      $changed = $true
+    }
+
+    & $git config --system --get-all http.sslCAInfo | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+      & $git config --system --unset-all http.sslCAInfo
+      if ($LASTEXITCODE -ne 0) { throw "git config --system --unset-all http.sslCAInfo failed with $LASTEXITCODE" }
+      $changed = $true
+    }
+
+    if ($changed) { Write-Output 'CHANGED' }
+    exit 0
+  register: git_schannel_config
+  changed_when: "'CHANGED' in git_schannel_config.stdout"
+  when: configure_windows_git_schannel | bool
+
 - name: Install PowerShell modules
   win_shell: |
     Install-Module Posh-SSH -Scope AllUsers -Force
