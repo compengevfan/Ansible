@@ -31,7 +31,8 @@ What it does, in order
 9. Installs the latest PowerShell 7 MSI from the GitHub releases API if
    `pwsh.exe` is absent.
 10. **Reboots unconditionally.**
-11. Installs the `Posh-SSH` and `DupreeFunctions` PowerShell modules.
+11. Points git at the Windows certificate store (see below).
+12. Installs the `Posh-SSH` and `DupreeFunctions` PowerShell modules.
 
 The guard against Tier 0 hosts
 ------------------------------
@@ -63,6 +64,35 @@ picked up as a second config candidate by the monitoring role. The cleanup is
 gated on Chocolatey having already been present before this run, and a failed
 uninstall warns rather than stopping the play.
 
+Git and the internal CA
+-----------------------
+
+Git for Windows validates TLS with its own bundled OpenSSL CA bundle, which does
+not contain the internal CA. That makes `git clone` against the internal gitea
+fail with a certificate error even though the host trusts the CA everywhere else.
+
+Step 11 fixes that by running, against the **system** config:
+
+    git config --system http.sslBackend schannel
+    git config --system --unset-all http.sslCAInfo
+
+`schannel` hands validation to the Windows certificate store, where the domain CA
+is already present because the host is domain joined — nothing has to be copied
+onto the box. `http.sslCAInfo` has to be cleared as well, because the Git
+installer points it at the bundled `ca-bundle.crt` and git will not combine a CA
+file with the schannel backend.
+
+The scope is `--system` rather than `--global` deliberately. `--global` writes to
+`%USERPROFILE%\.gitconfig` of whichever account is running, which under Ansible
+is the `evoriginda` service account and nobody else. The system config lives in
+the Git install directory, so every account that logs into the host inherits it.
+A per-user `--global` `http.sslCAInfo` still overrides it, so an account that was
+configured by hand in the past may need that key unset once.
+
+The task is idempotent — it reads the current values first and only reports
+changed when it actually writes. Set `configure_windows_git_schannel: false` to
+skip it.
+
 Requirements
 ------------
 
@@ -85,6 +115,7 @@ See `defaults/main.yml`.
 | `configure_windows_blocked_domain_roles` | PDC, BDC | Matched against `ansible_windows_domain_role` |
 | `netfx_48_release` | `528040` | Registry `Release` meaning 4.8; `533320` is 4.8.1 |
 | `dotnet_runtime_packages` | `[]` | Modern .NET (Core) Chocolatey packages; empty skips the task |
+| `configure_windows_git_schannel` | `true` | Configure git to validate TLS against the Windows certificate store |
 
 Zabbix and windows_exporter settings are **not** here — they live in
 `ConfigureMonitoringWindows/defaults/main.yml`.
