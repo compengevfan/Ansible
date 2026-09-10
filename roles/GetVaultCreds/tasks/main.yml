@@ -2,82 +2,82 @@
 # tasks file for GetVaultCreds
 - name: Get iDrac cred from Vault
   set_fact:
-    idrac_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/dell/iDRAC validate_certs=False') }}"
+    idrac_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/dell/iDRAC') }}"
   no_log: true
   when: "'idrac' in includecred"
 
 - name: Get Netbox cred from Vault
   set_fact:
-    netbox_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/netbox validate_certs=False') }}"
+    netbox_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/netbox') }}"
   no_log: true
   when: "'netbox' in includecred"
 
 - name: Get Git cred from Vault
   set_fact:
-    git_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/git validate_certs=False') }}"
+    git_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/git') }}"
   no_log: true
   when: "'git' in includecred"
 
 - name: Get vCenter cred from Vault
   set_fact:
-    vcenter_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/vmware/vcenter validate_certs=False') }}"
+    vcenter_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/vmware/vcenter') }}"
   no_log: true
   when: "'vcenter' in includecred"
 
 - name: Get Local Windows Admin cred from Vault
   set_fact:
-    windowslocaladmin_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/windowslocaladmin validate_certs=False') }}"
+    windowslocaladmin_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/windowslocaladmin') }}"
   no_log: true
   when: "'windowslocaladmin' in includecred"
 
 - name: Get svcDNS evorigin cred from Vault
   set_fact:
-    evorigindns_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/serviceaccounts/evorigin/svcdns validate_certs=False') }}"
+    evorigindns_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/serviceaccounts/evorigin/svcdns') }}"
   no_log: true
   when: "'evorigindns' in includecred"
 
 - name: Get evorigin DA cred from Vault
   set_fact:
-    evoriginda_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/serviceaccounts/evorigin/da validate_certs=False') }}"
+    evoriginda_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/serviceaccounts/evorigin/da') }}"
   no_log: true
   when: "'evoriginda' in includecred"
 
 - name: Get linux root cred from Vault
   set_fact:
-    linuxroot_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/linuxroot validate_certs=False') }}"
+    linuxroot_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/linuxroot') }}"
   no_log: true
   when: "'linuxroot' in includecred"
 
 - name: Get proxmox root cred from Vault
   set_fact:
-    proxmoxroot_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/proxmox/root validate_certs=False') }}"
+    proxmoxroot_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/proxmox/root') }}"
   no_log: true
   when: "'proxmoxroot' in includecred"
 
 - name: Get Certificate Authority info from Vault
   set_fact:
-    certificateauthority_info: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/certificateauthority validate_certs=False') }}"
+    certificateauthority_info: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/certificateauthority') }}"
   no_log: true
   when: "'certificateauthority' in includecred"
 
 - name: Get AWX Credential
   set_fact:
-    awx_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/awx validate_certs=False') }}"
+    awx_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/awx') }}"
   when: "'awx' in includecred"
 
 - name: Test Credential
   set_fact:
-    test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test validate_certs=False') }}"
+    test_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/test') }}"
   when: "'test' in includecred"
 
 - name: Get Zabbix API cred from Vault
   set_fact:
-    zabbixapi_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/zabbix validate_certs=False') }}"
+    zabbixapi_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/zabbix') }}"
   no_log: true
   when: "'zabbixapi' in includecred"
 
 - name: Get dfdeploy public key from Vault
   set_fact:
-    dfdeploy_publickey: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/dfdeploy validate_certs=False') }}"
+    dfdeploy_publickey: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/dfdeploy') }}"
   no_log: true
   when: "'dfdeploy' in includecred"
