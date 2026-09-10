@@ -45,7 +45,7 @@
 - name: Get linux root cred from Vault
   set_fact:
     linuxroot_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/linuxroot',ca_cert='/etc/pki/tls/certs/ca-bundle.crt') }}"
-  # no_log: true
+  no_log: true
   when: "'linuxroot' in includecred"
 
 - name: Get proxmox root cred from Vault
