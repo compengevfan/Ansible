@@ -1,0 +1,16 @@
+---
+# defaults file for ExpandLinuxDisk
+# The filesystem to grow. Everything else - the logical volume, the volume
+# group, the physical volume, the partition and the disk - is discovered from
+# this at run time, so the role works on sda, vda or nvme0n1 without being told.
+expand_disk_mount: /
+
+# Override only when discovery cannot pick the right partition, which today is
+# just the case of a volume group spanning more than one physical volume.
+# Full path, e.g. /dev/sdb1.
+expand_disk_partition: ""
+
+# Write to /sys/class/block/<disk>/device/rescan first, so a SCSI disk that was
+# grown while the VM was running is seen without a reboot. Ignored on disks with
+# no rescan node (virtio-blk grows on its own).
+expand_disk_rescan: true
