@@ -25,7 +25,7 @@
 
 - name: Install Vault
   ansible.builtin.yum:
-    name: vault-1.15.6
+    name: vault-2.1.0
     state: present
 
 - name: Create data folder
