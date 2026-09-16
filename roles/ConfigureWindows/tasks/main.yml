@@ -150,7 +150,6 @@
 - name: Install PowerShell modules
   win_shell: |
     Install-Module Posh-SSH -Scope AllUsers -Force
-    Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber
   # delegate_to: "{{ ServerNameUpper }}.{{ ConfigFileContents_JSON.Domain }}"
 
 - name: Check for DupreeFunctions
