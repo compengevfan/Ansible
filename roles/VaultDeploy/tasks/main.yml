@@ -1,19 +1,19 @@
 ---
 # tasks file for DeployVault
-- name: configure firewall rules
-  ansible.posix.firewalld:
-    port: "{{ item }}"
-    zone: public
-    state: enabled
-    permanent: true
-  vars:
-    ports:
-      - 8200/tcp
-      - 8201/tcp
-  loop: "{{ ports }}"
+# - name: configure firewall rules
+#   ansible.posix.firewalld:
+#     port: "{{ item }}"
+#     zone: public
+#     state: enabled
+#     permanent: true
+#   vars:
+#     ports:
+#       - 8200/tcp
+#       - 8201/tcp
+#   loop: "{{ ports }}"
 
-- name: reload firewalld
-  shell: firewall-cmd --reload
+# - name: reload firewalld
+#   shell: firewall-cmd --reload
 
 - name: Install Config Manager
   ansible.builtin.yum:
