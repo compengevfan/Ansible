@@ -21,7 +21,7 @@
   awx.awx.host:
     name: "{{ ServerNameUpper }}"
     inventory: "Linux"
-    controller_host: "jax-k3s001.evorigin.com"
+    controller_host: "ascender.evorigin.com"
     controller_username: "{{ awx_cred.username }}"
     controller_password: "{{ awx_cred.password }}"
     validate_certs: no
@@ -32,7 +32,7 @@
   awx.awx.group:
     name: "AlmaLinux"
     inventory: "Linux"
-    controller_host: "jax-k3s001.evorigin.com"
+    controller_host: "ascender.evorigin.com"
     controller_username: "{{ awx_cred.username }}"
     controller_password: "{{ awx_cred.password }}"
     validate_certs: no
@@ -46,7 +46,7 @@
   awx.awx.group:
     name: "Virtual"
     inventory: "Linux"
-    controller_host: "jax-k3s001.evorigin.com"
+    controller_host: "ascender.evorigin.com"
     controller_username: "{{ awx_cred.username }}"
     controller_password: "{{ awx_cred.password }}"
     validate_certs: no
