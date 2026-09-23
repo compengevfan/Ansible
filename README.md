@@ -94,6 +94,7 @@ Playbooks
 | `ConfigureLinux.yml` | `ConfigureLinux` | AlmaLinux 9 baseline, then Zabbix and Prometheus onboarding |
 | `ConfigureWindows.yml` | `ConfigureWindows` | Windows member server baseline, then Zabbix and Prometheus onboarding |
 | `ConfigureMonitoringWindows.yml` | `ConfigureMonitoringWindows` | Monitoring agents only, for in-service and Tier 0 Windows hosts |
+| `ExpandLinuxDisk.yml` | `ExpandLinuxDisk` | Grow a Linux filesystem into space already added to the virtual disk |
 
 ### DNS, certificates, infrastructure
 
@@ -160,6 +161,7 @@ Each role has its own README with its variables, requirements and caveats.
 | `CreateMsCaCertificate` | `certreq` enrolment and pfx/key/crt export |
 | `DnsCreateARecord` | Add an A record to Microsoft DNS |
 | `DnsDeleteARecord` | Remove an A record from Microsoft DNS |
+| `ExpandLinuxDisk` | Grow a partition, PV, LV and filesystem after a disk expansion |
 | `GetVaultCreds` | Fetch credentials from HashiCorp Vault |
 | `GitConfigInfo` | Fetch a network config definition from GitHub |
 | `GitGetVmInfo` | Fetch a server build definition from GitHub |

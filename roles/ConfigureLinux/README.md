@@ -15,7 +15,8 @@ What it does
 - Stops and disables `firewalld`.
 - `dnf update -y`.
 - Adds the Microsoft RHEL 9 repo, then installs `git`, `powershell`,
-  `qemu-guest-agent` and `cifs-utils`.
+  `qemu-guest-agent`, `cifs-utils` and `cloud-utils-growpart` (the last so
+  `ExpandLinuxDisk` can grow a disk later without a prerequisite install).
 - Adds EPEL 9.
 - Replaces the old `golang-github-prometheus-node-exporter` package and its
   service with `node_exporter`, then enables and starts it (listens on 9100).

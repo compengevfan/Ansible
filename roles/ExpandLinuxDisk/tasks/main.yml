@@ -1,0 +1,225 @@
+---
+# tasks file for ExpandLinuxDisk
+# Grows a filesystem into space that has already been added to the virtual disk
+# at the hypervisor. Nothing here talks to Proxmox or vSphere - grow the disk
+# there first, then run this.
+#
+# It is the manual procedure, in order:
+#
+#   rescan -> growpart -> pvresize -> lvextend -> xfs_growfs / resize2fs
+#
+# Every step is a no-op when there is nothing left to grow, so the role is safe
+# to re-run, and safe to run against a host whose disk was never expanded.
+#
+# The device chain is discovered from expand_disk_mount rather than hard coded,
+# because /dev/sda2 is only correct for a SCSI controller - a virtio-blk disk on
+# Proxmox is /dev/vda2 and has no rescan node at all.
+
+- name: Check that growpart is installed
+  ansible.builtin.shell: command -v growpart
+  register: expand_disk_growpart_bin
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Fail when cloud-utils-growpart is not installed
+  ansible.builtin.fail:
+    msg: >-
+      growpart was not found on {{ inventory_hostname }}. Install it with
+      'dnf install cloud-utils-growpart', or run ConfigureLinux.yml, which
+      installs it as part of the baseline.
+  when: expand_disk_growpart_bin.rc != 0
+
+- name: Resolve the filesystem mounted at {{ expand_disk_mount }}
+  ansible.builtin.command: "findmnt --noheadings --first-only --output SOURCE,FSTYPE --target {{ expand_disk_mount }}"
+  register: expand_disk_findmnt
+  changed_when: false
+  check_mode: false
+
+- name: Note the filesystem device and type
+  ansible.builtin.set_fact:
+    expand_disk_fs_device: "{{ expand_disk_findmnt.stdout.split()[0] }}"
+    expand_disk_fs_type: "{{ expand_disk_findmnt.stdout.split()[1] }}"
+
+- name: Fail on a filesystem this role cannot grow
+  ansible.builtin.fail:
+    msg: >-
+      {{ expand_disk_mount }} is {{ expand_disk_fs_type }} on
+      {{ expand_disk_fs_device }}. This role only grows xfs and ext2/3/4.
+  when: expand_disk_fs_type not in ['xfs', 'ext2', 'ext3', 'ext4']
+
+- name: Record the filesystem size before the expansion
+  ansible.builtin.shell: "df --block-size=1 --output=size {{ expand_disk_mount }} | tail -n 1"
+  register: expand_disk_fs_before
+  changed_when: false
+  check_mode: false
+
+- name: Determine whether {{ expand_disk_fs_device }} is a logical volume
+  ansible.builtin.command: "lsblk --noheadings --nodeps --output TYPE {{ expand_disk_fs_device }}"
+  register: expand_disk_device_type
+  changed_when: false
+  check_mode: false
+
+- name: Note whether LVM is in the chain
+  ansible.builtin.set_fact:
+    expand_disk_is_lvm: "{{ (expand_disk_device_type.stdout | trim) == 'lvm' }}"
+
+- name: Find the volume group behind {{ expand_disk_fs_device }}
+  ansible.builtin.command: "lvs --noheadings --options vg_name {{ expand_disk_fs_device }}"
+  register: expand_disk_lvs
+  changed_when: false
+  check_mode: false
+  when: expand_disk_is_lvm
+
+- name: Find the physical volumes in the volume group
+  ansible.builtin.command: "pvs --noheadings --options pv_name --select vg_name={{ expand_disk_lvs.stdout | trim }}"
+  register: expand_disk_pvs
+  changed_when: false
+  check_mode: false
+  when: expand_disk_is_lvm
+
+- name: Fail when the volume group spans more than one physical volume
+  # Growing the wrong one would silently do nothing, so make the caller say.
+  ansible.builtin.fail:
+    msg: >-
+      Volume group {{ expand_disk_lvs.stdout | trim }} spans
+      {{ expand_disk_pvs.stdout_lines | length }} physical volumes
+      ({{ expand_disk_pvs.stdout_lines | map('trim') | join(', ') }}).
+      Re-run with -e expand_disk_partition=<the partition whose disk grew>.
+  when:
+    - expand_disk_is_lvm
+    - expand_disk_partition | length == 0
+    - expand_disk_pvs.stdout_lines | length > 1
+
+- name: Decide which partition to grow
+  ansible.builtin.set_fact:
+    expand_disk_partition_device: >-
+      {{ expand_disk_partition if expand_disk_partition | length > 0
+         else (expand_disk_pvs.stdout_lines | first | trim
+               if expand_disk_is_lvm else expand_disk_fs_device) }}
+
+- name: Resolve the disk behind {{ expand_disk_partition_device }}
+  ansible.builtin.command: "lsblk --noheadings --nodeps --output TYPE,KNAME,PKNAME {{ expand_disk_partition_device }}"
+  register: expand_disk_lsblk_part
+  changed_when: false
+  check_mode: false
+
+- name: Fail when the device to grow is not a partition
+  ansible.builtin.fail:
+    msg: >-
+      {{ expand_disk_partition_device }} is a
+      '{{ expand_disk_lsblk_part.stdout.split()[0] }}', not a partition, so
+      growpart has nothing to grow. A whole-disk physical volume needs pvresize
+      alone, and a filesystem straight on a disk needs only the filesystem tool.
+  when: expand_disk_lsblk_part.stdout.split()[0] != 'part'
+
+- name: Note the disk and partition to grow
+  ansible.builtin.set_fact:
+    expand_disk_part_kname: "{{ expand_disk_lsblk_part.stdout.split()[1] }}"
+    expand_disk_disk: "{{ expand_disk_lsblk_part.stdout.split()[2] }}"
+
+- name: Read the partition number from sysfs
+  # Not derived from the device name: nvme0n1p2 and sda2 are numbered
+  # differently.
+  ansible.builtin.slurp:
+    src: "/sys/class/block/{{ expand_disk_part_kname }}/partition"
+  register: expand_disk_partition_number_raw
+
+- name: Note the partition number
+  ansible.builtin.set_fact:
+    expand_disk_partition_number: "{{ expand_disk_partition_number_raw.content | b64decode | trim }}"
+
+- name: Check whether /dev/{{ expand_disk_disk }} can be rescanned without a reboot
+  ansible.builtin.stat:
+    path: "/sys/class/block/{{ expand_disk_disk }}/device/rescan"
+  register: expand_disk_rescan_path
+
+- name: Rescan /dev/{{ expand_disk_disk }} so the kernel sees the new size
+  # SCSI and virtio-scsi disks need this after an online expansion. virtio-blk
+  # disks have no rescan node and pick the new size up on their own.
+  ansible.builtin.shell: "echo 1 > /sys/class/block/{{ expand_disk_disk }}/device/rescan"
+  changed_when: false
+  when:
+    - expand_disk_rescan
+    - expand_disk_rescan_path.stat.exists
+
+- name: Record the disk size the kernel now reports
+  ansible.builtin.command: "lsblk --noheadings --nodeps --bytes --output SIZE /dev/{{ expand_disk_disk }}"
+  register: expand_disk_disk_size
+  changed_when: false
+  check_mode: false
+
+- name: Grow partition {{ expand_disk_partition_number }} to fill /dev/{{ expand_disk_disk }}
+  # growpart exits 1 and prints NOCHANGE when the partition already fills the
+  # disk. That is the idempotent case, not a failure.
+  ansible.builtin.command: "growpart /dev/{{ expand_disk_disk }} {{ expand_disk_partition_number }}"
+  register: expand_disk_growpart
+  failed_when:
+    - expand_disk_growpart.rc != 0
+    - "'NOCHANGE' not in expand_disk_growpart.stdout"
+    - "'NOCHANGE' not in expand_disk_growpart.stderr"
+  changed_when: expand_disk_growpart.rc == 0
+
+- name: Record the size of the physical volume before the resize
+  ansible.builtin.command: "pvs --noheadings --nosuffix --units b --options pv_size {{ expand_disk_partition_device }}"
+  register: expand_disk_pv_before
+  changed_when: false
+  check_mode: false
+  when: expand_disk_is_lvm
+
+- name: Resize the physical volume into the grown partition
+  # pvresize reports success whether or not the physical volume actually got
+  # bigger, so the changed status comes from the size check that follows.
+  ansible.builtin.command: "pvresize {{ expand_disk_partition_device }}"
+  changed_when: false
+  when: expand_disk_is_lvm
+
+- name: Confirm the physical volume grew
+  ansible.builtin.command: "pvs --noheadings --nosuffix --units b --options pv_size {{ expand_disk_partition_device }}"
+  register: expand_disk_pv_after
+  changed_when: (expand_disk_pv_after.stdout | trim | float) > (expand_disk_pv_before.stdout | trim | float)
+  check_mode: false
+  when: expand_disk_is_lvm
+
+- name: Extend {{ expand_disk_fs_device }} into the free space in the volume group
+  # Exits non-zero when the volume group has no free extents left. Also
+  # idempotent, also not a failure.
+  ansible.builtin.command: "lvextend --extents +100%FREE {{ expand_disk_fs_device }}"
+  register: expand_disk_lvextend
+  failed_when:
+    - expand_disk_lvextend.rc != 0
+    - "'matches existing size' not in (expand_disk_lvextend.stdout + expand_disk_lvextend.stderr)"
+    - "'insufficient free space' not in ((expand_disk_lvextend.stdout + expand_disk_lvextend.stderr) | lower)"
+  changed_when: expand_disk_lvextend.rc == 0
+  when: expand_disk_is_lvm
+
+- name: Grow the XFS filesystem on {{ expand_disk_mount }}
+  # Online, no unmount. Prints 'data size unchanged, skipping' when there is
+  # nothing to add.
+  ansible.builtin.command: "xfs_growfs {{ expand_disk_mount }}"
+  register: expand_disk_xfs_growfs
+  changed_when: "'data blocks changed from' in expand_disk_xfs_growfs.stdout"
+  when: expand_disk_fs_type == 'xfs'
+
+- name: Grow the ext filesystem on {{ expand_disk_mount }}
+  ansible.builtin.command: "resize2fs {{ expand_disk_fs_device }}"
+  register: expand_disk_resize2fs
+  changed_when: "'Nothing to do' not in expand_disk_resize2fs.stdout"
+  when: expand_disk_fs_type in ['ext2', 'ext3', 'ext4']
+
+- name: Record the filesystem size after the expansion
+  ansible.builtin.shell: "df --block-size=1 --output=size {{ expand_disk_mount }} | tail -n 1"
+  register: expand_disk_fs_after
+  changed_when: false
+  check_mode: false
+
+- name: Report the result
+  ansible.builtin.debug:
+    msg: >-
+      {{ expand_disk_mount }} on {{ expand_disk_fs_device }} (disk
+      /dev/{{ expand_disk_disk }}, partition {{ expand_disk_partition_number }}):
+      {{ (expand_disk_fs_before.stdout | trim | float / 1073741824) | round(1) }} GiB ->
+      {{ (expand_disk_fs_after.stdout | trim | float / 1073741824) | round(1) }} GiB.
+      {{ 'Nothing to grow - the filesystem already fills the disk.'
+         if (expand_disk_fs_after.stdout | trim | float) <= (expand_disk_fs_before.stdout | trim | float)
+         else '' }}

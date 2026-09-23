@@ -1,0 +1,22 @@
+---
+- name: GetCredentials
+  hosts: "{{ target_hostname | default('AlmaLinux') }}"
+  gather_facts: no
+  tasks:
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - linuxroot
+
+- name: Run the ExpandLinuxDisk Role
+  hosts: "{{ target_hostname | default('AlmaLinux') }}"
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Run the ExpandLinuxDisk Role
+      include_role:
+        name: ExpandLinuxDisk
