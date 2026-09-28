@@ -101,6 +101,7 @@ Requirements
 - Collections: `ansible.windows`, `community.windows`, `chocolatey.chocolatey`.
 - Outbound HTTPS to `chocolatey.org`, `github.com`, `api.github.com`,
   `go.microsoft.com`, plus whatever `ConfigureMonitoringWindows` needs.
+- HTTPS to `gitea.evorigin.com:3030` for the DupreeFunctions clone.
 - The host must tolerate multiple reboots — at least one is unconditional.
 
 Role Variables

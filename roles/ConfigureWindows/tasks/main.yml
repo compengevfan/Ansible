@@ -332,16 +332,19 @@
   failed_when: false
 
 # The clone is kept, not deleted. It is the staging clone every future deployment
-# reuses, so this runs only when the repo is not already there.
+# reuses, so this runs only when the repo is not already there. The URL must be https:
+# port 3030 serves TLS only and answers plain http with a 400. It matches the URL
+# Deploy.yml passes to Install-DfModule.ps1 (built from Gitea's ROOT_URL). That script
+# discards a staging clone with any other origin, so a mismatch would cost a re-clone.
 # runas is required here: over WinRM the session gets a network logon token, and DISM
 # rejects that with Access denied even though Administrators is enabled on it. That is
 # what Add-WindowsCapability trips over when it installs OpenSSH Server.
-- name: Clone PowerShell Repo and run Bootstrap-DfDeployTarget.ps1
+- name: Clone DupreeFunctions Repo and run Bootstrap-DfDeployTarget.ps1
   win_shell: |
     if (!(Test-Path C:\ProgramData\DupreeFunctions\repo\.git)) {
-      git clone --quiet https://github.com/compengevfan/PowerShell.git C:\ProgramData\DupreeFunctions\repo
+      git clone --quiet https://gitea.evorigin.com:3030/CompEngLSUFan/DupreeFunctions.git C:\ProgramData\DupreeFunctions\repo
     }
-    C:\ProgramData\DupreeFunctions\repo\GitHubActions\Bootstrap-DfDeployTarget.ps1 -PublicKey "{{ dfdeploy_publickey.public_key }}"
+    C:\ProgramData\DupreeFunctions\repo\GiteaActions\Bootstrap-DfDeployTarget.ps1 -PublicKey "{{ dfdeploy_publickey.public_key }}"
   become: true
   become_method: runas
   become_user: SYSTEM

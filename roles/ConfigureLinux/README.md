@@ -24,7 +24,7 @@ What it does
   `ServerActive` and `Hostname`, enables and starts it (listens on 10050).
 - Installs the `Posh-SSH` PowerShell module for all users.
 - Installs the `DupreeFunctions` PowerShell module from
-  `github.com/compengevfan/PowerShell` if it is not already importable.
+  `gitea.evorigin.com:3030/CompEngLSUFan/DupreeFunctions` if it is not already importable.
 - **Reboots unconditionally** at the end, with a 300s timeout.
 
 Zabbix packaging
