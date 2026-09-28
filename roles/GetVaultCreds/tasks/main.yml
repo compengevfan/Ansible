@@ -81,3 +81,9 @@
     dfdeploy_publickey: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/dfdeploy validate_certs=False') }}"
   no_log: true
   when: "'dfdeploy' in includecred"
+
+# A public certificate, not a secret, so no no_log: a failure stays readable.
+- name: Get internal root CA certificate from Vault
+  set_fact:
+    cacert_info: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/ca_cert validate_certs=False') }}"
+  when: "'cacert' in includecred"

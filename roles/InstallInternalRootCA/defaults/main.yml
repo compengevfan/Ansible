@@ -1,0 +1,8 @@
+---
+# defaults file for InstallInternalRootCA
+# The file name the CA is written to in the anchors folder. The certificate
+# itself comes from Vault (HomeLabSecrets/data/ca_cert, key ca.crt) through
+# GetVaultCreds, so it is never stored in this repository. If the CA is ever
+# rotated, keep this name: the old root is overwritten rather than left behind
+# as a second anchor.
+internal_ca_cert_file: ca.crt

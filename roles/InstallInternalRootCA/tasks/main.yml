@@ -1,0 +1,57 @@
+---
+# tasks file for InstallInternalRootCA
+# Makes an AlmaLinux host trust the internal root CA system-wide, so nothing on
+# it needs VAULT_CACERT, -tls-skip-verify or a per-tool CA flag.
+#
+# Safe on a server that is in service: it writes one file and rebuilds the trust
+# store. Nothing restarts and nothing reboots. A process that is already running
+# may have loaded the old bundle at startup and only sees the CA after its next
+# restart; new processes see it immediately.
+#
+# ConfigureLinux includes this as its first step, so later tasks that talk to
+# internal HTTPS endpoints (the DupreeFunctions clone from Gitea) already trust
+# the CA. InstallInternalRootCA.yml runs it on its own for hosts already built.
+#
+# The certificate is read from Vault, not from this repository: the calling
+# playbook runs GetVaultCreds with 'cacert' in includecred, which sets
+# cacert_info from HomeLabSecrets/data/ca_cert.
+
+- name: Check the CA certificate was read from Vault
+  ansible.builtin.assert:
+    that:
+      - cacert_info is defined
+      - "'ca.crt' in cacert_info"
+      - cacert_info['ca.crt'] | trim is match('-----BEGIN CERTIFICATE-----')
+    fail_msg: >-
+      No PEM certificate under key ca.crt in cacert_info. Run GetVaultCreds with
+      'cacert' in includecred first, and check HomeLabSecrets/data/ca_cert in Vault
+      holds the PEM text, BEGIN line included.
+    quiet: true
+
+# trim plus one newline gives the file a single fixed ending however the value
+# was pasted into Vault, so re-runs compare equal and report no change.
+- name: Write the internal root CA into the trust anchors
+  ansible.builtin.copy:
+    content: "{{ cacert_info['ca.crt'] | trim }}\n"
+    dest: "{{ internal_ca_anchor_dir }}/{{ internal_ca_cert_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: internal_ca_copy
+
+# A plain task rather than a handler: the trust store has to be rebuilt before
+# the next task, and a flush_handlers here would also fire every handler the
+# calling play had queued so far.
+- name: Rebuild the system trust store
+  ansible.builtin.command: update-ca-trust extract
+  when: internal_ca_copy.changed
+
+# Proves the rebuilt bundle really contains the root, not just that the anchor
+# file landed. A self-signed root verifies only against a bundle holding itself.
+- name: Verify the system bundle trusts the internal root CA
+  ansible.builtin.command: >-
+    openssl verify -CAfile {{ internal_ca_bundle }}
+    {{ internal_ca_anchor_dir }}/{{ internal_ca_cert_file }}
+  changed_when: false
+  check_mode: false
+  when: not (ansible_check_mode and internal_ca_copy.changed)

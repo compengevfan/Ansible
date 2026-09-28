@@ -1,0 +1,9 @@
+galaxy_info:
+  author: Chris Dupree
+  description: Trust the internal root CA system-wide on a Linux host
+  company: evorigin.com
+  license: MIT
+  min_ansible_version: 2.1
+  galaxy_tags: []
+
+dependencies: []

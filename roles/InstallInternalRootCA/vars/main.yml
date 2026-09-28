@@ -1,0 +1,6 @@
+---
+# vars file for InstallInternalRootCA
+# Where AlmaLinux reads trust anchors from, and the bundle update-ca-trust
+# writes from them, which is what OpenSSL, curl, git and Go read by default.
+internal_ca_anchor_dir: /etc/pki/ca-trust/source/anchors
+internal_ca_bundle: /etc/pki/tls/certs/ca-bundle.crt

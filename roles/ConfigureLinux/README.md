@@ -12,6 +12,10 @@ not done here — `ConfigureLinux.yml` follows this role with `AddToZabbix` and
 What it does
 ------------
 
+- Runs `InstallInternalRootCA` first, so the host trusts the lab CA before any
+  later task talks to an internal HTTPS endpoint. To add the CA to a server that
+  is already in service, without this role's reboot, run
+  `InstallInternalRootCA.yml` instead.
 - Stops and disables `firewalld`.
 - `dnf update -y`.
 - Adds the Microsoft RHEL 9 repo, then installs `git`, `powershell`,

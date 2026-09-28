@@ -1,6 +1,6 @@
 ---
 - name: GetCredentials
-  hosts: AlmaLinux
+  hosts: "{{ target_hostname | default('AlmaLinux') }}"
   gather_facts: no
   tasks:
     - name: Obtain Credentials
@@ -9,25 +9,15 @@
       vars:
         includecred:
           - linuxroot
-          - zabbixapi
-          - dfdeploy
           - cacert
 
-- name: Run the ConfigureLinux Role
-  hosts: AlmaLinux
+- name: Run the InstallInternalRootCA Role
+  hosts: "{{ target_hostname | default('AlmaLinux') }}"
   gather_facts: yes
   vars:
     ansible_user:     "{{ linuxroot_cred.username }}"
     ansible_password: "{{ linuxroot_cred.password }}"
   tasks:
-    - name: Run the ConfigureLinux Role
+    - name: Run the InstallInternalRootCA Role
       include_role:
-        name: ConfigureLinux
-
-    - name: Add host to Zabbix
-      include_role:
-        name: AddToZabbix
-
-    - name: Add host to Prometheus
-      include_role:
-        name: AddToPrometheus
+        name: InstallInternalRootCA

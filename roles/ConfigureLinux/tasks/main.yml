@@ -1,4 +1,10 @@
 ---
+# First, so every later task that talks to an internal HTTPS endpoint (the
+# DupreeFunctions clone from Gitea) already trusts the lab CA.
+- name: Trust the internal root CA
+  include_role:
+    name: InstallInternalRootCA
+
 - name: Disable firewalld on AlmaLinux 9
   systemd:
     name: firewalld
