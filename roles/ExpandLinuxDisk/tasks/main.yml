@@ -132,6 +132,10 @@
 - name: Check whether /dev/{{ expand_disk_disk }} can be rescanned without a reboot
   ansible.builtin.stat:
     path: "/sys/class/block/{{ expand_disk_disk }}/device/rescan"
+    # The rescan node is write-only, so stat must not try to read it.
+    get_checksum: false
+    get_mime: false
+    get_attributes: false
   register: expand_disk_rescan_path
 
 - name: Rescan /dev/{{ expand_disk_disk }} so the kernel sees the new size
