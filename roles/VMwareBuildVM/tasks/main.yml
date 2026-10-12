@@ -69,10 +69,10 @@
     datacenter: DC1
     cluster: "{{ ConfigFileContents_JSON.Cluster }}"
     name: "{{ ServerNameUpper }}"
-    template: "{{ platform.json.custom_fields.VM_Template }}"
+    template: "{{ platform.json.custom_fields.VM_Template.value if platform.json.custom_fields.VM_Template is mapping else platform.json.custom_fields.VM_Template }}"
     state: poweredoff
     folder: /EvOrigin/Workers
-    datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
+    datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore.value if vmInfo.json.results[0].custom_fields.Datastore is mapping else vmInfo.json.results[0].custom_fields.Datastore }}"
     hardware:
       num_cpus: "{{ vmInfo.json.results[0].vcpus | int }}"
       memory_mb: "{{ vmInfo.json.results[0].memory | int }}"
@@ -99,9 +99,9 @@
     cluster: "{{ ConfigFileContents_JSON.Cluster }}"
     state: poweredoff
     folder: /EvOrigin/Workers
-    template: "{{ platform.json.custom_fields.VM_Template }}"
+    template: "{{ platform.json.custom_fields.VM_Template.value if platform.json.custom_fields.VM_Template is mapping else platform.json.custom_fields.VM_Template }}"
     name: "{{ ServerNameUpper }}"
-    datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
+    datastore: "{{ vmInfo.json.results[0].custom_fields.Datastore.value if vmInfo.json.results[0].custom_fields.Datastore is mapping else vmInfo.json.results[0].custom_fields.Datastore }}"
     hardware:
       num_cpus: "{{ vmInfo.json.results[0].vcpus | int }}"
       memory_mb: "{{ vmInfo.json.results[0].memory | int }}"
