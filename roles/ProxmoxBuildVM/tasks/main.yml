@@ -67,10 +67,10 @@
       api_user: "{{ proxmoxroot_cred.username }}"
       api_password: "{{ proxmoxroot_cred.password }}"
       api_host: pmx1.evorigin.com
-      clone: "{{ platform.json.custom_fields.VM_Template }}"
+      clone: "{{ platform.json.custom_fields.VM_Template.value if platform.json.custom_fields.VM_Template is mapping else platform.json.custom_fields.VM_Template }}"
       name: "{{ ServerNameUpper }}"
       node: pmx1
-      storage: "{{ vmInfo.json.results[0].custom_fields.Datastore }}"
+      storage: "{{ vmInfo.json.results[0].custom_fields.Datastore.value if vmInfo.json.results[0].custom_fields.Datastore is mapping else vmInfo.json.results[0].custom_fields.Datastore }}"
       format: qcow2
       timeout: 500
 
