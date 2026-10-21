@@ -12,26 +12,31 @@ What it does, in order
 ----------------------
 
 1. Deletes and recreates `cert_folder`, so a re-run starts clean.
-2. Renders `templates/request.inf.j2` to `<cert_folder>\<ServerName>.inf`.
+2. Renders `templates/request.inf.j2` to `<cert_folder>\<cert_name>.inf`.
 3. `certreq -new` to produce the CSR.
 4. `certreq -submit -config "<ca_config>"` to get the signed `.cer`.
 5. `certreq -accept` to install it into `Cert:\LocalMachine\My`.
-6. Finds the thumbprint by matching the subject CN, and prints it with `debug`.
-7. `Export-PfxCertificate` to `<cert_folder>\<ServerName>.pfx`.
+6. Reads the thumbprint from the `.cer` issued this run, and prints it with `debug`.
+7. `Export-PfxCertificate` to `<cert_folder>\<cert_name>.pfx`.
 8. `openssl pkcs12` twice, splitting the PFX into `.key` and `.crt`.
 
 Wildcard vs. host certificates
 ------------------------------
 
-`Wildcard` controls both the subject and the SAN:
+`Wildcard` controls the subject, the SAN and the file names:
 
-| `Wildcard` | CN and SAN |
-|---|---|
-| `false` (default) | `<ServerName>.evorigin.com` |
-| `true` | `*.<ServerName>` — here `ServerName` is the **domain**, not a host |
+| `Wildcard` | CN | SAN | `cert_name` (files and folder) |
+|---|---|---|---|
+| `false` (default) | `<ServerName>.<Domain>` | same as CN | `<ServerName>` |
+| `true` | `*.<Domain>` | `*.<Domain>` and `<Domain>` | `wildcard.<Domain>` |
 
-The playbook mirrors this in `cert_folder`, which becomes
-`C:\CertStuff\wildcard.<ServerName>` for a wildcard request.
+A wildcard request needs no `ServerName`. The bare domain is added to the SAN
+because `*.evorigin.com` does not match `evorigin.com` itself. A wildcard covers
+one label only: `*.evorigin.com` does not match `app.lab.evorigin.com`.
+
+The playbook sets `cert_folder` to `C:\CertStuff\<cert_name>`, so a wildcard
+lands in `C:\CertStuff\wildcard.evorigin.com\wildcard.evorigin.com.pfx` (and
+`.key`, `.crt`).
 
 Requirements
 ------------
@@ -56,8 +61,11 @@ Role Variables
 
 | Variable | Default | Notes |
 |---|---|---|
-| `Wildcard` | `false` | See above. Only `defaults/main.yml` entry |
-| `ServerName` | — | Required. Host short name, or the domain when `Wildcard` is true |
+| `Wildcard` | `false` | See above |
+| `Domain` | `evorigin.com` | DNS domain for the CN and SAN |
+| `ServerName` | — | Host short name. Required unless `Wildcard` is true (asserted) |
+| `cert_name` | derived | Base name for the files; set in `defaults/main.yml` |
+| `cert_cn` | derived | Subject CN; set in `defaults/main.yml` |
 | `KeyLength` | — | Required. Consumed by the template; no default is set |
 | `cert_folder` | — | Required. Where everything is written |
 | `ca_config` | — | Required. `<CA host>\<CA name>` for `certreq -submit` |
@@ -80,9 +88,8 @@ Notes on behaviour
 
 - The role is **not idempotent** by design — the first task deletes
   `cert_folder`, so every run issues a new certificate.
-- The thumbprint lookup takes `Select-Object -Last 1` on a subject match, so an
-  older certificate with the same CN in the store does not break it, but nothing
-  verifies the one selected is the one just issued.
+- The thumbprint comes from the `.cer` that `certreq -submit` wrote this run,
+  so older certificates with the same CN in the store cannot be picked up.
 - There is no `handlers/`, `meta/`, `vars/` or `tests/` directory in this role.
 
 Dependencies
@@ -97,7 +104,12 @@ Example Playbook
 `CreateMsCaCertificate.yml` in the repository root:
 
     ansible-playbook CreateMsCaCertificate.yml \
-      -e ServerName=jax-web001 -e KeyLength=2048 -e Wildcard=false
+      -e ServerName=jax-web001 -e KeyLength=2048
+
+A wildcard for the domain:
+
+    ansible-playbook CreateMsCaCertificate.yml \
+      -e KeyLength=2048 -e Wildcard=true
 
 License
 -------
