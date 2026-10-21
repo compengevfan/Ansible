@@ -1,5 +1,5 @@
 [NewRequest]
-Subject = "CN={{ '*.' + ServerName if Wildcard | bool else ServerName + '.evorigin.com' }}, O=EvOrigin, OU=Lab, L=Jax, ST=FL, C=US"
+Subject = "CN={{ cert_cn }}, O=EvOrigin, OU=Lab, L=Jax, ST=FL, C=US"
 KeyLength = "{{ KeyLength }}"
 KeySpec = 1
 KeyUsage = 0xA0  ; Digital Signature, Key Encipherment
@@ -17,7 +17,13 @@ _continue_ = "CA=FALSE"
 
 ; Subject Alternative Name
 2.5.29.17 = "{text}"
-_continue_ = "DNS={{ '*.' + ServerName if Wildcard | bool else ServerName + '.evorigin.com' }}"
+{% if Wildcard | bool %}
+; *.domain does not match the bare domain, so list both
+_continue_ = "DNS={{ cert_cn }}&"
+_continue_ = "DNS={{ Domain }}"
+{% else %}
+_continue_ = "DNS={{ cert_cn }}"
+{% endif %}
 
 [RequestAttributes]
 CertificateTemplate = "{{ cert_template }}"

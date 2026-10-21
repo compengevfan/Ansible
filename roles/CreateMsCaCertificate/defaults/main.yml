@@ -1,2 +1,7 @@
 ---
 Wildcard: false
+Domain: evorigin.com
+
+# Derived names. ServerName is only needed for host certificates.
+cert_name: "{{ 'wildcard.' + Domain if Wildcard | bool else ServerName }}"
+cert_cn: "{{ '*.' + Domain if Wildcard | bool else ServerName + '.' + Domain }}"
