@@ -1,0 +1,29 @@
+---
+# HLT-1, Stage 1: Dropbox Camera Uploads to Immich, then file the originals
+# into Photos By Date. Scheduled in Ascender; see
+# roles/PhotoPipelineIngest/README.md. Runs as a dry run until photo_dry_run is
+# set false in the job template's extra vars.
+- name: GetCredentials
+  hosts: "{{ target_hostname | default('jax-wkn001l.evorigin.com') }}"
+  gather_facts: no
+  tasks:
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - linuxroot
+          - immich
+          - dropbox
+          - zabbixapi
+
+- name: Run the PhotoPipelineIngest Role
+  hosts: "{{ target_hostname | default('jax-wkn001l.evorigin.com') }}"
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Run the PhotoPipelineIngest Role
+      include_role:
+        name: PhotoPipelineIngest

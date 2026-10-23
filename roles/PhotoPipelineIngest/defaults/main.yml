@@ -1,0 +1,53 @@
+---
+# defaults file for PhotoPipelineIngest
+
+# Plan only: download and organize as normal, but immich-go runs with
+# --dry-run and nothing in Dropbox is moved or deleted. Leave this true until a
+# dry run's manifest has been checked, then set it false in the Ascender job
+# template's extra vars.
+photo_dry_run: true
+
+# Dropbox folders, relative to the Dropbox root. The rclone remote is always
+# named "dropbox"; see photo_rclone_env.
+photo_source_dir: Camera Uploads
+photo_dest_dir: Photos By Date
+photo_dest_format: "%Y/%Y_%m/%Y_%m_%d"
+
+# Local working area on the target host.
+photo_base_dir: /var/lib/photo-pipeline
+photo_staging_dir: "{{ photo_base_dir }}/staging"
+photo_manifest_dir: "{{ photo_base_dir }}/manifests"
+photo_manifest_retention_days: 90
+photo_script_path: /usr/local/libexec/photo-pipeline/photo_organize.py
+
+# Extra rclone flags for the download, e.g. ['--bwlimit', '20M'] if the run
+# starts slowing the Gitea runner on the same host.
+photo_rclone_extra_args: []
+
+# immich-go is pinned. Its CLI has changed between releases, so check the
+# upload flags in tasks/main.yml against the release notes before bumping.
+# The Immich server comes from Vault (HomeLabSecrets/data/immich, key url)
+# alongside the API key, so this repository names no server.
+immich_server_url: "{{ immich_cred.url }}"
+immich_go_version: "0.32.0"
+immich_go_url: "https://github.com/simulot/immich-go/releases/download/v{{ immich_go_version }}/immich-go_Linux_x86_64.tar.gz"
+immich_go_install_dir: "/opt/immich-go/{{ immich_go_version }}"
+immich_go_upload_timeout: 14400
+
+# rclone takes the whole remote from these variables, so no rclone.conf is
+# written. The token may be stored in Vault as a JSON string or as an object.
+photo_rclone_env:
+  RCLONE_CONFIG_DROPBOX_TYPE: dropbox
+  RCLONE_CONFIG_DROPBOX_CLIENT_ID: "{{ dropbox_cred.app_key }}"
+  RCLONE_CONFIG_DROPBOX_CLIENT_SECRET: "{{ dropbox_cred.app_secret }}"
+  RCLONE_CONFIG_DROPBOX_TOKEN: "{{ dropbox_cred.token if dropbox_cred.token is string else (dropbox_cred.token | to_json) }}"
+
+# Result reporting to a Zabbix trapper item, the same pattern as the Proxmox
+# backup webhooks. The item has to exist first; see the README. Dry runs never
+# report, so they can't satisfy the no-data trigger.
+photo_zabbix_report: true
+photo_zabbix_api_url: http://zabbix.evorigin.com/zabbix
+# Must match the Zabbix host name exactly, case included. Zabbix has the
+# JAX- hosts upper-cased, while ansible_fqdn on the host is lower-case.
+photo_zabbix_host: JAX-WKN001L.evorigin.com
+photo_zabbix_item_key: photo.pipeline.status
