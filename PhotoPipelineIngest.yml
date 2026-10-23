@@ -4,7 +4,7 @@
 # roles/PhotoPipelineIngest/README.md. Runs as a dry run until photo_dry_run is
 # set false in the job template's extra vars.
 - name: GetCredentials
-  hosts: "{{ target_hostname | default('jax-wkn001l.evorigin.com') }}"
+  hosts: "{{ target_hostname | default('JAX-WKN001L') }}"
   gather_facts: no
   tasks:
     - name: Obtain Credentials
@@ -18,7 +18,7 @@
           - zabbixapi
 
 - name: Run the PhotoPipelineIngest Role
-  hosts: "{{ target_hostname | default('jax-wkn001l.evorigin.com') }}"
+  hosts: "{{ target_hostname | default('JAX-WKN001L') }}"
   gather_facts: yes
   vars:
     ansible_user:     "{{ linuxroot_cred.username }}"
