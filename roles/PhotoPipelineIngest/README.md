@@ -6,7 +6,8 @@ uploads them to Immich, then files the originals into `Photos By Date` inside
 Dropbox. It replaces `PictureOrg.bat` and `PhotoOrganizer.ps1` on `JAX-WKN101`,
 and needs no Dropbox client: rclone talks to the Dropbox API directly.
 
-It runs on `jax-wkn001l.evorigin.com`, scheduled from Ascender through
+It runs on `JAX-WKN001L` (the host's name in the Ascender `Linux` inventory),
+scheduled from Ascender through
 `PhotoPipelineIngest.yml`.
 
 **It starts as a dry run.** `photo_dry_run` defaults to `true`; see *Going live*.
@@ -116,7 +117,9 @@ modification time`, `ok: nothing in Camera Uploads`, or `error: <failed step>`.
 
 ### Ascender
 
-1. Make sure `jax-wkn001l.evorigin.com` is in an inventory this project can use.
+1. Use the `Linux` inventory, where the host is `JAX-WKN001L`. The playbook
+   targets that name by default, and Ansible matches it exactly, case included:
+   a mismatch skips every play and the job still reports success.
 2. Job template: playbook `PhotoPipelineIngest.yml`, the same Vault credential
    as the other `GetVaultCreds` jobs, verbosity 0 or 1, concurrent jobs off.
 3. Schedule: daily at 03:00 (America/New_York), the slot `PictureOrg.bat` used.
