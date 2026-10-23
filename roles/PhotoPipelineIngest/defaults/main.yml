@@ -36,11 +36,16 @@ immich_go_upload_timeout: 14400
 
 # rclone takes the whole remote from these variables, so no rclone.conf is
 # written. The token may be stored in Vault as a JSON string or as an object.
+#
+# The leading space in the token is deliberate. Ansible converts any templated
+# string that starts with "{" back into a dictionary, and the environment then
+# receives its Python form ({'access_token': ...}), which rclone rejects as
+# JSON. The space stops the conversion, and JSON allows leading whitespace.
 photo_rclone_env:
   RCLONE_CONFIG_DROPBOX_TYPE: dropbox
   RCLONE_CONFIG_DROPBOX_CLIENT_ID: "{{ dropbox_cred.app_key }}"
   RCLONE_CONFIG_DROPBOX_CLIENT_SECRET: "{{ dropbox_cred.app_secret }}"
-  RCLONE_CONFIG_DROPBOX_TOKEN: "{{ dropbox_cred.token if dropbox_cred.token is string else (dropbox_cred.token | to_json) }}"
+  RCLONE_CONFIG_DROPBOX_TOKEN: " {{ dropbox_cred.token if dropbox_cred.token is string else (dropbox_cred.token | to_json) }}"
 
 # Result reporting to a Zabbix trapper item, the same pattern as the Proxmox
 # backup webhooks. The item has to exist first; see the README. Dry runs never
