@@ -1,0 +1,317 @@
+---
+# tasks file for PhotoPipelineIngest
+# HLT-1, Stage 1: Dropbox "Camera Uploads" to Immich, then file the originals
+# into "Photos By Date". Replaces PictureOrg.bat on JAX-WKN101.
+#
+#   1. rclone copies Camera Uploads into a local staging folder. The Dropbox
+#      API only exposes files that have finished uploading, so there is no
+#      partial-file problem and no sync client to stop.
+#   2. immich-go uploads the staging folder. If it fails, nothing is moved.
+#   3. photo_organize.py dates each file and moves the original server-side in
+#      Dropbox with rclone moveto. Nothing is uploaded twice.
+#   4. Staging is cleared, old manifests pruned, and the result pushed to Zabbix.
+#
+# Credentials: the calling playbook runs GetVaultCreds with 'immich' (Immich API
+# key), 'dropbox' (the Dropbox app values) and 'zabbixapi' in includecred.
+
+- name: Check the Immich and Dropbox values were read from Vault
+  ansible.builtin.assert:
+    that:
+      - immich_cred is defined
+      - immich_cred.api_key is defined
+      - immich_cred.url is defined
+      - immich_cred.url | trim | length > 0
+      - dropbox_cred is defined
+      - dropbox_cred.app_key is defined
+      - dropbox_cred.app_secret is defined
+      - dropbox_cred.token is defined
+    fail_msg: >-
+      A Vault value is missing. Run GetVaultCreds with 'immich' and 'dropbox'
+      in includecred, and check HomeLabSecrets/data/immich holds api_key and url, and
+      HomeLabSecrets/data/dropbox holds app_key, app_secret and token.
+    quiet: true
+
+# ---------------------------------------------------------------------------
+# Tools. Installed here so the host can be rebuilt from this role alone.
+# ---------------------------------------------------------------------------
+
+- name: Install EPEL
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+
+- name: Install rclone, exiftool and Python
+  ansible.builtin.dnf:
+    name:
+      - rclone
+      - perl-Image-ExifTool
+      - python3
+    state: present
+
+- name: Create the immich-go install directory
+  ansible.builtin.file:
+    path: "{{ immich_go_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# One directory per version, so a bump never half-overwrites a working binary
+# and rolling back is just changing immich_go_version.
+- name: Download and unpack immich-go {{ immich_go_version }}
+  ansible.builtin.unarchive:
+    src: "{{ immich_go_url }}"
+    dest: "{{ immich_go_install_dir }}"
+    remote_src: true
+    creates: "{{ immich_go_install_dir }}/immich-go"
+
+- name: Point /usr/local/bin/immich-go at the pinned version
+  ansible.builtin.file:
+    src: "{{ immich_go_install_dir }}/immich-go"
+    dest: /usr/local/bin/immich-go
+    state: link
+
+- name: Create the pipeline directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop:
+    - "{{ photo_base_dir }}"
+    - "{{ photo_manifest_dir }}"
+    - "{{ photo_script_path | dirname }}"
+
+- name: Install the organizer script
+  ansible.builtin.copy:
+    src: photo_organize.py
+    dest: "{{ photo_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Record the tool versions in the job output
+  # No pipefail: head closing the pipe early would fail the task.
+  ansible.builtin.shell: |
+    rclone version | head -1
+    exiftool -ver
+    immich-go version 2>&1 | head -1 || true
+  args:
+    executable: /bin/bash
+  register: photo_tool_versions
+  changed_when: false
+  check_mode: false
+
+- name: Show the tool versions
+  ansible.builtin.debug:
+    var: photo_tool_versions.stdout_lines
+
+# ---------------------------------------------------------------------------
+# The run. Any failure lands in rescue, which records the step; always then
+# cleans up, reports, and fails the job so Ascender shows it.
+# ---------------------------------------------------------------------------
+
+- name: Set the run timestamp and manifest path
+  ansible.builtin.set_fact:
+    photo_run_id: "{{ now(fmt='%Y%m%dT%H%M%S') }}"
+    photo_status: ok
+    photo_message: ""
+
+- name: Set the manifest path
+  ansible.builtin.set_fact:
+    photo_manifest_path: "{{ photo_manifest_dir }}/{{ photo_run_id }}{{ '-dryrun' if photo_dry_run | bool else '' }}.json"
+
+- name: Run the ingest
+  block:
+    # Leftovers from a run that died are already in Dropbox and get fetched
+    # again, so emptying staging first loses nothing.
+    - name: Empty the staging folder
+      ansible.builtin.file:
+        path: "{{ photo_staging_dir }}"
+        state: absent
+
+    - name: Create the staging folder
+      ansible.builtin.file:
+        path: "{{ photo_staging_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Copy Camera Uploads from Dropbox into staging
+      ansible.builtin.command:
+        argv: "{{ ['rclone', 'copy', 'dropbox:' ~ photo_source_dir, photo_staging_dir, '--stats-one-line', '-v'] + photo_rclone_extra_args }}"
+      environment: "{{ photo_rclone_env }}"
+      register: photo_download
+      changed_when: false
+
+    - name: Count the staged files
+      ansible.builtin.find:
+        paths: "{{ photo_staging_dir }}"
+        recurse: true
+        file_type: file
+      register: photo_staged
+
+    - name: Note an empty run
+      ansible.builtin.set_fact:
+        photo_message: "nothing in {{ photo_source_dir }}"
+      when: photo_staged.matched == 0
+
+    # no_log because the API key is on the command line, and the registered
+    # result would otherwise print it. The registered variable still holds the
+    # output, which the next task shows.
+    - name: Upload the staged files to Immich
+      ansible.builtin.command:
+        argv: >-
+          {{ ['immich-go', 'upload', 'from-folder',
+              '--server=' ~ immich_server_url,
+              '--api-key=' ~ immich_cred.api_key,
+              '--no-ui']
+             + (['--dry-run'] if photo_dry_run | bool else [])
+             + [photo_staging_dir] }}
+      async: "{{ immich_go_upload_timeout }}"
+      poll: 30
+      register: photo_upload
+      failed_when: false
+      changed_when: photo_upload.rc | default(1) == 0 and not photo_dry_run | bool
+      no_log: true
+      when: photo_staged.matched > 0
+
+    - name: Show the immich-go output
+      ansible.builtin.debug:
+        msg: "{{ (photo_upload.stdout_lines | default([]))[-40:] + (photo_upload.stderr_lines | default([]))[-20:] }}"
+      when: photo_staged.matched > 0
+
+    # The gate PictureOrg.bat never had: nothing leaves Camera Uploads unless
+    # Immich took the upload.
+    - name: Stop if the Immich upload failed
+      ansible.builtin.fail:
+        msg: "immich-go exited {{ photo_upload.rc | default('without a return code (timed out?)') }}. Nothing was moved in Dropbox."
+      when:
+        - photo_staged.matched > 0
+        - photo_upload.rc | default(1) != 0
+
+    - name: File the originals into {{ photo_dest_dir }}
+      ansible.builtin.command:
+        argv: >-
+          {{ ['python3', photo_script_path,
+              '--staging', photo_staging_dir,
+              '--source', 'dropbox:' ~ photo_source_dir,
+              '--dest', 'dropbox:' ~ photo_dest_dir,
+              '--format', photo_dest_format,
+              '--manifest', photo_manifest_path]
+             + (['--dry-run'] if photo_dry_run | bool else []) }}
+      environment: "{{ photo_rclone_env }}"
+      register: photo_organize
+      failed_when: false
+      changed_when: false
+      when: photo_staged.matched > 0
+
+    - name: Read the organizer summary
+      ansible.builtin.set_fact:
+        photo_summary: "{{ photo_organize.stdout_lines | last | from_json }}"
+      when:
+        - photo_staged.matched > 0
+        - photo_organize.stdout_lines | default([]) | length > 0
+
+    - name: Show the organizer summary
+      ansible.builtin.debug:
+        msg:
+          - "{{ photo_summary | default('no summary') }}"
+          - "{{ photo_organize.stderr_lines | default([]) }}"
+      when: photo_staged.matched > 0
+
+    - name: Stop if any file failed to move
+      ansible.builtin.fail:
+        msg: >-
+          The organizer exited {{ photo_organize.rc }}. Failed files are listed
+          above and in {{ photo_manifest_path }} on {{ inventory_hostname }}.
+          They are still in {{ photo_source_dir }} and will be retried next run.
+      when:
+        - photo_staged.matched > 0
+        - photo_organize.rc != 0
+
+    - name: Build the result message
+      ansible.builtin.set_fact:
+        photo_message: >-
+          {{ photo_summary.files }} files: {{ photo_summary.moved }} moved,
+          {{ photo_summary.duplicate_removed }} duplicates removed,
+          {{ photo_summary.date_from_modtime }} dated by modification time
+      when: photo_summary is defined
+
+  rescue:
+    - name: Record the failed step
+      ansible.builtin.set_fact:
+        photo_status: error
+        photo_message: "{{ ansible_failed_task.name }}"
+
+  always:
+    - name: Empty the staging folder
+      ansible.builtin.file:
+        path: "{{ photo_staging_dir }}"
+        state: absent
+
+    - name: Find manifests past retention
+      ansible.builtin.find:
+        paths: "{{ photo_manifest_dir }}"
+        patterns: "*.json"
+        age: "{{ photo_manifest_retention_days }}d"
+      register: photo_old_manifests
+
+    - name: Remove manifests past retention
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ photo_old_manifests.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+
+    # Runs on the execution node. The play's ansible_user/ansible_password come
+    # from a fact on the target, which localhost never had, so they are
+    # overridden here; same workaround as AddToZabbix. A failed push is a
+    # warning only: it must not hide or replace the run's own result.
+    - name: Report the result to Zabbix
+      vars:
+        ansible_connection: local
+        ansible_user: root
+        ansible_password: ''
+      ansible.builtin.uri:
+        url: "{{ photo_zabbix_api_url }}/api_jsonrpc.php"
+        method: POST
+        headers:
+          Content-Type: application/json-rpc
+          Authorization: "Bearer {{ zabbixapi_cred.token }}"
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: history.push
+          params:
+            - host: "{{ photo_zabbix_host }}"
+              key: "{{ photo_zabbix_item_key }}"
+              value: "{{ photo_status }}: {{ photo_message | trim }}"
+          id: 1
+      register: photo_zabbix_push
+      delegate_to: localhost
+      become: false
+      ignore_errors: true
+      when:
+        - photo_zabbix_report | bool
+        - not photo_dry_run | bool
+
+    - name: Warn if Zabbix rejected the result
+      ansible.builtin.debug:
+        msg: "Zabbix did not record the result: {{ photo_zabbix_push.json | default(photo_zabbix_push.msg | default('no response')) }}"
+      when:
+        - photo_zabbix_push is defined
+        - photo_zabbix_push is not skipped
+        - photo_zabbix_push is failed or 'error' in (photo_zabbix_push.json | default({}) | string)
+
+    - name: Fail the job if the run failed
+      ansible.builtin.fail:
+        msg: "Photo ingest failed at: {{ photo_message }}"
+      when: photo_status == 'error'
+
+    - name: Show the result
+      ansible.builtin.debug:
+        msg: "{{ 'DRY RUN, nothing changed in Dropbox. ' if photo_dry_run | bool else '' }}{{ photo_status }}: {{ photo_message | trim }}"

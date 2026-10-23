@@ -96,6 +96,12 @@ Playbooks
 | `ConfigureMonitoringWindows.yml` | `ConfigureMonitoringWindows` | Monitoring agents only, for in-service and Tier 0 Windows hosts |
 | `ExpandLinuxDisk.yml` | `ExpandLinuxDisk` | Grow a Linux filesystem into space already added to the virtual disk |
 
+### Scheduled jobs
+
+| Playbook | Role | What it does |
+|---|---|---|
+| `PhotoPipelineIngest.yml` | `PhotoPipelineIngest` | Nightly: Dropbox Camera Uploads to Immich, then file the originals into Photos By Date (HLT-1) |
+
 ### DNS, certificates, infrastructure
 
 | Playbook | Role | What it does |
@@ -167,6 +173,7 @@ Each role has its own README with its variables, requirements and caveats.
 | `GitGetVmInfo` | Fetch a server build definition from GitHub |
 | `NetboxAddVM` | Create the VM, interface, IP and DNS record |
 | `NetboxRemoveVM` | Delete the VM from NetBox |
+| `PhotoPipelineIngest` | Dropbox Camera Uploads to Immich via rclone and immich-go, then date-file in Dropbox |
 | `ProxmoxBalanceCluster` | **Scaffold only — no tasks.** Intended to rebalance VMs across Proxmox nodes |
 | `ProxmoxBuildVM` | Clone, size and start a VM on Proxmox |
 | `ProxmoxRemoveVM` | Stop and delete a Proxmox VM, optionally full decom |
