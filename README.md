@@ -101,6 +101,7 @@ Playbooks
 | Playbook | Role | What it does |
 |---|---|---|
 | `PhotoPipelineIngest.yml` | `PhotoPipelineIngest` | Nightly: Dropbox Camera Uploads to Immich, then file the originals into Photos By Date (HLT-1) |
+| `PhotoPipelineBackup.yml` | `PhotoPipelineBackup` | Nightly, after the ingest: mirror Immich changes, deletions included, onto the Storage1 backup (HLT-1) |
 
 ### DNS, certificates, infrastructure
 
@@ -174,6 +175,7 @@ Each role has its own README with its variables, requirements and caveats.
 | `NetboxAddVM` | Create the VM, interface, IP and DNS record |
 | `NetboxRemoveVM` | Delete the VM from NetBox |
 | `PhotoPipelineIngest` | Dropbox Camera Uploads to Immich via rclone and immich-go, then date-file in Dropbox |
+| `PhotoPipelineBackup` | Copy new Immich assets to Storage1 and delete trashed ones, driven by the Immich API |
 | `ProxmoxBalanceCluster` | **Scaffold only — no tasks.** Intended to rebalance VMs across Proxmox nodes |
 | `ProxmoxBuildVM` | Clone, size and start a VM on Proxmox |
 | `ProxmoxRemoveVM` | Stop and delete a Proxmox VM, optionally full decom |

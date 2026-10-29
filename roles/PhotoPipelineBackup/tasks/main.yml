@@ -1,0 +1,265 @@
+---
+# tasks file for PhotoPipelineBackup
+# HLT-1, Stage 2: keep \\storage1\Backups\ImmichPhotosAndVideos in step with
+# the Immich library on \\storage3\Immich\library\admin, deletions included.
+#
+#   1. Mount both shares for the run (Storage3 read-only; Storage1 read-only
+#      too during a dry run).
+#   2. photo_backup.py asks Immich which assets changed or were trashed since
+#      the last successful run, copies the new ones and deletes the backup
+#      copies of trashed ones. Nothing walks either tree.
+#   3. Unmount, prune old manifests, and push the result to Zabbix.
+#
+# Credentials: the calling playbook runs GetVaultCreds with 'immich',
+# 'smbstorage1', 'smbstorage3' and 'zabbixapi' in includecred.
+
+- name: Check the Immich and SMB values were read from Vault
+  ansible.builtin.assert:
+    that:
+      - immich_cred is defined
+      - immich_cred.api_key is defined
+      - immich_cred.url is defined
+      - smbstorage1_cred is defined
+      - smbstorage1_cred.username is defined
+      - smbstorage1_cred.password is defined
+      - smbstorage3_cred is defined
+      - smbstorage3_cred.username is defined
+      - smbstorage3_cred.password is defined
+    fail_msg: >-
+      A Vault value is missing. Run GetVaultCreds with 'immich', 'smbstorage1'
+      and 'smbstorage3' in includecred, and check HomeLabSecrets/data/immich
+      holds api_key and url, and HomeLabSecrets/data/smb/storage1 and
+      smb/storage3 hold username and password.
+    quiet: true
+
+- name: Install cifs-utils and Python
+  ansible.builtin.dnf:
+    name:
+      - cifs-utils
+      - python3
+    state: present
+
+- name: Create the backup directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop:
+    - "{{ photo_backup_state_file | dirname }}"
+    - "{{ photo_backup_manifest_dir }}"
+    - "{{ photo_backup_script_path | dirname }}"
+    - "{{ photo_backup_source_mount }}"
+    - "{{ photo_backup_dest_mount }}"
+
+- name: Install the backup script
+  ansible.builtin.copy:
+    src: photo_backup.py
+    dest: "{{ photo_backup_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Set the run values
+  ansible.builtin.set_fact:
+    photo_backup_status: ok
+    photo_backup_message: ""
+    photo_backup_manifest_path: "{{ photo_backup_manifest_dir }}/{{ now(fmt='%Y%m%dT%H%M%S') }}{{ '-dryrun' if photo_backup_dry_run | bool else '' }}.json"
+    # The SMB credentials live on tmpfs, only for the length of the run.
+    photo_backup_mounts:
+      - name: storage3
+        unc: "//{{ photo_backup_source_server }}/{{ photo_backup_source_share }}"
+        path: "{{ photo_backup_source_mount }}"
+        mode: ro
+        cred: "{{ smbstorage3_cred }}"
+      - name: storage1
+        unc: "//{{ photo_backup_dest_server }}/{{ photo_backup_dest_share }}"
+        path: "{{ photo_backup_dest_mount }}"
+        mode: "{{ 'ro' if photo_backup_dry_run | bool else 'rw' }}"
+        cred: "{{ smbstorage1_cred }}"
+  no_log: true
+
+- name: Run the backup
+  block:
+    - name: Create the credentials directory on tmpfs
+      ansible.builtin.file:
+        path: /run/photo-backup
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Write the SMB credentials files
+      ansible.builtin.copy:
+        dest: "/run/photo-backup/{{ item.name }}.cred"
+        content: |
+          username={{ item.cred.username }}
+          password={{ item.cred.password }}
+          {% if item.cred.domain is defined %}domain={{ item.cred.domain }}
+          {% endif %}
+        owner: root
+        group: root
+        mode: "0600"
+      loop: "{{ photo_backup_mounts }}"
+      loop_control:
+        label: "{{ item.name }}"
+      no_log: true
+
+    # A run that died mid-way can leave a share mounted, possibly with the
+    # wrong mode, so always start clean.
+    - name: Unmount anything left over from an earlier run
+      ansible.builtin.command: "umount {{ item.path }}"
+      register: photo_backup_stale_umount
+      changed_when: photo_backup_stale_umount.rc == 0
+      failed_when: false
+      loop: "{{ photo_backup_mounts }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+    - name: Mount the shares
+      ansible.builtin.command:
+        argv:
+          - mount
+          - -t
+          - cifs
+          - "{{ item.unc }}"
+          - "{{ item.path }}"
+          - -o
+          - "credentials=/run/photo-backup/{{ item.name }}.cred,{{ item.mode }},{{ photo_backup_cifs_opts }}"
+      loop: "{{ photo_backup_mounts }}"
+      loop_control:
+        label: "{{ item.unc }} ({{ item.mode }})"
+
+    - name: Mirror Immich changes onto the backup
+      ansible.builtin.command:
+        argv: >-
+          {{ ['python3', photo_backup_script_path,
+              '--url', immich_cred.url,
+              '--source-prefix', photo_backup_source_prefix,
+              '--source-root', photo_backup_source_root,
+              '--dest-root', photo_backup_dest_root,
+              '--state', photo_backup_state_file,
+              '--initial-checkpoint', photo_backup_initial_checkpoint,
+              '--overlap-minutes', photo_backup_overlap_minutes | string,
+              '--max-deletes', photo_backup_max_deletes | string,
+              '--manifest', photo_backup_manifest_path]
+             + (photo_backup_visibilities | map('regex_replace', '^', '--visibility=') | list)
+             + (['--dry-run'] if photo_backup_dry_run | bool else []) }}
+      environment:
+        IMMICH_API_KEY: "{{ immich_cred.api_key }}"
+      async: "{{ photo_backup_timeout }}"
+      poll: 30
+      register: photo_backup_run
+      failed_when: false
+      changed_when: false
+
+    - name: Read the backup summary
+      ansible.builtin.set_fact:
+        photo_backup_summary: "{{ photo_backup_run.stdout_lines | last | from_json }}"
+      when: photo_backup_run.stdout_lines | default([]) | length > 0
+
+    - name: Show the backup summary
+      ansible.builtin.debug:
+        msg:
+          - "{{ photo_backup_summary | default('no summary') }}"
+          - "{{ (photo_backup_run.stderr_lines | default([]))[-40:] }}"
+
+    - name: Stop if the backup did not finish cleanly
+      ansible.builtin.fail:
+        msg: >-
+          The backup script exited {{ photo_backup_run.rc | default('without a return code (timed out?)') }}.
+          {{ (photo_backup_summary | default({})).error | default('Failed files are listed above') }}.
+          Manifest: {{ photo_backup_manifest_path }} on {{ inventory_hostname }}.
+          The checkpoint did not advance, so the next run retries.
+      when: photo_backup_run.rc | default(1) != 0
+
+    - name: Build the result message
+      ansible.builtin.set_fact:
+        photo_backup_message: >-
+          {{ photo_backup_summary.assets }} changed assets: {{ photo_backup_summary.copied }} copied,
+          {{ photo_backup_summary.deleted }} deleted, {{ photo_backup_summary.present }} already present
+
+  rescue:
+    - name: Record the failed step
+      ansible.builtin.set_fact:
+        photo_backup_status: error
+        photo_backup_message: >-
+          {{ ansible_failed_task.name }}{{ ': ' ~ photo_backup_summary.error
+             if (photo_backup_summary | default({})).error is defined else '' }}
+
+  always:
+    - name: Unmount the shares
+      ansible.builtin.command: "umount {{ item.path }}"
+      register: photo_backup_umount
+      changed_when: photo_backup_umount.rc == 0
+      failed_when: false
+      loop: "{{ photo_backup_mounts | reverse | list }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+    - name: Remove the SMB credentials files
+      ansible.builtin.file:
+        path: /run/photo-backup
+        state: absent
+
+    - name: Find manifests past retention
+      ansible.builtin.find:
+        paths: "{{ photo_backup_manifest_dir }}"
+        patterns: "*.json"
+        age: "{{ photo_backup_manifest_retention_days }}d"
+      register: photo_backup_old_manifests
+
+    - name: Remove manifests past retention
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ photo_backup_old_manifests.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+
+    # Same connection-variable override as PhotoPipelineIngest and AddToZabbix.
+    - name: Report the result to Zabbix
+      vars:
+        ansible_connection: local
+        ansible_user: root
+        ansible_password: ''
+      ansible.builtin.uri:
+        url: "{{ photo_backup_zabbix_api_url }}/api_jsonrpc.php"
+        method: POST
+        headers:
+          Content-Type: application/json-rpc
+          Authorization: "Bearer {{ zabbixapi_cred.token }}"
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: history.push
+          params:
+            - host: "{{ photo_backup_zabbix_host }}"
+              key: "{{ photo_backup_zabbix_item_key }}"
+              value: "{{ photo_backup_status }}: {{ photo_backup_message | trim }}"
+          id: 1
+      register: photo_backup_zabbix_push
+      delegate_to: localhost
+      become: false
+      ignore_errors: true
+      when:
+        - photo_backup_zabbix_report | bool
+        - not photo_backup_dry_run | bool
+
+    - name: Warn if Zabbix rejected the result
+      ansible.builtin.debug:
+        msg: "Zabbix did not record the result: {{ photo_backup_zabbix_push.json | default(photo_backup_zabbix_push.msg | default('no response')) }}"
+      when:
+        - photo_backup_zabbix_push is defined
+        - photo_backup_zabbix_push is not skipped
+        - photo_backup_zabbix_push is failed or 'error' in (photo_backup_zabbix_push.json | default({}) | string)
+
+    - name: Fail the job if the run failed
+      ansible.builtin.fail:
+        msg: "Photo backup failed at: {{ photo_backup_message | trim }}"
+      when: photo_backup_status == 'error'
+
+    - name: Show the result
+      ansible.builtin.debug:
+        msg: "{{ 'DRY RUN, nothing changed on Storage1. ' if photo_backup_dry_run | bool else '' }}{{ photo_backup_status }}: {{ photo_backup_message | trim }}"

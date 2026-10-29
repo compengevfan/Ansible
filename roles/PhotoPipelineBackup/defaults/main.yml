@@ -1,0 +1,55 @@
+---
+# defaults file for PhotoPipelineBackup
+
+# Plan only: query Immich and write the manifest, but copy and delete nothing.
+# The Storage1 share is mounted read-only during a dry run. Leave this true
+# until a dry run's manifest has been checked, then set it false in the
+# Ascender job template's extra vars.
+photo_backup_dry_run: true
+
+# Shares. Each is mounted for the run only and unmounted afterwards. The
+# Storage3 library is always mounted read-only.
+photo_backup_source_server: storage3.evorigin.com
+photo_backup_source_share: Immich
+photo_backup_dest_server: storage1.evorigin.com
+photo_backup_dest_share: Backups
+photo_backup_mount_base: /mnt/photo-backup
+photo_backup_source_mount: "{{ photo_backup_mount_base }}/storage3-immich"
+photo_backup_dest_mount: "{{ photo_backup_mount_base }}/storage1-backups"
+photo_backup_cifs_opts: vers=3.0,iocharset=utf8
+
+# Path mapping. Immich reports originalPath under photo_backup_source_prefix
+# (its container path). That prefix is library/admin on the Storage3 share,
+# and the backup copy mirrors it under ImmichPhotosAndVideos on Storage1.
+photo_backup_source_prefix: /usr/src/app/upload/library/admin
+photo_backup_source_root: "{{ photo_backup_source_mount }}/library/admin"
+photo_backup_dest_root: "{{ photo_backup_dest_mount }}/ImmichPhotosAndVideos"
+
+# Checkpoint. With no state file yet, the first run starts here: the seed copy
+# covered everything up to the 2026-10-23 ingest run. Each run looks back
+# photo_backup_overlap_minutes before the last success, so nothing falls in a
+# gap; files already in the backup at the same size are skipped.
+photo_backup_state_file: /var/lib/photo-pipeline/backup-state.json
+photo_backup_initial_checkpoint: "2026-10-23T00:00:00-04:00"
+photo_backup_overlap_minutes: 60
+
+# Extra Immich visibilities to search, on top of the default search. Live
+# Photo video parts are "hidden"; empty means the default search only.
+photo_backup_visibilities: []
+
+# A run planning more deletions than this aborts without changing anything,
+# so an API problem can never empty the backup. Raise it in extra vars for a
+# deliberate mass clean-up in Immich.
+photo_backup_max_deletes: 500
+
+photo_backup_manifest_dir: /var/lib/photo-pipeline/backup-manifests
+photo_backup_manifest_retention_days: 90
+photo_backup_script_path: /usr/local/libexec/photo-pipeline/photo_backup.py
+photo_backup_timeout: 14400
+
+# Result reporting, same pattern as PhotoPipelineIngest. Dry runs never report.
+photo_backup_zabbix_report: true
+photo_backup_zabbix_api_url: http://zabbix.evorigin.com/zabbix
+# Must match the Zabbix host name exactly, case included.
+photo_backup_zabbix_host: JAX-WKN001L.evorigin.com
+photo_backup_zabbix_item_key: photo.backup.status

@@ -1,0 +1,30 @@
+---
+# HLT-1, Stage 2: mirror Immich changes, deletions included, onto the
+# Storage1 backup copy. Runs after PhotoPipelineIngest in an Ascender
+# workflow; see roles/PhotoPipelineBackup/README.md. Runs as a dry run until
+# photo_backup_dry_run is set false in the job template's extra vars.
+- name: GetCredentials
+  hosts: "{{ target_hostname | default('JAX-WKN001L') }}"
+  gather_facts: no
+  tasks:
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - linuxroot
+          - immich
+          - smbstorage1
+          - smbstorage3
+          - zabbixapi
+
+- name: Run the PhotoPipelineBackup Role
+  hosts: "{{ target_hostname | default('JAX-WKN001L') }}"
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Run the PhotoPipelineBackup Role
+      include_role:
+        name: PhotoPipelineBackup

@@ -97,6 +97,20 @@
   no_log: true
   when: "'dropbox' in includecred"
 
+# SMB accounts for the Storage1 and Storage3 shares (username, password, and
+# optionally domain), for the photo backup, HLT-1.
+- name: Get Storage1 SMB cred from Vault
+  set_fact:
+    smbstorage1_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/smb/storage1 validate_certs=False') }}"
+  no_log: true
+  when: "'smbstorage1' in includecred"
+
+- name: Get Storage3 SMB cred from Vault
+  set_fact:
+    smbstorage3_cred: "{{ lookup('community.hashi_vault.hashi_vault','secret=HomeLabSecrets/data/smb/storage3 validate_certs=False') }}"
+  no_log: true
+  when: "'smbstorage3' in includecred"
+
 # A public certificate, not a secret, so no no_log: a failure stays readable.
 - name: Get internal root CA certificate from Vault
   set_fact:
