@@ -43,6 +43,7 @@ Each entry is looked up with `community.hashi_vault.hashi_vault` and
 | `dropbox` | `dropbox_cred` | `dropbox` |
 | `smbstorage1` | `smbstorage1_cred` | `smb/storage1` |
 | `smbstorage3` | `smbstorage3_cred` | `smb/storage3` |
+| `asustoradmin` | `asustoradmin_cred` | `storage/asustor_admin` |
 
 The facts are dictionaries whose keys come from the secret itself — usually
 `username` and `password`, but not always. Callers in this repository also use:
@@ -57,6 +58,9 @@ The facts are dictionaries whose keys come from the secret itself — usually
   (the Dropbox app rclone uses) — read by `PhotoPipelineIngest`
 - `smbstorage1_cred` / `smbstorage3_cred`: `username`, `password`, optional
   `domain` — the SMB mounts in `PhotoPipelineBackup`
+- `asustoradmin_cred`: `username`, `password`, plus `ssh_private_key`,
+  `ssh_public_key` and `ssh_known_hosts` (Storage3's ECDSA host key line) — the
+  SSH connection to Storage3 in `PhotoPipelineUsb`
 - `cacert_info['ca.crt']` — the internal root CA certificate in PEM form, read
   by `InstallInternalRootCA`. Bracket syntax because the key has a dot in it
 

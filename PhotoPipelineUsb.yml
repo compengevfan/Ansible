@@ -1,0 +1,30 @@
+---
+# HLT-1, Stage 3: keep the detachable USB photo drive on Storage3 in step with
+# Immich. Runs after PhotoPipelineBackup in an Ascender workflow, and succeeds
+# quietly when the drive is not attached; see roles/PhotoPipelineUsb/README.md.
+# Runs as a dry run until photo_usb_dry_run is set false in the job template's
+# extra vars.
+- name: GetCredentials
+  hosts: "{{ target_hostname | default('JAX-WKN001L') }}"
+  gather_facts: no
+  tasks:
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - linuxroot
+          - immich
+          - asustoradmin
+          - zabbixapi
+
+- name: Run the PhotoPipelineUsb Role
+  hosts: "{{ target_hostname | default('JAX-WKN001L') }}"
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Run the PhotoPipelineUsb Role
+      include_role:
+        name: PhotoPipelineUsb

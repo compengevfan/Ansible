@@ -1,0 +1,227 @@
+---
+# tasks file for PhotoPipelineUsb
+# HLT-1, Stage 3: keep the detachable USB photo drive on Storage3 in step with
+# the Immich library, deletions included.
+#
+#   1. Write the Storage3 SSH key and host key to tmpfs for the run.
+#   2. photo_usb.py finds the drive by UUID over SSH. Not attached: report
+#      that and stop, successfully. Attached: ask Immich what changed since
+#      the drive's own checkpoint, then rsync and delete on Storage3 itself,
+#      so the photos never cross the network.
+#   3. Remove the keys, prune old manifests, and push the result to Zabbix.
+#
+# Credentials: the calling playbook runs GetVaultCreds with 'immich',
+# 'asustoradmin' and 'zabbixapi' in includecred.
+
+- name: Check the Immich and Storage3 values were read from Vault
+  ansible.builtin.assert:
+    that:
+      - immich_cred is defined
+      - immich_cred.api_key is defined
+      - immich_cred.url is defined
+      - asustoradmin_cred is defined
+      - asustoradmin_cred.username is defined
+      - asustoradmin_cred.ssh_private_key is defined
+      - asustoradmin_cred.ssh_known_hosts is defined
+    fail_msg: >-
+      A Vault value is missing. Run GetVaultCreds with 'immich' and
+      'asustoradmin' in includecred, and check HomeLabSecrets/data/immich holds
+      api_key and url, and HomeLabSecrets/data/storage/asustor_admin holds
+      username, ssh_private_key and ssh_known_hosts.
+    quiet: true
+
+- name: Install Python and the SSH client
+  ansible.builtin.dnf:
+    name:
+      - python3
+      - openssh-clients
+    state: present
+
+- name: Create the USB sync directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop:
+    - "{{ photo_usb_manifest_dir }}"
+    - "{{ photo_usb_script_path | dirname }}"
+
+- name: Install the USB sync script
+  ansible.builtin.copy:
+    src: photo_usb.py
+    dest: "{{ photo_usb_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Set the run values
+  ansible.builtin.set_fact:
+    photo_usb_status: ok
+    photo_usb_message: ""
+    photo_usb_manifest_path: "{{ photo_usb_manifest_dir }}/{{ now(fmt='%Y%m%dT%H%M%S') }}{{ '-dryrun' if photo_usb_dry_run | bool else '' }}.json"
+
+- name: Run the USB sync
+  block:
+    - name: Create the key directory on tmpfs
+      ansible.builtin.file:
+        path: /run/photo-usb
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    # ssh rejects a private key without its final newline.
+    - name: Write the Storage3 SSH key and host key
+      ansible.builtin.copy:
+        dest: "/run/photo-usb/{{ item.name }}"
+        content: "{{ item.content | trim }}\n"
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - name: id_storage3
+          content: "{{ asustoradmin_cred.ssh_private_key }}"
+        - name: known_hosts
+          content: "{{ asustoradmin_cred.ssh_known_hosts }}"
+      loop_control:
+        label: "{{ item.name }}"
+      no_log: true
+
+    - name: Sync Immich changes onto the USB drive
+      ansible.builtin.command:
+        argv: >-
+          {{ ['python3', photo_usb_script_path,
+              '--url', immich_cred.url,
+              '--ssh-target', photo_usb_ssh_user ~ '@' ~ photo_usb_ssh_host,
+              '--ssh-key', '/run/photo-usb/id_storage3',
+              '--known-hosts', '/run/photo-usb/known_hosts',
+              '--drive-uuid', photo_usb_drive_uuid,
+              '--marker', photo_usb_marker_file,
+              '--state-name', photo_usb_state_file,
+              '--dest-dir', photo_usb_dest_dir,
+              '--source-prefix', photo_usb_source_prefix,
+              '--source-root', photo_usb_source_root,
+              '--overlap-minutes', photo_usb_overlap_minutes | string,
+              '--max-deletes', photo_usb_max_deletes | string,
+              '--min-free-gb', photo_usb_min_free_gb | string,
+              '--rsync-timeout', ([photo_usb_timeout | int - 600, 600] | max) | string,
+              '--manifest', photo_usb_manifest_path]
+             + (photo_usb_visibilities | map('regex_replace', '^', '--visibility=') | list)
+             + (['--dry-run'] if photo_usb_dry_run | bool else []) }}
+      environment:
+        IMMICH_API_KEY: "{{ immich_cred.api_key }}"
+      async: "{{ photo_usb_timeout }}"
+      poll: 30
+      register: photo_usb_run
+      failed_when: false
+      changed_when: false
+
+    - name: Read the sync summary
+      ansible.builtin.set_fact:
+        photo_usb_summary: "{{ photo_usb_run.stdout_lines | last | from_json }}"
+      when: photo_usb_run.stdout_lines | default([]) | length > 0
+
+    - name: Show the sync summary
+      ansible.builtin.debug:
+        msg:
+          - "{{ photo_usb_summary | default('no summary') }}"
+          - "{{ (photo_usb_run.stderr_lines | default([]))[-40:] }}"
+
+    - name: Stop if the sync did not finish cleanly
+      ansible.builtin.fail:
+        msg: >-
+          The USB sync script exited {{ photo_usb_run.rc | default('without a return code (timed out?)') }}.
+          {{ (photo_usb_summary | default({})).error | default('Failed files are listed above') }}.
+          Manifest: {{ photo_usb_manifest_path }} on {{ inventory_hostname }}.
+          The checkpoint on the drive did not advance, so the next run retries.
+      when: photo_usb_run.rc | default(1) != 0
+
+    - name: Build the result message
+      vars:
+        s: "{{ photo_usb_summary }}"
+      ansible.builtin.set_fact:
+        photo_usb_message: >-
+          {{ 'drive not attached' if s.drive == 'absent'
+             else 'drive attached but not mounted (ejected)' if s.drive == 'unmounted'
+             else s.mode ~ ' sync, ' ~ s.assets ~ (' changed' if s.mode == 'delta' else '')
+                  ~ ' assets: ' ~ s.copied ~ ' copied ('
+                  ~ ((s.bytes | int) / 1e9) | round(1) ~ ' GB), ' ~ s.deleted ~ ' deleted, '
+                  ~ s.present ~ ' already present; ' ~ s.free_gb ~ ' GB free' }}
+
+  rescue:
+    - name: Record the failed step
+      ansible.builtin.set_fact:
+        photo_usb_status: error
+        photo_usb_message: >-
+          {{ ansible_failed_task.name }}{{ ': ' ~ photo_usb_summary.error
+             if (photo_usb_summary | default({})).error is defined else '' }}
+
+  always:
+    - name: Remove the Storage3 SSH key
+      ansible.builtin.file:
+        path: /run/photo-usb
+        state: absent
+
+    - name: Find manifests past retention
+      ansible.builtin.find:
+        paths: "{{ photo_usb_manifest_dir }}"
+        patterns: "*.json"
+        age: "{{ photo_usb_manifest_retention_days }}d"
+      register: photo_usb_old_manifests
+
+    - name: Remove manifests past retention
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ photo_usb_old_manifests.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+
+    # Same connection-variable override as the other photo pipeline roles and
+    # AddToZabbix.
+    - name: Report the result to Zabbix
+      vars:
+        ansible_connection: local
+        ansible_user: root
+        ansible_password: ''
+      ansible.builtin.uri:
+        url: "{{ photo_usb_zabbix_api_url }}/api_jsonrpc.php"
+        method: POST
+        headers:
+          Content-Type: application/json-rpc
+          Authorization: "Bearer {{ zabbixapi_cred.token }}"
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: history.push
+          params:
+            - host: "{{ photo_usb_zabbix_host }}"
+              key: "{{ photo_usb_zabbix_item_key }}"
+              value: "{{ photo_usb_status }}: {{ photo_usb_message | trim }}"
+          id: 1
+      register: photo_usb_zabbix_push
+      delegate_to: localhost
+      become: false
+      ignore_errors: true
+      when:
+        - photo_usb_zabbix_report | bool
+        - not photo_usb_dry_run | bool
+
+    - name: Warn if Zabbix rejected the result
+      ansible.builtin.debug:
+        msg: "Zabbix did not record the result: {{ photo_usb_zabbix_push.json | default(photo_usb_zabbix_push.msg | default('no response')) }}"
+      when:
+        - photo_usb_zabbix_push is defined
+        - photo_usb_zabbix_push is not skipped
+        - photo_usb_zabbix_push is failed or 'error' in (photo_usb_zabbix_push.json | default({}) | string)
+
+    - name: Fail the job if the run failed
+      ansible.builtin.fail:
+        msg: "Photo USB sync failed at: {{ photo_usb_message | trim }}"
+      when: photo_usb_status == 'error'
+
+    - name: Show the result
+      ansible.builtin.debug:
+        msg: "{{ 'DRY RUN, nothing changed on the drive. ' if photo_usb_dry_run | bool else '' }}{{ photo_usb_status }}: {{ photo_usb_message | trim }}"
