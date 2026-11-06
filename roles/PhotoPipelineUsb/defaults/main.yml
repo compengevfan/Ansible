@@ -1,0 +1,60 @@
+---
+# defaults file for PhotoPipelineUsb
+
+# Plan only: find the drive, query Immich and size the copy with an rsync dry
+# run, but copy, delete and write nothing on the drive. Leave this true until
+# a dry run's manifest has been checked, then set it false in the Ascender job
+# template's extra vars.
+photo_usb_dry_run: true
+
+# Storage3, reached over SSH as the account in HomeLabSecrets/data/storage/
+# asustor_admin. Its host key comes from the same secret (ssh_known_hosts) and
+# is checked strictly.
+photo_usb_ssh_host: storage3.evorigin.com
+photo_usb_ssh_user: "{{ asustoradmin_cred.username }}"
+
+# The drive. Found by filesystem UUID, never by mount point: ADM numbers USB
+# drives (USB1, USB2, ...) in the order it sees them. The job only writes when
+# the marker file at the drive's root holds this UUID.
+photo_usb_drive_uuid: 682C12C72C128FE4
+photo_usb_marker_file: .photo-usb-drive
+# Checkpoint, kept on the drive so a drive that was away catches up from its
+# own last sync. Missing = full sync (every live asset).
+photo_usb_state_file: .photo-usb-state.json
+# The folder on the drive that holds the photos, as year/MM/dd/<file>.
+photo_usb_dest_dir: Photos
+
+# Path mapping. Immich reports originalPath under photo_usb_source_prefix (its
+# container path), which is library/admin on Storage3's Immich share.
+photo_usb_source_prefix: /usr/src/app/upload/library/admin
+photo_usb_source_root: /share/Immich/library/admin
+
+# Each delta run looks back this far before the last success, so nothing falls
+# in a gap; files already on the drive at the same size are skipped.
+photo_usb_overlap_minutes: 60
+
+# Extra Immich visibilities to search, on top of the default search. Keep in
+# step with photo_backup_visibilities.
+photo_usb_visibilities: []
+
+# A run planning more deletions than this aborts without changing anything.
+photo_usb_max_deletes: 500
+
+# A run whose copy would leave less than this free on the drive aborts
+# without changing anything.
+photo_usb_min_free_gb: 20
+
+photo_usb_manifest_dir: /var/lib/photo-pipeline/usb-manifests
+photo_usb_manifest_retention_days: 90
+photo_usb_script_path: /usr/local/libexec/photo-pipeline/photo_usb.py
+# Seconds. Nightly deltas take minutes; the first full sync (about 1 TB onto
+# the USB drive) can take many hours, so raise this for that one run.
+photo_usb_timeout: 14400
+
+# Result reporting, same pattern as the other photo pipeline roles. Dry runs
+# never report.
+photo_usb_zabbix_report: true
+photo_usb_zabbix_api_url: http://zabbix.evorigin.com/zabbix
+# Must match the Zabbix host name exactly, case included.
+photo_usb_zabbix_host: JAX-WKN001L.evorigin.com
+photo_usb_zabbix_item_key: photo.usb.status
