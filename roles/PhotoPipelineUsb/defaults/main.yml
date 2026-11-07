@@ -29,6 +29,14 @@ photo_usb_dest_dir: Photos
 photo_usb_source_prefix: /usr/src/app/upload/library/admin
 photo_usb_source_root: /share/Immich/library/admin
 
+# Assets under these originalPath prefixes are files Immich generated itself
+# and are skipped, not copied. encoded-video holds the videos Immich extracts
+# from Android motion photos (hidden "<id>-MP.mp4" assets); the original photo
+# in the library still holds the video. Any other path outside
+# photo_usb_source_prefix still fails the run.
+photo_usb_skip_prefixes:
+  - /usr/src/app/upload/encoded-video
+
 # Each delta run looks back this far before the last success, so nothing falls
 # in a gap; files already on the drive at the same size are skipped.
 photo_usb_overlap_minutes: 60

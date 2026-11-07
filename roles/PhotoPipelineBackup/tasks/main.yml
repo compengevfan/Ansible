@@ -144,6 +144,7 @@
               '--overlap-minutes', photo_backup_overlap_minutes | string,
               '--max-deletes', photo_backup_max_deletes | string,
               '--manifest', photo_backup_manifest_path]
+             + (photo_backup_skip_prefixes | map('regex_replace', '^', '--skip-prefix=') | list)
              + (photo_backup_visibilities | map('regex_replace', '^', '--visibility=') | list)
              + (['--dry-run'] if photo_backup_dry_run | bool else []) }}
       environment:

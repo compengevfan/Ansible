@@ -75,7 +75,12 @@ All run before anything is changed:
   folder (the year folders).
 - **Unexpected paths:** an asset whose `originalPath` is outside
   `photo_backup_source_prefix` fails the run rather than being skipped, since
-  it means something is not being backed up.
+  it means something is not being backed up. The exception is
+  `photo_backup_skip_prefixes` (default `/usr/src/app/upload/encoded-video`):
+  files Immich generated itself, skipped and listed as `skipped_derived`.
+  These are the `<id>-MP.mp4` videos Immich extracts from Android motion
+  photos (562 in November 2026, found by the first `PhotoPipelineUsb` dry
+  run). The original photo in the library still holds the video.
 - **Deletion limit:** a run planning more than `photo_backup_max_deletes`
   deletions (default 500) aborts with nothing changed. For a deliberate large
   clean-up in Immich, raise it in the template's extra vars for one run.
@@ -91,7 +96,7 @@ The manifest
 `/var/lib/photo-pipeline/backup-manifests/<timestamp>.json` (or
 `-dryrun.json`). A `summary` block, then one entry per asset: `id`,
 `originalPath`, `trashed`, `source`, `destination` and `action` (`copied`,
-`replaced`, `present`, `deleted`, `already_absent`, `outside_library`,
+`replaced`, `present`, `deleted`, `already_absent`, `skipped_derived`, `outside_library`,
 `failed`, or `not_run` when a safety check aborted the run).
 
 Credentials
@@ -160,6 +165,7 @@ Role Variables
 | `photo_backup_source_prefix` | `/usr/src/app/upload/library/admin` | The `originalPath` prefix Immich reports |
 | `photo_backup_source_root` | `<storage3 mount>/library/admin` | Where that prefix is on the share |
 | `photo_backup_dest_root` | `<storage1 mount>/ImmichPhotosAndVideos` | |
+| `photo_backup_skip_prefixes` | `['/usr/src/app/upload/encoded-video']` | Immich-generated files, skipped |
 | `photo_backup_initial_checkpoint` | `2026-10-23T00:00:00-04:00` | Used only until the first successful run |
 | `photo_backup_overlap_minutes` | `60` | |
 | `photo_backup_visibilities` | `[]` | Extra visibilities to search, e.g. `['hidden']` for Live Photo video parts |
@@ -176,9 +182,9 @@ Known limits
   matches. Immich does not edit originals, so this is enough for nightly runs;
   the planned integrity pass is where content would be checked.
 - **The gap described above** for assets trashed and purged between runs.
-- **Hidden assets.** If Immich's default search leaves out hidden assets
-  (Live Photo video parts), set `photo_backup_visibilities: ['hidden']`. Whether
-  any arrive depends on what Dropbox uploads for Live Photos; not yet checked.
+- **Hidden assets.** The default Immich search does return hidden assets (the
+  first `PhotoPipelineUsb` dry run included 562 motion-photo videos), so
+  `photo_backup_visibilities` can stay empty.
 - **Storage template changes.** If the Immich storage template is changed and
   its migration job moves files, run a one-off full re-sync afterwards.
 

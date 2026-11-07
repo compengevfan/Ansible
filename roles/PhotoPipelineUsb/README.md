@@ -115,7 +115,12 @@ All run before anything is changed:
   other drive is ever written to.
 - **Unexpected paths:** an asset whose `originalPath` is outside
   `photo_usb_source_prefix`, or whose relative path contains `..` or control
-  characters, fails the run.
+  characters, fails the run. The exception is `photo_usb_skip_prefixes`
+  (default `/usr/src/app/upload/encoded-video`): files Immich generated
+  itself, which are skipped and listed as `skipped_derived`. The first dry run
+  found 562 of them, all `<id>-MP.mp4`: the videos Immich extracts from
+  Android motion photos. The original photo in the library still holds the
+  video, so nothing is lost.
 - **Deletion limit:** more than `photo_usb_max_deletes` deletions (default 500)
   aborts with nothing changed. Raise it in extra vars for one run after a
   deliberate large clean-up in Immich.
@@ -137,7 +142,7 @@ The manifest
 A `summary` block (drive state, mode, counts, bytes, free space), then one
 entry per asset: `id`, `originalPath`, `trashed`, `destination`, `source` (for
 copies) and `action` (`copied`, `present`, `deleted`, `already_absent`,
-`outside_library`, `failed`, `unknown` when rsync failed part way, or
+`skipped_derived`, `outside_library`, `failed`, `unknown` when rsync failed part way, or
 `not_run` when a safety check aborted the run). In a dry run, `copied` and
 `deleted` mean "would be".
 
@@ -222,6 +227,7 @@ Role Variables
 | `photo_usb_dest_dir` | `Photos` | Folder on the drive |
 | `photo_usb_source_prefix` | `/usr/src/app/upload/library/admin` | The `originalPath` prefix Immich reports |
 | `photo_usb_source_root` | `/share/Immich/library/admin` | That prefix on Storage3 |
+| `photo_usb_skip_prefixes` | `['/usr/src/app/upload/encoded-video']` | Immich-generated files, skipped |
 | `photo_usb_overlap_minutes` | `60` | |
 | `photo_usb_visibilities` | `[]` | Keep in step with `photo_backup_visibilities` |
 | `photo_usb_max_deletes` | `500` | |
@@ -238,7 +244,9 @@ Known limits
   copy stays on the drive. Nothing is lost; the drive keeps an extra file. The
   planned reconciliation pass would clean these up.
 - **Sizes, not hashes**, as in `PhotoPipelineBackup`.
-- **Hidden assets** (Live Photo video parts): see `photo_usb_visibilities`.
+- **Hidden assets.** The default Immich search does return hidden assets (the
+  first dry run included the 562 motion-photo videos), so
+  `photo_usb_visibilities` can stay empty.
 - **Windows file names.** A file name NTFS cannot hold (for example one with
   `:` or `?`) fails the run, with rsync's error in the job output. Phone
   uploads do not produce these.
