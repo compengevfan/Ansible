@@ -108,6 +108,7 @@
               '--min-free-gb', photo_usb_min_free_gb | string,
               '--rsync-timeout', ([photo_usb_timeout | int - 600, 600] | max) | string,
               '--manifest', photo_usb_manifest_path]
+             + (photo_usb_skip_prefixes | map('regex_replace', '^', '--skip-prefix=') | list)
              + (photo_usb_visibilities | map('regex_replace', '^', '--visibility=') | list)
              + (['--dry-run'] if photo_usb_dry_run | bool else []) }}
       environment:

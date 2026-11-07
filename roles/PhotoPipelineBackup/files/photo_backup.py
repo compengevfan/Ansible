@@ -19,7 +19,9 @@ Safety checks, all before anything is changed:
   - The backup root's top-level folders must match the library's, which
     catches a wrong path mapping before it copies files to the wrong place.
   - Assets whose originalPath is outside the expected library prefix fail
-    the run instead of being silently skipped.
+    the run instead of being silently skipped. The exception is
+    --skip-prefix: files Immich generated itself (the videos it extracts from
+    Android motion photos), which are skipped and listed as skipped_derived.
   - More than --max-deletes deletions in one run aborts the whole run.
   - A path that would land outside the backup root is refused.
 
@@ -104,6 +106,8 @@ def main():
     p.add_argument("--source-prefix", required=True, help="originalPath prefix Immich reports for the library")
     p.add_argument("--source-root", required=True, help="where that prefix is mounted on this host")
     p.add_argument("--dest-root", required=True, help="the backup copy's root")
+    p.add_argument("--skip-prefix", action="append", default=[],
+                   help="originalPath prefix of files Immich generated itself, skipped (repeatable)")
     p.add_argument("--state", required=True, help="checkpoint file")
     p.add_argument("--initial-checkpoint", required=True, help="ISO time to start from when there is no checkpoint")
     p.add_argument("--overlap-minutes", type=int, default=60)
@@ -118,6 +122,7 @@ def main():
     if not key:
         sys.exit("IMMICH_API_KEY is not set")
     prefix = a.source_prefix.rstrip("/") + "/"
+    skip_prefixes = [s.rstrip("/") + "/" for s in a.skip_prefix]
     dest_root = os.path.realpath(a.dest_root)
     run_started = utcnow()
     checkpoint = read_checkpoint(a.state, a.initial_checkpoint)
@@ -125,7 +130,7 @@ def main():
 
     summary = {"started": iso(run_started), "dry_run": a.dry_run, "since": since,
                "assets": 0, "copied": 0, "present": 0, "replaced": 0, "deleted": 0,
-               "already_absent": 0, "outside_library": 0, "failed": 0, "manifest": a.manifest}
+               "already_absent": 0, "skipped_derived": 0, "outside_library": 0, "failed": 0, "manifest": a.manifest}
     records = []
 
     def finish(code, error=None):
@@ -168,6 +173,12 @@ def main():
     for item in sorted(found.values(), key=lambda i: i.get("originalPath") or ""):
         path = item.get("originalPath") or ""
         rec = {"id": item["id"], "originalPath": path, "trashed": bool(item.get("isTrashed"))}
+        if any(path.startswith(s) for s in skip_prefixes):
+            # e.g. the video Immich extracts from an Android motion photo; the
+            # original photo in the library still holds it.
+            rec["action"] = "skipped_derived"
+            records.append(rec)
+            continue
         if not path.startswith(prefix):
             rec.update(action="outside_library", error=f"not under {prefix}")
             records.append(rec)

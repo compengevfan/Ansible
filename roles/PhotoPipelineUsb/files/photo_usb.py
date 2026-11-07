@@ -25,6 +25,8 @@ Safety checks, all before anything is changed:
   - The marker file must be present and match the UUID.
   - Assets whose originalPath is outside the expected library prefix, or
     whose relative path is unsafe (.., control characters), fail the run.
+    The exception is --skip-prefix: files Immich generated itself (the
+    videos it extracts from Android motion photos), which are skipped.
   - More than --max-deletes deletions in one run aborts the whole run.
   - An rsync dry run sizes the copy first; if it would leave less than
     --min-free-gb free on the drive, nothing is changed.
@@ -236,6 +238,8 @@ def main():
     p.add_argument("--dest-dir", required=True, help="folder on the drive that holds the photos")
     p.add_argument("--source-prefix", required=True, help="originalPath prefix Immich reports for the library")
     p.add_argument("--source-root", required=True, help="where that prefix is on Storage3")
+    p.add_argument("--skip-prefix", action="append", default=[],
+                   help="originalPath prefix of files Immich generated itself, skipped (repeatable)")
     p.add_argument("--overlap-minutes", type=int, default=60)
     p.add_argument("--visibility", action="append", default=[],
                    help="also search this visibility (repeatable); none = Immich's default")
@@ -250,6 +254,7 @@ def main():
     if not key:
         sys.exit("IMMICH_API_KEY is not set")
     prefix = a.source_prefix.rstrip("/") + "/"
+    skip_prefixes = [s.rstrip("/") + "/" for s in a.skip_prefix]
     run_started = utcnow()
     remote = Remote(a.ssh_target, a.ssh_key, a.known_hosts)
 
@@ -259,7 +264,8 @@ def main():
                "free_gb": None, "manifest": a.manifest}
     records = []
 
-    count_keys = ("copied", "present", "deleted", "already_absent", "outside_library", "failed")
+    count_keys = ("copied", "present", "deleted", "already_absent", "skipped_derived",
+                  "outside_library", "failed")
 
     def finish(code, error=None):
         # Count from the records on every exit, aborts included.
@@ -345,6 +351,12 @@ def main():
     for item in sorted(found.values(), key=lambda i: i["originalPath"]):
         path = item["originalPath"]
         rec = {"id": item["id"], "originalPath": path, "trashed": item["isTrashed"]}
+        if any(path.startswith(s) for s in skip_prefixes):
+            # e.g. the video Immich extracts from an Android motion photo; the
+            # original photo in the library still holds it.
+            rec["action"] = "skipped_derived"
+            records.append(rec)
+            continue
         if not path.startswith(prefix):
             rec.update(action="outside_library", error=f"not under {prefix}")
             records.append(rec)

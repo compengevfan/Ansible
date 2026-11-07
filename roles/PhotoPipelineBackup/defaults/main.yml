@@ -25,6 +25,14 @@ photo_backup_source_prefix: /usr/src/app/upload/library/admin
 photo_backup_source_root: "{{ photo_backup_source_mount }}/library/admin"
 photo_backup_dest_root: "{{ photo_backup_dest_mount }}/ImmichPhotosAndVideos"
 
+# Assets under these originalPath prefixes are files Immich generated itself
+# and are skipped, not copied. encoded-video holds the videos Immich extracts
+# from Android motion photos (hidden "<id>-MP.mp4" assets); the original photo
+# in the library still holds the video. Any other path outside
+# photo_backup_source_prefix still fails the run.
+photo_backup_skip_prefixes:
+  - /usr/src/app/upload/encoded-video
+
 # Checkpoint. With no state file yet, the first run starts here: the seed copy
 # covered everything up to the 2026-10-23 ingest run. Each run looks back
 # photo_backup_overlap_minutes before the last success, so nothing falls in a
