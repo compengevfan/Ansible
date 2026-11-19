@@ -1,0 +1,78 @@
+---
+# Monthly patching for every AlmaLinux host, run on a schedule from Ascender.
+#
+# Ascender runs as a pod on JAX-K3S001L, so rebooting that VM in the middle of
+# the job would kill the job. Every host is updated, but the reboots happen in
+# three groups:
+#
+#   patch_linux_reboot_now        rebooted one at a time, straight away
+#   patch_linux_reboot_last       rebooted one at a time after the first group
+#                                 (hosts the others depend on: Gitea, Tailscale)
+#   patch_linux_reboot_scheduled  given a delayed reboot that fires after the
+#                                 job has finished (the Ascender host)
+#
+# Only hosts that dnf says need a reboot are put in a group. A reboot that does
+# not come back stops the run, so one bad update cannot take down every host.
+# See roles/PatchLinux/README.md.
+
+- name: GetCredentials
+  hosts: "{{ target_hostname | default('AlmaLinux') }}"
+  gather_facts: no
+  tasks:
+    - name: Obtain Credentials
+      include_role:
+        name: GetVaultCreds
+      vars:
+        includecred:
+          - linuxroot
+
+- name: Apply updates and decide when each host reboots
+  hosts: "{{ target_hostname | default('AlmaLinux') }}"
+  gather_facts: yes
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Run the PatchLinux Role
+      include_role:
+        name: PatchLinux
+
+- name: Reboot the updated hosts one at a time
+  hosts: patch_linux_reboot_now
+  gather_facts: no
+  serial: 1
+  max_fail_percentage: 0
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Reboot and verify
+      include_role:
+        name: PatchLinux
+        tasks_from: reboot
+
+- name: Reboot the hosts the rest depend on, one at a time
+  hosts: patch_linux_reboot_last
+  gather_facts: no
+  serial: 1
+  max_fail_percentage: 0
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Reboot and verify
+      include_role:
+        name: PatchLinux
+        tasks_from: reboot
+
+- name: Schedule the reboot of the host Ascender runs on
+  hosts: patch_linux_reboot_scheduled
+  gather_facts: no
+  vars:
+    ansible_user:     "{{ linuxroot_cred.username }}"
+    ansible_password: "{{ linuxroot_cred.password }}"
+  tasks:
+    - name: Schedule the reboot
+      include_role:
+        name: PatchLinux
+        tasks_from: schedule_reboot

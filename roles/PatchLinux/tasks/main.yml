@@ -1,0 +1,66 @@
+---
+# tasks file for PatchLinux
+# The update half: apply every available update, then work out whether the host
+# needs a reboot and, if it does, which reboot group it goes in. PatchLinux.yml
+# runs this on every host at once. The reboots themselves are in reboot.yml and
+# schedule_reboot.yml, run by later plays against the groups made here.
+
+- name: Make sure dnf needs-restarting is available
+  ansible.builtin.dnf:
+    name: dnf-plugins-core
+    state: present
+
+- name: Apply every available update
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+    update_cache: true
+  register: patch_linux_dnf
+
+- name: Report the packages that were updated
+  ansible.builtin.debug:
+    msg: >-
+      {{ patch_linux_dnf.results | default([])
+         | select('match', '^Installed: ')
+         | map('regex_replace', '^Installed: ', '')
+         | list
+         if patch_linux_dnf is changed else 'Already up to date.' }}
+
+- name: Check whether a reboot is needed
+  # Exits 1 when the kernel, glibc, systemd or another core package was updated
+  # since boot, 0 when not.
+  ansible.builtin.command: dnf needs-restarting -r
+  register: patch_linux_needs_restarting
+  changed_when: false
+  failed_when: patch_linux_needs_restarting.rc not in [0, 1]
+  check_mode: false
+
+- name: Work out the reboot group
+  ansible.builtin.set_fact:
+    patch_linux_reboot_group: >-
+      {%- set short_name = (inventory_hostname | lower).split('.')[0] -%}
+      {%- if not (patch_linux_force_reboot | bool or patch_linux_needs_restarting.rc == 1) -%}
+      none
+      {%- elif short_name in (patch_linux_scheduled_reboot_hosts | map('lower') | list) -%}
+      scheduled
+      {%- elif short_name in (patch_linux_reboot_last_hosts | map('lower') | list) -%}
+      last
+      {%- else -%}
+      now
+      {%- endif -%}
+
+- name: Put the host in its reboot group
+  ansible.builtin.group_by:
+    key: "patch_linux_reboot_{{ patch_linux_reboot_group }}"
+  when: patch_linux_reboot_group != 'none'
+
+- name: Report the reboot plan
+  ansible.builtin.debug:
+    msg: >-
+      {{ {
+           'none': 'No reboot needed.',
+           'now': 'Reboot needed. Rebooting in the first group, one host at a time.',
+           'last': 'Reboot needed. Rebooting after every other host, one at a time.',
+           'scheduled': 'Reboot needed. This host runs the job, so it gets a reboot '
+                        ~ patch_linux_scheduled_reboot_delay ~ ' minutes after the run ends.'
+         }[patch_linux_reboot_group] }}

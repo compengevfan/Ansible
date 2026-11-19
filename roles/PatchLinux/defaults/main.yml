@@ -1,0 +1,40 @@
+---
+# defaults file for PatchLinux
+# Host names in the lists below are short names, compared case-insensitively
+# against the inventory name with the domain stripped, so jax-k3s001l matches
+# JAX-K3S001L and jax-k3s001l.evorigin.com alike.
+
+# Reboot even when dnf needs-restarting says it is not needed.
+patch_linux_force_reboot: false
+
+# Hosts that must not be rebooted while the job is running, because the job is
+# running on them. They get a delayed reboot instead, at the very end. Ascender
+# runs as a pod on the jax-k3s001l k3s cluster.
+patch_linux_scheduled_reboot_hosts:
+  - jax-k3s001l
+
+# Minutes between the end of the run and the scheduled reboot. Only the final
+# play runs after it is set, so this just needs to cover Ascender saving the
+# job result.
+patch_linux_scheduled_reboot_delay: 5
+
+# Hosts rebooted after every other host, one at a time: Gitea (which Argo CD
+# and Ascender project syncs need) on jax-dock001l, and the Tailscale subnet
+# router that carries remote access and the cloud Zabbix's path in.
+patch_linux_reboot_last_hosts:
+  - jax-dock001l
+  - jax-tail001l
+
+# Seconds to wait for a host to come back from its reboot before failing.
+patch_linux_reboot_timeout: 900
+
+# Services to wait for after a reboot, checked only on hosts where the unit is
+# installed and enabled. The next host may depend on them (Gitea runs in
+# Docker), so the run waits until they are active.
+patch_linux_wait_for_services:
+  - k3s
+  - docker
+
+# After a reboot, systemd reports 'degraded' when any unit has failed. By
+# default that is reported and the run carries on; set true to stop instead.
+patch_linux_fail_on_degraded: false

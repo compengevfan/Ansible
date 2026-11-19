@@ -1,0 +1,81 @@
+---
+# Reboot one host and check it came back healthy. PatchLinux.yml runs this with
+# serial: 1 and max_fail_percentage: 0, so a host that fails here stops the run
+# before the next host is touched.
+
+- name: Reboot to apply the updates
+  ansible.builtin.reboot:
+    msg: "Rebooting to apply the monthly updates (PatchLinux)"
+    reboot_timeout: "{{ patch_linux_reboot_timeout }}"
+
+- name: Verify the host after the reboot
+  # Nothing rebooted in check mode, so there is nothing to verify.
+  when: not ansible_check_mode
+  block:
+    - name: Wait for the boot to finish
+      # Prints 'running', or 'degraded' when a unit has failed. Exits non-zero
+      # for degraded, which is handled below rather than here.
+      ansible.builtin.command: systemctl is-system-running --wait
+      register: patch_linux_system_state
+      changed_when: false
+      failed_when: false
+      timeout: 600
+
+    - name: List the failed units
+      ansible.builtin.command: systemctl --failed --no-legend --plain
+      register: patch_linux_failed_units
+      changed_when: false
+      when: patch_linux_system_state.stdout != 'running'
+
+    - name: Stop when the host came back degraded
+      ansible.builtin.fail:
+        msg: >-
+          {{ inventory_hostname }} came back '{{ patch_linux_system_state.stdout }}'.
+          Failed units: {{ patch_linux_failed_units.stdout_lines | default([]) | join('; ') }}
+      when:
+        - patch_linux_system_state.stdout != 'running'
+        - patch_linux_fail_on_degraded | bool
+
+    - name: Warn when the host came back degraded
+      ansible.builtin.debug:
+        msg: >-
+          WARNING: {{ inventory_hostname }} came back '{{ patch_linux_system_state.stdout }}'.
+          Failed units: {{ patch_linux_failed_units.stdout_lines | default([]) | join('; ') }}
+      when:
+        - patch_linux_system_state.stdout != 'running'
+        - not (patch_linux_fail_on_degraded | bool)
+
+    - name: Gather the service list
+      ansible.builtin.service_facts:
+
+    - name: Wait for the services the next host may depend on
+      ansible.builtin.command: "systemctl is-active {{ item }}"
+      register: patch_linux_service_state
+      until: patch_linux_service_state.stdout == 'active'
+      retries: 30
+      delay: 10
+      changed_when: false
+      failed_when: patch_linux_service_state.stdout != 'active'
+      loop: "{{ patch_linux_wait_for_services }}"
+      when:
+        - (item ~ '.service') in ansible_facts.services
+        - ansible_facts.services[item ~ '.service'].status == 'enabled'
+
+    - name: Read the running kernel
+      ansible.builtin.command: uname -r
+      register: patch_linux_running_kernel
+      changed_when: false
+
+    - name: Read the default boot kernel
+      ansible.builtin.command: grubby --default-kernel
+      register: patch_linux_default_kernel
+      changed_when: false
+
+    - name: Report the kernel
+      ansible.builtin.debug:
+        msg: >-
+          {{ 'Running kernel ' ~ patch_linux_running_kernel.stdout ~ ', the newest default.'
+             if patch_linux_default_kernel.stdout == '/boot/vmlinuz-' ~ patch_linux_running_kernel.stdout
+             else 'WARNING: running kernel ' ~ patch_linux_running_kernel.stdout
+                  ~ ' is not the default boot kernel (' ~ patch_linux_default_kernel.stdout
+                  ~ '). Check the GRUB default.' }}

@@ -82,6 +82,7 @@ Playbooks
 |---|---|---|
 | `NetboxAddVM.yml` | `NetboxAddVM` | Create the VM, interface, IP and DNS record in NetBox |
 | `NetboxRemoveVM.yml` | `NetboxRemoveVM` | Delete the VM from NetBox |
+| `PatchLinux` | dnf update everything, then ordered and verified reboots; delayed reboot for the controller host |
 | `ProxmoxBuildVM.yml` | `ProxmoxBuildVM` | Clone, size and start a VM on Proxmox; register it in AWX |
 | `ProxmoxRemoveVM.yml` | `ProxmoxRemoveVM` | Stop and delete a Proxmox VM; full decom with `-e mode=Decom` |
 | `VMwareBuildVM.yml` | `VMwareBuildVM` | Clone, customise and power on a vSphere VM, then run the OS baseline |
@@ -103,6 +104,7 @@ Playbooks
 | `PhotoPipelineIngest.yml` | `PhotoPipelineIngest` | Nightly: Dropbox Camera Uploads to Immich, then file the originals into Photos By Date (HLT-1) |
 | `PhotoPipelineBackup.yml` | `PhotoPipelineBackup` | Nightly, after the ingest: mirror Immich changes, deletions included, onto the Storage1 backup (HLT-1) |
 | `PhotoPipelineUsb.yml` | `PhotoPipelineUsb` | Nightly, after the backup: keep the detachable USB photo drive on Storage3 current; skips quietly when it is unplugged (HLT-1) |
+| `PatchLinux.yml` | `PatchLinux` | Monthly: apply every dnf update to the `AlmaLinux` group, reboot one host at a time, and give the Ascender host a delayed reboot |
 
 ### DNS, certificates, infrastructure
 

@@ -1,0 +1,23 @@
+---
+# Give a host a delayed reboot instead of rebooting it now. Used for the host
+# the job itself runs on (Ascender on jax-k3s001l): rebooting it straight away
+# would kill the job before it could report.
+#
+# shutdown +N is handed to systemd-logind, so it survives the SSH session
+# closing. Running it again replaces the earlier schedule, and
+# 'shutdown -c' on the host cancels it.
+
+- name: Schedule a reboot {{ patch_linux_scheduled_reboot_delay }} minutes from now
+  ansible.builtin.command: >-
+    shutdown -r +{{ patch_linux_scheduled_reboot_delay | int }}
+    "Rebooting to apply the monthly updates (PatchLinux)"
+  register: patch_linux_scheduled_reboot
+  changed_when: true
+
+- name: Report the scheduled reboot
+  ansible.builtin.debug:
+    msg: >-
+      {{ (patch_linux_scheduled_reboot.stderr | default('', true))
+         or (patch_linux_scheduled_reboot.stdout | default('', true))
+         or 'Reboot scheduled.' }}
+  when: not ansible_check_mode
